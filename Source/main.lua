@@ -3,31 +3,37 @@ import "CoreLibs/graphics"
 
 local gfx = playdate.graphics
 
-local cursor = playdate.geometry.point.new(2, 2)
+local player = playdate.geometry.point.new(11, 1)
+local finish = playdate.geometry.point.new(11, 12)
 
 local w = 20
 local h = 12
+gfx.setColor(gfx.kColorBlack)
 
-local useDiagonals = false
+local grid = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1}
 
-local grid = {1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
-			  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1}
-			  
-local path, graph, startNode, endNode
+local function drawWall(x, y)
+	gfx.fillRect(x*20, y*20, 20, 20)
+end
+
+local function drawLaser(x, y)
+	gfx.setLineWidth(2)
+	gfx.drawRect(x*20, y*20, 20, 20)
+	gfx.drawRect(x*20+5, y*20+5, 10, 10)
+end
 
 local function drawGrid()
-
-	gfx.setColor(gfx.kColorBlack)
 	gfx.setLineWidth(1)
 
 	for x = 1, w do
@@ -40,39 +46,38 @@ local function drawGrid()
 
 	for x = 0, w-1 do
 		for y = 0, h-1 do
-			if grid[((y)*w)+x+1] == 0 then
-				gfx.fillRect(x*20, y*20, 20, 20)
+			local cell = grid[((y)*w)+x+1]
+			if cell == 0 then
+				drawWall(x, y)
+			elseif cell == 2 then
+				drawLaser(x, y)
 			end
 		end
 	end
-
 end
 
-local function drawCursor()
 
-	gfx.setColor(gfx.kColorBlack)
-	gfx.setLineWidth(3)
 
-	gfx.drawRect((cursor.x-1)*20, (cursor.y-1)*20, 21, 21)
-end
-
-local function drawStartAndEndSquares()
-
-	gfx.setColor(gfx.kColorBlack)
-	gfx.fillRoundRect(2, 2, 16, 16, 2)
-	gfx.fillRoundRect(w*20-17, h*20-17, 15, 15, 2)
-
+local function drawPlayer()
 	gfx.setImageDrawMode(gfx.kDrawModeInverted)
-	gfx.drawText("s", 6, 0)
-	gfx.drawText("e", w*20-13, h*20-20)
+	gfx.fillRoundRect((player.x-1)*w+3, (player.y-1)*w+3, 15, 15, 2)
+	gfx.drawText("v", (player.x-1)*w+7, (player.y-1)*w)
 	gfx.setImageDrawMode(gfx.kDrawModeCopy)
 end
 
+local function drawFinish()
+	gfx.setImageDrawMode(gfx.kDrawModeInverted)
+	gfx.fillRoundRect((finish.x-1)*w+3, (finish.y-1)*w+3, 15, 15, 2)
+	gfx.drawText("e", (finish.x-1)*w+7, (finish.y-1)*w)
+	gfx.setImageDrawMode(gfx.kDrawModeCopy)
+end
+
+drawPlayer()
+drawFinish()
+drawGrid()
 function playdate.update()
 
-	gfx.clear()
-	drawGrid()
-	drawStartAndEndSquares()
-	drawCursor()
+	-- gfx.clear()
 
+	
 end
