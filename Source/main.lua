@@ -84,8 +84,8 @@ local function drawFinish()
 	gfx.setImageDrawMode(gfx.kDrawModeCopy)
 end
 
-local function incrementTurn()
-	step += 1
+local function moveStep(d)
+	step += d
 end
 
 
@@ -98,7 +98,10 @@ function playdate.update()
 
 	local ticks = playdate.getCrankTicks(6)
     if ticks > 0 then
-        incrementTurn()
+        moveStep(1)
 		player.y += 1
-    end
+    elseif ticks < 0 then
+		moveStep(-1)
+		player.y -= 1
+	end
 end
