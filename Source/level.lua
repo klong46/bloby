@@ -15,6 +15,7 @@ class('Level').extends(SLIB)
 
 local tilesPerRow = 20
 local tilesPerColumn = 12
+local testLevel = PD.datastore.read("levels/testLevel")
 
 local levelOneGrid = {1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
                       1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
@@ -32,7 +33,7 @@ local levelOneGrid = {1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1
 function Level:drawWalls()
     for x = 1, tilesPerRow do
         for y = 1, tilesPerColumn do
-            local cell = levelOneGrid[((y-1)*tilesPerRow)+x]
+            local cell = testLevel.level[((y-1)*tilesPerRow)+x]
             if cell == 1 then
                 local position = PD.geometry.point.new(x, y)
                 Wall(position)
