@@ -1,6 +1,7 @@
 import "CoreLibs/sprites"
 import "CoreLibs/crank"
 import "player"
+import "ladder"
 
 local PD <const> = playdate
 local GFX <const> = PD.graphics
@@ -9,13 +10,12 @@ local CRANK_SPEED <const> = 6
 
 class('Level').extends(SLIB)
 
-local playerStartPos = PD.geometry.point.new(11, 1)
-
-function Level:init()
+function Level:init(playerStartPosition, ladderPosition)
     Level.super.init(self)
     self.move = 1
     self.step = 1
-    self.player = Player(playerStartPos)
+    self.player = Player(playerStartPosition)
+    self.ladder = Ladder(ladderPosition)
     self:add()
 end
 
