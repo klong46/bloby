@@ -1,27 +1,25 @@
 import "CoreLibs/sprites"
+import "gameObject"
 
 local PD <const> = playdate
 local GFX <const> = PD.graphics
-local SLIB <const> = GFX.sprite
 
-class('Player').extends(SLIB)
-
-local image = GFX.image.new('img/player')
+class('Player').extends(GameObject)
 
 function Player:init(position)
-    Player.super.init(self)
+    local image = GFX.image.new('img/player')
+    Player.super.init(self, image)
     self.position = position
-    self.step = 1
-    self:setImage(image)
+    self:setZIndex(1000)
+    self:setPlayerPosition()
     self:add()
 end
 
-function Player:update()
-    Player.super.update(self)
-	self.position.y = self.step
-    self:moveTo((self.position.x * TileSize) - 9, (self.position.y * TileSize) - 9)
+function Player:move(step)
+    self.position.y += step
+    self:setPlayerPosition()
 end
 
-function Player:setStep(nextStep)
-    self.step = nextStep
+function Player:setPlayerPosition()
+    self:moveTo((self.position.x * TileSize) - 9, (self.position.y * TileSize) - 9)
 end

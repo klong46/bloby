@@ -9,28 +9,15 @@ local SLIB <const> = GFX.sprite
 
 -- Global Variables
 TileSize = 20
-
-local tilesPerRow = 20
-local tilesPerColumn = 12
-
--- local function drawLaserBase(x, y)
--- 	GFX.setLineWidth(2)
--- 	GFX.drawRect(x*TileSize, y*TileSize, 20, 20)
--- 	GFX.drawRect(x*TileSize+5, y*TileSize+5, 10, 10)
--- end
-
--- local function drawLaser(x, y)
--- 	GFX.setLineWidth(4)
--- 	GFX.setLineCapStyle(GFX.kLineCapStyleRound)
--- 	GFX.drawLine(x*TileSize+10, y*TileSize+10, 13*TileSize-2, y*TileSize+10)
--- end
+TilesPerRow = 20
+TilesPerColumn = 12
 
 local function drawGrid()
-	for x = 1, tilesPerRow do
-		GFX.drawLine(x*20, 0, x*20, tilesPerColumn*20)
+	for x = 1, TilesPerRow do
+		GFX.drawLine(x*20, 0, x*20, TilesPerColumn*20)
 	end
-	for y = 1, tilesPerColumn do
-		GFX.drawLine(0, y*20, tilesPerRow*20, y*20)
+	for y = 1, TilesPerColumn do
+		GFX.drawLine(0, y*20, TilesPerRow*20, y*20)
 	end
 end
 
