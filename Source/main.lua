@@ -1,6 +1,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "level"
+import "levelManager"
 
 local PD <const> = playdate
 local GFX <const> = PD.graphics
@@ -22,9 +23,8 @@ local function drawGrid()
 end
 
 GFX.setLineWidth(1)
-local levelOnePlayerStartPosition = PD.geometry.point.new(11, 1)
-local levelOneLadderPosition = PD.geometry.point.new(11, 12)
-local level = Level(levelOnePlayerStartPosition, levelOneLadderPosition)
+local levelManager = LevelManager()
+levelManager:nextLevel()
 
 function PD.update()
 	SLIB.update()

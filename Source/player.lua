@@ -10,7 +10,7 @@ function Player:init(position)
     local image = GFX.image.new('img/player')
     Player.super.init(self, image)
     self.position = position
-    self:setZIndex(1000)
+    self:setZIndex(1)
     self:setPlayerPosition()
     self:add()
 end
