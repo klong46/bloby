@@ -44,6 +44,14 @@ function Player:changeDirection(image, direction)
     self.direction = direction
 end
 
+function Player:moveValid()
+    if self.direction == 'up' and self.position.y == 1
+    or self.direction == 'down' and self.position.y == TilesPerColumn then
+        return false
+    end
+    return true
+end
+
 function Player:update()
     Player.super.update(self)
     if PD.buttonIsPressed(PD.kButtonUp) then

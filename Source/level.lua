@@ -52,14 +52,6 @@ local function updateGameObjectSteps(player, lasers, step, turn)
     end
 end
 
-local function playerBoundsValid(direction, playerPosition)
-    if direction == 'up' and playerPosition.y == 1
-    or direction == 'down' and playerPosition.y == TilesPerColumn then
-        return false
-    end
-    return true
-end
-
 function Level:setStep()
 	local ticks = PD.getCrankTicks(CRANK_SPEED)
     if ticks > 0 then
@@ -68,7 +60,7 @@ function Level:setStep()
         -- elseif ticks < 0 then
             -- self.step = -1
         -- end
-        if playerBoundsValid(self.player.direction, self.player.position) then
+        if self.player:moveValid() then
             self.turn += 1
             updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
         end
