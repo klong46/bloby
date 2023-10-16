@@ -7,7 +7,6 @@ local PD <const> = playdate
 local GFX <const> = PD.graphics
 local SLIB <const> = GFX.sprite
 
-
 -- Global Variables
 TileSize = 20
 TilesPerRow = 20
@@ -21,8 +20,6 @@ local function drawGrid()
 		GFX.drawLine(0, y*20, TilesPerRow*20, y*20)
 	end
 end
-
-
 
 GFX.setLineWidth(1)
 local levelManager = LevelManager()

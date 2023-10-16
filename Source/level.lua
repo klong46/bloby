@@ -62,12 +62,12 @@ end
 
 function Level:setStep()
 	local ticks = PD.getCrankTicks(CRANK_SPEED)
-    if ticks ~= 0 then
-        if ticks > 0 then
-            self.step = 1
-        elseif ticks < 0 then
-            self.step = -1
-        end
+    if ticks > 0 then
+        -- if ticks > 0 then
+        self.step = 1
+        -- elseif ticks < 0 then
+            -- self.step = -1
+        -- end
         if playerBoundsValid(self.step, self.player.position) then
             self.turn += 1
             updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
