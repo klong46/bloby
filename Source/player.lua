@@ -48,6 +48,10 @@ local function nextTileWall(grid, x, y)
     return grid[(y-1)*TilesPerRow+x] == 1
 end
 
+local function nextTileLadder(grid, x, y)
+    return grid[(y-1)*TilesPerRow+x] == 4
+end
+
 function Player:moveValid(grid)
     local x = self.position.x
     local y = self.position.y

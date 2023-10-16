@@ -32,14 +32,31 @@ function Level:drawWalls()
     end
 end
 
-function Level:init(playerStartPosition, ladderPosition, file)
+function Level:getSpritePosition(sprite)
+    local spriteVal
+    if sprite == 'player' then
+        spriteVal = 3
+    elseif sprite == 'ladder' then
+        spriteVal = 4
+    end
+    for x = 1, tilesPerRow do
+        for y = 1, tilesPerColumn do
+            local cell = self.grid[((y-1)*tilesPerRow)+x]
+            if cell == spriteVal then
+                return PD.geometry.point.new(x, y)
+            end
+        end
+    end
+end
+
+function Level:init(file)
     Level.super.init(self)
     self.move = 0
     self.step = 0
     self.turn = 0
     self.grid = PD.datastore.read("levels/"..file).level
-    self.player = Player(playerStartPosition)
-    self.ladder = Ladder(ladderPosition)
+    self.player = Player(self:getSpritePosition('player'))
+    self.ladder = Ladder(self:getSpritePosition('ladder'))
     self.lasers = {}
     self:drawWalls()
     self:add()
