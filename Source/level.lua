@@ -52,9 +52,9 @@ local function updateGameObjectSteps(player, lasers, step, turn)
     end
 end
 
-local function playerBoundsValid(step, playerPosition)
-    if step < 0 and playerPosition.y == 1
-    or step > 0 and playerPosition.y == TilesPerColumn then
+local function playerBoundsValid(direction, playerPosition)
+    if direction == 'up' and playerPosition.y == 1
+    or direction == 'down' and playerPosition.y == TilesPerColumn then
         return false
     end
     return true
@@ -68,7 +68,7 @@ function Level:setStep()
         -- elseif ticks < 0 then
             -- self.step = -1
         -- end
-        if playerBoundsValid(self.step, self.player.position) then
+        if playerBoundsValid(self.player.direction, self.player.position) then
             self.turn += 1
             updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
         end
