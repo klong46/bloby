@@ -6,7 +6,7 @@ local GFX <const> = PD.graphics
 local SLIB <const> = GFX.sprite
 
 local playerStartPositions = {
-    PD.geometry.point.new(11, 1),
+    PD.geometry.point.new(11, 5),
     PD.geometry.point.new(11, 1)
 }
 local ladderPositions = {

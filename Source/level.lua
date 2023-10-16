@@ -19,7 +19,7 @@ local tilesPerColumn = 12
 function Level:drawWalls()
     for x = 1, tilesPerRow do
         for y = 1, tilesPerColumn do
-            local cell = self.file.level[((y-1)*tilesPerRow)+x]
+            local cell = self.grid[((y-1)*tilesPerRow)+x]
             if cell == 1 then
                 local position = PD.geometry.point.new(x, y)
                 Wall(position)
@@ -37,7 +37,7 @@ function Level:init(playerStartPosition, ladderPosition, file)
     self.move = 0
     self.step = 0
     self.turn = 0
-    self.file = PD.datastore.read("levels/"..file)
+    self.grid = PD.datastore.read("levels/"..file).level
     self.player = Player(playerStartPosition)
     self.ladder = Ladder(ladderPosition)
     self.lasers = {}
@@ -60,7 +60,7 @@ function Level:setStep()
         -- elseif ticks < 0 then
             -- self.step = -1
         -- end
-        if self.player:moveValid() then
+        if self.player:moveValid(self.grid) then
             self.turn += 1
             updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
         end
