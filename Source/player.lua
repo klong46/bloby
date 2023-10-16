@@ -44,33 +44,25 @@ function Player:changeDirection(image, direction)
     self.direction = direction
 end
 
+local function nextTileValid(grid, x, y)
+    return grid[(y-1)*TilesPerRow+x] == 1
+end
+
 function Player:moveValid(grid)
-    if self:canMoveUp(grid)
-    or self.direction == 'down' and self.position.y == TilesPerColumn then
-        return false
-    end
-    return true
-end
-
-local function getNextTileValue(grid, x, y)
-    return grid[(y-1)*TilesPerRow+x]
-end
-
-function Player:canMoveUp(grid)
     local x = self.position.x
     local y = self.position.y
     if (self.direction == 'up') then
         y -= 1
-        return self.position.y == 1 or getNextTileValue(grid, x, y) == 1
+        return not (self.position.y == 1 or nextTileValid(grid, x, y))
     elseif (self.direction == 'down') then
         y += 1
-        return self.position.y == TilesPerColumn or getNextTileValue(grid, x, y) == 1
+        return not (self.position.y == TilesPerColumn or nextTileValid(grid, x, y))
     elseif (self.direction == 'left') then
         x -= 1
-        return self.position.x == 1 or getNextTileValue(grid, x, y) == 1
+        return not (self.position.x == 1 or nextTileValid(grid, x, y))
     elseif (self.direction == 'right') then
         x += 1
-        return self.position.x == TilesPerRow or getNextTileValue(grid, x, y) == 1
+        return not (self.position.x == TilesPerRow or nextTileValid(grid, x, y))
     end
 end
 
