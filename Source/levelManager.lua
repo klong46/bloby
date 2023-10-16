@@ -18,12 +18,11 @@ class('LevelManager').extends(SLIB)
 
 function LevelManager:init()
     self.levelNum = 1
-    print(playerStartPositions[levelNum])
-    self.level = Level(PD.geometry.point.new(11, 1), PD.geometry.point.new(11, 12), "1-1")
+    self.level = Level(playerStartPositions[self.levelNum], ladderPositions[self.levelNum], "1-"..self.levelNum)
 end
 
 function LevelManager:nextLevel()
-    self.levelNum += 1
     SLIB.removeAll()
-    self.level = Level(PD.geometry.point.new(11, 1), PD.geometry.point.new(11, 12), "testLevel")
+    self.levelNum += 1
+    self.level = Level(playerStartPositions[self.levelNum], ladderPositions[self.levelNum], "1-"..self.levelNum)
 end

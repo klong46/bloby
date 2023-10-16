@@ -22,9 +22,14 @@ local function drawGrid()
 	end
 end
 
+
+
 GFX.setLineWidth(1)
 local levelManager = LevelManager()
-levelManager:nextLevel()
+
+function PD.AButtonDown()
+	levelManager:nextLevel()
+end
 
 function PD.update()
 	SLIB.update()
