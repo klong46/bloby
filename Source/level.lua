@@ -47,6 +47,7 @@ function Level:getSpritePosition(sprite)
             end
         end
     end
+    return PD.geometry.point.new(0, 0)
 end
 
 function Level:init(file)

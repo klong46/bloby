@@ -10,6 +10,7 @@ class('LevelManager').extends(SLIB)
 function LevelManager:init()
     self.levelNum = 1
     self.level = Level("1-"..self.levelNum)
+    self:add()
 end
 
 function LevelManager:nextLevel()
@@ -17,3 +18,7 @@ function LevelManager:nextLevel()
     self.levelNum += 1
     self.level = Level("1-"..self.levelNum)
 end
+
+-- function LevelManager:update()
+
+-- end
