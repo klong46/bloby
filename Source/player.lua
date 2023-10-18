@@ -45,8 +45,9 @@ function Player:changeDirection(image, direction)
     self.direction = direction
 end
 
-local function nextTileWall(grid, x, y)
-    return grid[(y-1)*TilesPerRow+x] == 1
+local function nextTileIsObstacle(grid, x, y)
+    local nextTile = grid[(y-1)*TilesPerRow+x]
+    return nextTile == 1 or nextTile == 2 or nextTile == 5
 end
 
 function Player:onLadder(grid)
@@ -61,19 +62,19 @@ end
 function Player:moveValid(grid)
     local isBlocked
     if (self.direction == 'up') then
-        isBlocked = self.position.y == 1 or nextTileWall(grid, self.position.x, self.position.y-1)
+        isBlocked = self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
         self:setCanTurn(isBlocked)
         return not isBlocked
     elseif (self.direction == 'down') then
-        isBlocked = self.position.y == TilesPerColumn or nextTileWall(grid, self.position.x, self.position.y+1)
+        isBlocked = self.position.y == TilesPerColumn or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
         self:setCanTurn(isBlocked)
         return not isBlocked
     elseif (self.direction == 'left') then
-        isBlocked = self.position.x == 1 or nextTileWall(grid, self.position.x-1, self.position.y)
+        isBlocked = self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
         self:setCanTurn(isBlocked)
         return not isBlocked
     elseif (self.direction == 'right') then
-        isBlocked = self.position.x == TilesPerRow or nextTileWall(grid, self.position.x+1, self.position.y)
+        isBlocked = self.position.x == TilesPerRow or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
         self:setCanTurn(isBlocked)
         return not isBlocked
     end
