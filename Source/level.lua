@@ -81,6 +81,11 @@ function Level:setStep()
         if self.player:moveValid(self.grid) then
             self.turn += 1
             updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
+            if self.player:onLaser(self.grid) then
+                ResetLevel()
+            elseif self.player:onLadder(self.grid) then
+                NextLevel()
+            end
         end
     end
 end

@@ -28,10 +28,15 @@ function PD.AButtonDown()
 	levelManager:nextLevel()
 end
 
+function ResetLevel()
+	levelManager:resetLevel()
+end
+
+function NextLevel()
+	levelManager:nextLevel()
+end
+
 function PD.update()
 	SLIB.update()
-	if levelManager.level.player:onLadder(levelManager.level.grid) then
-        levelManager:nextLevel()
-    end
 	drawGrid()
 end

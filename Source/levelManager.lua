@@ -14,11 +14,11 @@ function LevelManager:init()
 end
 
 function LevelManager:nextLevel()
-    SLIB.removeAll()
     self.levelNum += 1
-    self.level = Level("1-"..self.levelNum)
+    self:resetLevel()
 end
 
--- function LevelManager:update()
-
--- end
+function LevelManager:resetLevel()
+    SLIB.removeAll()
+    self.level = Level("1-"..self.levelNum)
+end
