@@ -13,10 +13,11 @@ local PLAYER_IMAGES <const> = {
 class('Player').extends(GameObject)
 
 function Player:init(position)
-    local image = PLAYER_IMAGES.down
+    local image = PLAYER_IMAGES.right
     Player.super.init(self, image)
     self.position = position
-    self.direction = 'down'
+    self.direction = 'right'
+    self.canTurn = false
     self:setZIndex(1)
     self:setPlayerPosition()
     self:add()
@@ -52,36 +53,50 @@ function Player:onLadder(grid)
     return grid[(self.position.y-1)*TilesPerRow+self.position.x] == 4
 end
 
+function Player:onLaser(grid)
+    -- return grid[(self.position.y-1)*TilesPerRow+self.position.x] == 2
+    return false
+end
+
 function Player:moveValid(grid)
-    local x = self.position.x
-    local y = self.position.y
+    local isBlocked
     if (self.direction == 'up') then
-        y -= 1
-        return not (self.position.y == 1 or nextTileWall(grid, x, y))
+        isBlocked = self.position.y == 1 or nextTileWall(grid, self.position.x, self.position.y-1)
+        self:setCanTurn(isBlocked)
+        return not isBlocked
     elseif (self.direction == 'down') then
-        y += 1
-        return not (self.position.y == TilesPerColumn or nextTileWall(grid, x, y))
+        isBlocked = self.position.y == TilesPerColumn or nextTileWall(grid, self.position.x, self.position.y+1)
+        self:setCanTurn(isBlocked)
+        return not isBlocked
     elseif (self.direction == 'left') then
-        x -= 1
-        return not (self.position.x == 1 or nextTileWall(grid, x, y))
+        isBlocked = self.position.x == 1 or nextTileWall(grid, self.position.x-1, self.position.y)
+        self:setCanTurn(isBlocked)
+        return not isBlocked
     elseif (self.direction == 'right') then
-        x += 1
-        return not (self.position.x == TilesPerRow or nextTileWall(grid, x, y))
+        isBlocked = self.position.x == TilesPerRow or nextTileWall(grid, self.position.x+1, self.position.y)
+        self:setCanTurn(isBlocked)
+        return not isBlocked
     end
+end
+
+
+
+function Player:setCanTurn(isBlocked)
+    self.canTurn = isBlocked -- player can only turn when stopped by obstacle
 end
 
 function Player:update()
     Player.super.update(self)
-    if PD.buttonIsPressed(PD.kButtonUp) then
+    if PD.buttonIsPressed(PD.kButtonUp) and self.canTurn then
         self:changeDirection(PLAYER_IMAGES.up, 'up')
     end
-    if PD.buttonIsPressed(PD.kButtonDown) then
+    if PD.buttonIsPressed(PD.kButtonDown) and self.canTurn then
         self:changeDirection(PLAYER_IMAGES.down, 'down')
     end
-    if PD.buttonIsPressed(PD.kButtonLeft) then
+    if PD.buttonIsPressed(PD.kButtonLeft) and self.canTurn then
         self:changeDirection(PLAYER_IMAGES.left, 'left')
     end
-    if PD.buttonIsPressed(PD.kButtonRight) then
+    if PD.buttonIsPressed(PD.kButtonRight) and self.canTurn then
         self:changeDirection(PLAYER_IMAGES.right, 'right')
     end
 end

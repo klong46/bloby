@@ -86,6 +86,7 @@ function Level:setStep()
             elseif self.player:onLadder(self.grid) then
                 NextLevel()
             end
+            self.player:moveValid(self.grid)
         end
     end
 end
