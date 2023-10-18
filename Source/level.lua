@@ -23,16 +23,21 @@ function Level:drawWalls()
             if cell == 1 then
                 local position = PD.geometry.point.new(x, y)
                 Wall(position)
-            elseif cell == 2 then
+            elseif cell == 2 or cell == 5 then
                 local position = PD.geometry.point.new(x, y)
-                LaserBase(position)
-                table.insert(self.lasers, Laser(position))
+                if cell == 2 then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, 'right'))
+                else
+                    table.insert(self.laserBases, LaserBase(position, self.grid, 'left'))
+                end
+                
+
             end
         end
     end
 end
 
-function Level:getSpritePosition(sprite)
+function Level:setSpritePosition(sprite)
     local spriteVal
     if sprite == 'player' then
         spriteVal = 3
@@ -56,17 +61,17 @@ function Level:init(file)
     self.step = 0
     self.turn = 0
     self.grid = PD.datastore.read("levels/"..file).level
-    self.player = Player(self:getSpritePosition('player'))
-    self.ladder = Ladder(self:getSpritePosition('ladder'))
-    self.lasers = {}
+    self.player = Player(self:setSpritePosition('player'))
+    self.ladder = Ladder(self:setSpritePosition('ladder'))
+    self.laserBases = {}
     self:drawWalls()
     self:add()
 end
 
-local function updateGameObjectSteps(player, lasers, step, turn)
+local function updateGameObjectSteps(player, laserBases, step, turn)
     player:move(step)
-    for i, laser in ipairs(lasers) do
-        laser:setVisible(turn)
+    for i, laserBase in ipairs(laserBases) do
+        laserBase.laser:setVisible(turn)
     end
 end
 
@@ -80,7 +85,7 @@ function Level:setStep()
         -- end
         if self.player:moveValid(self.grid) then
             self.turn += 1
-            updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
+            updateGameObjectSteps(self.player, self.laserBases, self.step, self.turn)
             if self.player:onLaser(self.grid) then
                 ResetLevel()
             elseif self.player:onLadder(self.grid) then

@@ -13,10 +13,10 @@ local PLAYER_IMAGES <const> = {
 class('Player').extends(GameObject)
 
 function Player:init(position)
-    local image = PLAYER_IMAGES.right
+    local image = PLAYER_IMAGES.down
     Player.super.init(self, image)
     self.position = position
-    self.direction = 'right'
+    self.direction = 'down'
     self.canTurn = false
     self:setZIndex(1)
     self:setPlayerPosition()
