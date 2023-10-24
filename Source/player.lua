@@ -54,8 +54,20 @@ function Player:onLadder(grid)
     return grid[(self.position.y-1)*TilesPerRow+self.position.x] == 4
 end
 
-function Player:onLaser(grid)
-    -- return grid[(self.position.y-1)*TilesPerRow+self.position.x] == 2
+function Player:onLaser(laserBases, turn)
+    local allLaserTilePosition = {}
+    for i, laserBase in ipairs(laserBases) do
+        if laserBase.laser:isVisible(turn) then
+            table.insert( allLaserTilePosition, laserBase.laser:getTilePositions() )
+        end
+    end
+    for i, positionTable in ipairs(allLaserTilePosition) do
+        for y, position in ipairs(positionTable) do
+            if position == self.position then
+                return true
+            end
+        end
+    end
     return false
 end
 

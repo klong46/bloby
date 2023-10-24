@@ -31,6 +31,13 @@ function Laser:setVisible(turn)
     end
 end
 
+function Laser:isVisible(turn)
+    if (turn+1) % 2 == 0 then
+        return false
+    end
+    return true
+end
+
 function Laser:setLength(grid)
     if (self.direction == 'up') then
 
@@ -49,4 +56,16 @@ function Laser:setLength(grid)
             end
         end
     end
+end
+
+function Laser:getTilePositions()
+    local tiles = {}
+    local xStepDirection = 1
+    if self.direction == 'left' then
+        xStepDirection = -1
+    end
+    for i = 1, self.length, 1 do
+        table.insert( tiles, PD.geometry.point.new(self.origin.x + (i * xStepDirection), self.origin.y) )
+    end
+    return tiles
 end
