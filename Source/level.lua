@@ -19,45 +19,58 @@ local tilesPerColumn = 12
 function Level:drawWalls()
     for x = 1, tilesPerRow do
         for y = 1, tilesPerColumn do
-            local cell = self.file.level[((y-1)*tilesPerRow)+x]
+            local cell = self.grid[((y-1)*tilesPerRow)+x]
             if cell == 1 then
                 local position = PD.geometry.point.new(x, y)
                 Wall(position)
-            elseif cell == 2 then
+            elseif cell == 2 or cell == 5 then
                 local position = PD.geometry.point.new(x, y)
-                LaserBase(position)
-                table.insert(self.lasers, Laser(position))
+                if cell == 2 then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, 'right'))
+                else
+                    table.insert(self.laserBases, LaserBase(position, self.grid, 'left'))
+                end
             end
         end
     end
 end
 
-function Level:init(playerStartPosition, ladderPosition, file)
+function Level:setSpritePosition(sprite)
+    local spriteVal
+    if sprite == 'player' then
+        spriteVal = 3
+    elseif sprite == 'ladder' then
+        spriteVal = 4
+    end
+    for x = 1, tilesPerRow do
+        for y = 1, tilesPerColumn do
+            local cell = self.grid[((y-1)*tilesPerRow)+x]
+            if cell == spriteVal then
+                return PD.geometry.point.new(x, y)
+            end
+        end
+    end
+    return PD.geometry.point.new(0, 0)
+end
+
+function Level:init(file)
     Level.super.init(self)
     self.move = 0
     self.step = 0
     self.turn = 0
-    self.file = PD.datastore.read("levels/"..file)
-    self.player = Player(playerStartPosition)
-    self.ladder = Ladder(ladderPosition)
-    self.lasers = {}
+    self.grid = PD.datastore.read("levels/"..file).level
+    self.player = Player(self:setSpritePosition('player'))
+    self.ladder = Ladder(self:setSpritePosition('ladder'))
+    self.laserBases = {}
     self:drawWalls()
     self:add()
 end
 
-local function updateGameObjectSteps(player, lasers, step, turn)
+local function updateGameObjectSteps(player, laserBases, step, turn)
     player:move(step)
-    for i, laser in ipairs(lasers) do
-        laser:setVisible(turn)
+    for i, laserBase in ipairs(laserBases) do
+        laserBase.laser:setVisible(turn)
     end
-end
-
-local function playerBoundsValid(step, playerPosition)
-    if step < 0 and playerPosition.y == 1
-    or step > 0 and playerPosition.y == TilesPerColumn then
-        return false
-    end
-    return true
 end
 
 function Level:setStep()
@@ -68,9 +81,15 @@ function Level:setStep()
         -- elseif ticks < 0 then
             -- self.step = -1
         -- end
-        if playerBoundsValid(self.step, self.player.position) then
+        if self.player:moveValid(self.grid) then
             self.turn += 1
-            updateGameObjectSteps(self.player, self.lasers, self.step, self.turn)
+            updateGameObjectSteps(self.player, self.laserBases, self.step, self.turn)
+            if self.player:onLaser(self.laserBases, self.turn) then
+                ResetLevel()
+            elseif self.player:onLadder(self.grid) then
+                NextLevel()
+            end
+            self.player:moveValid(self.grid)
         end
     end
 end
