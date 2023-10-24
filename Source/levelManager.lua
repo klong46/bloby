@@ -4,6 +4,7 @@ import "level"
 local PD <const> = playdate
 local GFX <const> = PD.graphics
 local SLIB <const> = GFX.sprite
+local TOTAL_LEVELS <const> = 3
 
 class('LevelManager').extends(SLIB)
 
@@ -20,5 +21,8 @@ end
 
 function LevelManager:resetLevel()
     SLIB.removeAll()
+    if self.levelNum > TOTAL_LEVELS then
+        self.levelNum = 1
+    end
     self.level = Level("1-"..self.levelNum)
 end
