@@ -5,34 +5,26 @@ import "ladder"
 import "wall"
 import "laserBase"
 import "laser"
-
-local PD <const> = playdate
-local GFX <const> = PD.graphics
-local SLIB <const> = GFX.sprite
-local CRANK_SPEED <const> = 6
+import "constants"
 
 class('Level').extends(SLIB)
 
-local tilesPerRow = 20
-local tilesPerColumn = 12
-
 function Level:drawWalls()
-    for x = 1, tilesPerRow do
-        for y = 1, tilesPerColumn do
-            local cell = self.grid[((y-1)*tilesPerRow)+x]
-            if cell == 1 then
-                local position = PD.geometry.point.new(x, y)
+    for x = 1, TILES_PER_ROW do
+        for y = 1, TILES_PER_COLUMN do
+            local cell = self.grid[((y-1)*TILES_PER_ROW)+x]
+            local position = PD.geometry.point.new(x, y)
+            if cell == WALL_TILE then
                 Wall(position)
-            elseif cell == 2 or cell == 5 or cell == 6 or cell == 7 then
-                local position = PD.geometry.point.new(x, y)
-                if cell == 2 then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, 'right'))
-                elseif cell == 5 then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, 'left'))
-                elseif cell == 6 then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, 'up'))
-                elseif cell == 7 then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, 'down'))
+            else
+                if cell == RIGHT_LASER_TILE then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT))
+                elseif cell == LEFT_LASER_TILE then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.LEFT))
+                elseif cell == RIGHT_LASER_TILE then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.UP))
+                elseif cell == RIGHT_LASER_TILE then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN))
                 end
             end
         end
@@ -42,19 +34,19 @@ end
 function Level:setSpritePosition(sprite)
     local spriteVal
     if sprite == 'player' then
-        spriteVal = 3
+        spriteVal = PLAYER_TILE
     elseif sprite == 'ladder' then
-        spriteVal = 4
+        spriteVal = LADDER_TILE
     end
-    for x = 1, tilesPerRow do
-        for y = 1, tilesPerColumn do
-            local cell = self.grid[((y-1)*tilesPerRow)+x]
+    for x = 1, TILES_PER_ROW do
+        for y = 1, TILES_PER_COLUMN do
+            local cell = self.grid[((y-1)*TILES_PER_ROW)+x]
             if cell == spriteVal then
                 return PD.geometry.point.new(x, y)
             end
         end
     end
-    return PD.geometry.point.new(0, 0)
+    return PD.geometry.point.new(0, 0) -- default position if none is found
 end
 
 function Level:init(file)
@@ -63,7 +55,7 @@ function Level:init(file)
     self.step = 0
     self.turn = 0
     self.grid = PD.datastore.read("levels/"..file).level
-    self.player = Player(self:setSpritePosition('player'))
+    self.player = Player(self:setSpritePosition('player'), DIRECTIONS.DOWN)
     self.ladder = Ladder(self:setSpritePosition('ladder'))
     self.laserBases = {}
     self:drawWalls()

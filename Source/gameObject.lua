@@ -1,8 +1,5 @@
 import "CoreLibs/sprites"
-
-local PD <const> = playdate
-local GFX <const> = PD.graphics
-local SLIB <const> = GFX.sprite
+import "constants"
 
 class('GameObject').extends(SLIB)
 
