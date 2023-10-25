@@ -79,12 +79,18 @@ end
 
 function Laser:getTilePositions()
     local tiles = {}
-    local xStepDirection = 1
-    if self.direction == 'left' then
-        xStepDirection = -1
+    local stepDirection = 1
+    if self.direction == 'left' or self.direction == 'up' then
+        stepDirection = -1
     end
-    for i = 1, self.length, 1 do
-        table.insert( tiles, PD.geometry.point.new(self.origin.x + (i * xStepDirection), self.origin.y) )
+    if self.direction == 'left' or self.direction == 'right' then
+        for i = 1, self.length do
+            table.insert(tiles, PD.geometry.point.new(self.origin.x + (i * stepDirection), self.origin.y))
+        end
+    elseif self.direction == 'up' or self.direction == 'down' then
+        for i = 1, self.length do
+            table.insert(tiles, PD.geometry.point.new(self.origin.x, self.origin.y + (i * stepDirection)))
+        end
     end
     return tiles
 end
