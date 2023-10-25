@@ -1,9 +1,6 @@
 import "CoreLibs/sprites"
 import "tile"
-
-local PD <const> = playdate
-local GFX <const> = PD.graphics
-local SLIB <const> = GFX.sprite
+import "constants"
 
 class('LaserBase').extends(Tile)
 

@@ -1,10 +1,6 @@
 import "CoreLibs/sprites"
 import "level"
-
-local PD <const> = playdate
-local GFX <const> = PD.graphics
-local SLIB <const> = GFX.sprite
-local TOTAL_LEVELS <const> = 3
+import "constants"
 
 class('LevelManager').extends(SLIB)
 

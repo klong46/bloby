@@ -1,8 +1,7 @@
 import "CoreLibs/sprites"
 import "gameObject"
+import "constants"
 
-local PD <const> = playdate
-local GFX <const> = PD.graphics
 local PLAYER_IMAGES <const> = {
     up = GFX.image.new('img/player/player_up'),
     down = GFX.image.new('img/player/player_down'),
@@ -12,11 +11,11 @@ local PLAYER_IMAGES <const> = {
 
 class('Player').extends(GameObject)
 
-function Player:init(position)
+function Player:init(position, direction)
     local image = PLAYER_IMAGES.down
     Player.super.init(self, image)
     self.position = position
-    self.direction = 'down'
+    self.direction = direction
     self.canTurn = false
     self:setZIndex(1)
     self:setPlayerPosition()
@@ -24,20 +23,20 @@ function Player:init(position)
 end
 
 function Player:move(step)
-    if (self.direction == 'up') then
+    if (self.direction == DIRECTIONS.UP) then
         self.position.y -= step
-    elseif (self.direction == 'down') then
+    elseif (self.direction == DIRECTIONS.DOWN) then
         self.position.y += step
-    elseif (self.direction == 'left') then
+    elseif (self.direction == DIRECTIONS.LEFT) then
         self.position.x -= step
-    elseif (self.direction == 'right') then
+    elseif (self.direction == DIRECTIONS.RIGHT) then
         self.position.x += step
     end
     self:setPlayerPosition()
 end
 
 function Player:setPlayerPosition()
-    self:moveTo((self.position.x * TileSize) - 9, (self.position.y * TileSize) - 9)
+    self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
 end
 
 function Player:changeDirection(image, direction)
@@ -46,12 +45,12 @@ function Player:changeDirection(image, direction)
 end
 
 local function nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[(y-1)*TilesPerRow+x]
-    return (nextTile == 1 or nextTile == 2 or nextTile == 5 or nextTile == 6 or nextTile == 7)
+    local nextTile = grid[(y-1)*TILES_PER_ROW+x]
+    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE)
 end
 
 function Player:onLadder(grid)
-    return grid[(self.position.y-1)*TilesPerRow+self.position.x] == 4
+    return grid[(self.position.y-1)*TILES_PER_ROW+self.position.x] == LADDER_TILE
 end
 
 function Player:onLaser(laserBases, turn)
@@ -73,20 +72,20 @@ end
 
 function Player:moveValid(grid)
     local isBlocked
-    if (self.direction == 'up') then
+    if (self.direction == DIRECTIONS.UP) then
         isBlocked = self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
         self:setCanTurn(isBlocked)
         return not isBlocked
-    elseif (self.direction == 'down') then
-        isBlocked = self.position.y == TilesPerColumn or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
+    elseif (self.direction == DIRECTIONS.DOWN) then
+        isBlocked = self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
         self:setCanTurn(isBlocked)
         return not isBlocked
-    elseif (self.direction == 'left') then
+    elseif (self.direction == DIRECTIONS.LEFT) then
         isBlocked = self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
         self:setCanTurn(isBlocked)
         return not isBlocked
-    elseif (self.direction == 'right') then
-        isBlocked = self.position.x == TilesPerRow or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
+    elseif (self.direction == DIRECTIONS.RIGHT) then
+        isBlocked = self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
         self:setCanTurn(isBlocked)
         return not isBlocked
     end
@@ -101,15 +100,15 @@ end
 function Player:update()
     Player.super.update(self)
     if PD.buttonIsPressed(PD.kButtonUp) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.up, 'up')
+        self:changeDirection(PLAYER_IMAGES.up, DIRECTIONS.UP)
     end
     if PD.buttonIsPressed(PD.kButtonDown) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.down, 'down')
+        self:changeDirection(PLAYER_IMAGES.down, DIRECTIONS.DOWN)
     end
     if PD.buttonIsPressed(PD.kButtonLeft) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.left, 'left')
+        self:changeDirection(PLAYER_IMAGES.left, DIRECTIONS.LEFT)
     end
     if PD.buttonIsPressed(PD.kButtonRight) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.right, 'right')
+        self:changeDirection(PLAYER_IMAGES.right, DIRECTIONS.RIGHT)
     end
 end
