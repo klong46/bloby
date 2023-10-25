@@ -14,11 +14,12 @@ function Laser:init(position, grid, direction)
     self.direction = direction
     self.length = self:setLength(grid)
     self:setImage(GFX.image.new(imagePath..self.length))
-    self:setCenter(0.06, 0.5)
+    self:setCenter(0, 0.5)
+    print(self.width)
     if self.direction == 'right' then
         self:moveTo((self.origin.x * TileSize), (self.origin.y * TileSize) - 10)
     elseif self.direction == 'left' then
-        self:moveTo((self.origin.x * TileSize) - self.width - 3, (self.origin.y * TileSize) - 10)
+        self:moveTo((self.origin.x * TileSize) - self.width - 17, (self.origin.y * TileSize) - 10)
     end
     self:add()
 end
