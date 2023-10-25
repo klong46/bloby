@@ -23,12 +23,16 @@ function Level:drawWalls()
             if cell == 1 then
                 local position = PD.geometry.point.new(x, y)
                 Wall(position)
-            elseif cell == 2 or cell == 5 then
+            elseif cell == 2 or cell == 5 or cell == 6 or cell == 7 then
                 local position = PD.geometry.point.new(x, y)
                 if cell == 2 then
                     table.insert(self.laserBases, LaserBase(position, self.grid, 'right'))
-                else
+                elseif cell == 5 then
                     table.insert(self.laserBases, LaserBase(position, self.grid, 'left'))
+                elseif cell == 6 then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, 'up'))
+                elseif cell == 7 then
+                    table.insert(self.laserBases, LaserBase(position, self.grid, 'down'))
                 end
             end
         end

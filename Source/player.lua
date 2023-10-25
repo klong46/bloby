@@ -47,7 +47,7 @@ end
 
 local function nextTileIsObstacle(grid, x, y)
     local nextTile = grid[(y-1)*TilesPerRow+x]
-    return nextTile == 1 or nextTile == 2 or nextTile == 5
+    return (nextTile == 1 or nextTile == 2 or nextTile == 5 or nextTile == 6 or nextTile == 7)
 end
 
 function Player:onLadder(grid)
