@@ -9,12 +9,12 @@ import "constants"
 
 class('Level').extends(SLIB)
 
-local laserNum = 1
+local laserCadenceIndex
 
 function Level:getLaserCadence()
-    if laserNum <= #(self.laserCadences) then
-        local cadence = self.laserCadences[laserNum]
-        laserNum += 1
+    if laserCadenceIndex <= #(self.laserCadences) then
+        local cadence = self.laserCadences[laserCadenceIndex]
+        laserCadenceIndex += 1
         return cadence
     end
     return 2
@@ -65,6 +65,7 @@ function Level:init(file)
     self.move = 0
     self.step = 0
     self.turn = 1
+    laserCadenceIndex = 1
     local levelData = PD.datastore.read("levels/"..file)
     self.grid = levelData.grid
     self.laserCadences = levelData.laserCadences

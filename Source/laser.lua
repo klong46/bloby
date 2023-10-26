@@ -11,7 +11,6 @@ function Laser:init(position, grid, direction, cadence)
     self.origin = position
     self.direction = direction
     self.cadence = cadence
-    print(cadence)
     self.length = self:setLength(grid)
     local image = GFX.image.new(imagePath..self.length)
     self:setImage(image)
