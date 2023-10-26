@@ -68,8 +68,9 @@ function Level:init(file)
     laserCadenceIndex = 1
     local levelData = PD.datastore.read("levels/"..file)
     self.grid = levelData.grid
-    self.laserCadences = levelData.laserCadences
-    self.player = Player(self:setSpritePosition('player'), levelData.playerDirection)
+    self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
+    local playerDir = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
+    self.player = Player(self:setSpritePosition('player'), playerDir)
     self.ladder = Ladder(self:setSpritePosition('ladder'))
     self.laserBases = {}
     self:drawWalls()
