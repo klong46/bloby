@@ -9,6 +9,17 @@ import "constants"
 
 class('Level').extends(SLIB)
 
+local laserNum = 1
+
+function Level:getLaserCadence()
+    if laserNum <= #(self.laserCadences) then
+        local cadence = self.laserCadences[laserNum]
+        laserNum += 1
+        return cadence
+    end
+    return 2
+end
+
 function Level:drawWalls()
     for x = 1, TILES_PER_ROW do
         for y = 1, TILES_PER_COLUMN do
@@ -18,13 +29,13 @@ function Level:drawWalls()
                 Wall(position)
             else
                 if cell == RIGHT_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence()))
                 elseif cell == LEFT_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.LEFT))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.LEFT, self:getLaserCadence()))
                 elseif cell == UP_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.UP))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.UP, self:getLaserCadence()))
                 elseif cell == DOWN_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence()))
                 end
             end
         end
@@ -53,17 +64,16 @@ function Level:init(file)
     Level.super.init(self)
     self.move = 0
     self.step = 0
-    self.turn = 0
+    self.turn = 1
     local levelData = PD.datastore.read("levels/"..file)
-    self.grid = levelData.level
+    self.grid = levelData.grid
+    self.laserCadences = levelData.laserCadences
     self.player = Player(self:setSpritePosition('player'), levelData.playerDirection)
     self.ladder = Ladder(self:setSpritePosition('ladder'))
     self.laserBases = {}
     self:drawWalls()
     self:add()
 end
-
--- local setPlayerStartPosition
 
 local function updateGameObjectSteps(player, laserBases, step, turn)
     player:move(step)

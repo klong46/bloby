@@ -6,10 +6,12 @@ class('Laser').extends(GameObject)
 
 local imagePath = 'img/laser/laser_'
 
-function Laser:init(position, grid, direction)
+function Laser:init(position, grid, direction, cadence)
     Laser.super.init(self)
     self.origin = position
     self.direction = direction
+    self.cadence = cadence
+    print(cadence)
     self.length = self:setLength(grid)
     local image = GFX.image.new(imagePath..self.length)
     self:setImage(image)
@@ -29,7 +31,7 @@ function Laser:init(position, grid, direction)
 end
 
 function Laser:setVisible(turn)
-    if (turn+1) % 2 == 0 then
+    if (turn) % self.cadence == 0 then
         self:remove()
     else
         self:add()
@@ -37,7 +39,7 @@ function Laser:setVisible(turn)
 end
 
 function Laser:isVisible(turn)
-    if (turn+1) % 2 == 0 then
+    if (turn) % self.cadence == 0 then
         return false
     end
     return true
