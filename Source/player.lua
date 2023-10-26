@@ -16,6 +16,7 @@ function Player:init(position, direction)
     Player.super.init(self, image)
     self.position = position
     self.direction = direction
+    self:setDirection(direction)
     self.canTurn = false
     self:setZIndex(1)
     self:setPlayerPosition()
@@ -39,7 +40,20 @@ function Player:setPlayerPosition()
     self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
 end
 
-function Player:changeDirection(image, direction)
+local function getDirectionImage(direction)
+    if direction == DIRECTIONS.LEFT then
+        return PLAYER_IMAGES.left
+    elseif direction == DIRECTIONS.RIGHT then
+        return PLAYER_IMAGES.right
+    elseif direction == DIRECTIONS.UP then
+        return PLAYER_IMAGES.up
+    elseif direction == DIRECTIONS.DOWN then
+        return PLAYER_IMAGES.down
+    end
+end
+
+function Player:setDirection(direction)
+    local image = getDirectionImage(direction)
     self:setImage(image)
     self.direction = direction
 end
@@ -91,8 +105,6 @@ function Player:moveValid(grid)
     end
 end
 
-
-
 function Player:setCanTurn(isBlocked)
     self.canTurn = isBlocked -- player can only turn when stopped by obstacle
 end
@@ -100,15 +112,15 @@ end
 function Player:update()
     Player.super.update(self)
     if PD.buttonIsPressed(PD.kButtonUp) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.up, DIRECTIONS.UP)
+        self:setDirection(DIRECTIONS.UP)
     end
     if PD.buttonIsPressed(PD.kButtonDown) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.down, DIRECTIONS.DOWN)
+        self:setDirection(DIRECTIONS.DOWN)
     end
     if PD.buttonIsPressed(PD.kButtonLeft) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.left, DIRECTIONS.LEFT)
+        self:setDirection(DIRECTIONS.LEFT)
     end
     if PD.buttonIsPressed(PD.kButtonRight) and self.canTurn then
-        self:changeDirection(PLAYER_IMAGES.right, DIRECTIONS.RIGHT)
+        self:setDirection(DIRECTIONS.RIGHT)
     end
 end

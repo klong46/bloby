@@ -54,13 +54,16 @@ function Level:init(file)
     self.move = 0
     self.step = 0
     self.turn = 0
-    self.grid = PD.datastore.read("levels/"..file).level
-    self.player = Player(self:setSpritePosition('player'), DIRECTIONS.DOWN)
+    local levelData = PD.datastore.read("levels/"..file)
+    self.grid = levelData.level
+    self.player = Player(self:setSpritePosition('player'), levelData.playerDirection)
     self.ladder = Ladder(self:setSpritePosition('ladder'))
     self.laserBases = {}
     self:drawWalls()
     self:add()
 end
+
+-- local setPlayerStartPosition
 
 local function updateGameObjectSteps(player, laserBases, step, turn)
     player:move(step)
