@@ -21,9 +21,9 @@ function Level:drawWalls()
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT))
                 elseif cell == LEFT_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.LEFT))
-                elseif cell == RIGHT_LASER_TILE then
+                elseif cell == UP_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.UP))
-                elseif cell == RIGHT_LASER_TILE then
+                elseif cell == DOWN_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN))
                 end
             end
