@@ -60,7 +60,7 @@ end
 
 local function nextTileIsObstacle(grid, x, y)
     local nextTile = grid[(y-1)*TILES_PER_ROW+x]
-    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE)
+    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE or  nextTile == PLAYER_TILE)
 end
 
 function Player:onLadder(grid)
