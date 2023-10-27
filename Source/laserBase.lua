@@ -6,8 +6,8 @@ class('LaserBase').extends(Tile)
 
 local image = GFX.image.new('img/laser/laser_base')
 
-function LaserBase:init(position, grid, direction, cadence)
+function LaserBase:init(position, grid, direction, cadence, offset)
     LaserBase.super.init(self, position, image)
-    self.laser = Laser(position, grid, direction, cadence)
+    self.laser = Laser(position, grid, direction, cadence, offset)
     self:add()
 end

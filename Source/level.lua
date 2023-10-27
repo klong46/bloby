@@ -10,6 +10,7 @@ import "constants"
 class('Level').extends(SLIB)
 
 local laserCadenceIndex
+local laserOffsetIndex
 
 function Level:getLaserCadence()
     if laserCadenceIndex <= #(self.laserCadences) then
@@ -18,6 +19,15 @@ function Level:getLaserCadence()
         return cadence
     end
     return 2
+end
+
+function Level:getLaserOffset()
+    if laserOffsetIndex <= #(self.laserOffsets) then
+        local offset = self.laserOffsets[laserOffsetIndex]
+        laserOffsetIndex += 1
+        return offset
+    end
+    return 0
 end
 
 function Level:drawWalls()
@@ -29,13 +39,13 @@ function Level:drawWalls()
                 Wall(position)
             else
                 if cell == RIGHT_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence()))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence(), self:getLaserOffset()))
                 elseif cell == LEFT_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.LEFT, self:getLaserCadence()))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.LEFT, self:getLaserCadence(), self:getLaserOffset()))
                 elseif cell == UP_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.UP, self:getLaserCadence()))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.UP, self:getLaserCadence(), self:getLaserOffset()))
                 elseif cell == DOWN_LASER_TILE then
-                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence()))
+                    table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence(), self:getLaserOffset()))
                 end
             end
         end
@@ -66,9 +76,11 @@ function Level:init(file)
     self.step = 0
     self.turn = 1
     laserCadenceIndex = 1
+    laserOffsetIndex = 1
     local levelData = PD.datastore.read("levels/"..file)
     self.grid = levelData.grid
     self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
+    self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
     local playerDir = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
     self.player = Player(self:setSpritePosition('player'), playerDir)
     self.ladder = Ladder(self:setSpritePosition('ladder'))
@@ -106,6 +118,7 @@ function Level:setStep()
 end
 
 function Level:update()
+
     Player.super.update(self)
     self:setStep()
 end
