@@ -73,7 +73,6 @@ end
 function Level:init(file)
     Level.super.init(self)
     self.move = 0
-    self.step = 0
     self.turn = 1
     laserCadenceIndex = 1
     laserOffsetIndex = 1
@@ -96,24 +95,31 @@ local function updateGameObjectSteps(player, laserBases, step, turn)
     end
 end
 
+function Level:incrementTurn(step)
+    local isForward
+    if step == 1 then
+        isForward = true
+    else
+        isForward = false
+    end
+    if self.player:moveValid(self.grid, isForward) then
+        self.turn += step
+        updateGameObjectSteps(self.player, self.laserBases, step, self.turn)
+        if self.player:onLaser(self.laserBases, self.turn) then
+            ResetLevel()
+        elseif self.player:onLadder(self.grid) then
+            NextLevel()
+        end
+        self.player:moveValid(self.grid, isForward) -- check if move is valid after turn ends
+    end
+end
+
 function Level:setStep()
 	local ticks = PD.getCrankTicks(CRANK_SPEED)
     if ticks > 0 then
-        -- if ticks > 0 then
-        self.step = 1
-        -- elseif ticks < 0 then
-            -- self.step = -1
-        -- end
-        if self.player:moveValid(self.grid) then
-            self.turn += 1
-            updateGameObjectSteps(self.player, self.laserBases, self.step, self.turn)
-            if self.player:onLaser(self.laserBases, self.turn) then
-                ResetLevel()
-            elseif self.player:onLadder(self.grid) then
-                NextLevel()
-            end
-            self.player:moveValid(self.grid)
-        end
+        self:incrementTurn(1)
+    elseif ticks < 0 then
+        self:incrementTurn(-1)
     end
 end
 

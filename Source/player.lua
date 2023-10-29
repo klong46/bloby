@@ -84,29 +84,57 @@ function Player:onLaser(laserBases, turn)
     return false
 end
 
-function Player:moveValid(grid)
+function Player:moveValid(grid, isForward)
     local isBlocked
     if (self.direction == DIRECTIONS.UP) then
-        isBlocked = self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
-        self:setCanTurn(isBlocked)
+        if isForward then
+            isBlocked = self:upIsBlocked(grid)
+        else
+            isBlocked = self:downIsBlocked(grid)
+        end
+        self.canTurn = isBlocked
         return not isBlocked
     elseif (self.direction == DIRECTIONS.DOWN) then
-        isBlocked = self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
-        self:setCanTurn(isBlocked)
+        if isForward then
+            isBlocked = self:downIsBlocked(grid)
+        else
+            isBlocked = self:upIsBlocked(grid)
+        end
+        self.canTurn = isBlocked
         return not isBlocked
     elseif (self.direction == DIRECTIONS.LEFT) then
-        isBlocked = self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
-        self:setCanTurn(isBlocked)
+        if isForward then
+            isBlocked = self:leftIsBlocked(grid)
+        else
+            isBlocked = self:rightIsBlocked(grid)
+        end
+        self.canTurn = isBlocked
         return not isBlocked
     elseif (self.direction == DIRECTIONS.RIGHT) then
-        isBlocked = self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
-        self:setCanTurn(isBlocked)
+        if isForward then
+            isBlocked = self:rightIsBlocked(grid)
+        else
+            isBlocked = self:leftIsBlocked(grid)
+        end
+        self.canTurn = isBlocked
         return not isBlocked
     end
 end
 
-function Player:setCanTurn(isBlocked)
-    self.canTurn = isBlocked -- player can only turn when stopped by obstacle
+function Player:upIsBlocked(grid)
+    return self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
+end
+
+function Player:downIsBlocked(grid)
+    return self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
+end
+
+function Player:leftIsBlocked(grid)
+    return self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
+end
+
+function Player:rightIsBlocked(grid)
+    return self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
 end
 
 function Player:update()
