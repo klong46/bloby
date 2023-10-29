@@ -11,6 +11,8 @@ class('Level').extends(SLIB)
 
 local laserCadenceIndex
 local laserOffsetIndex
+-- laser offsets and cadences match with the lasers left to right on the grid 
+-- (top to bottom for lasers in the same column)
 
 function Level:getLaserCadence()
     if laserCadenceIndex <= #(self.laserCadences) then

@@ -1,3 +1,5 @@
 {"grid":[],
-"playerDirection": "right"
+"playerDirection": "right",
+"laserCadences":[],
+"laserOffsets": []
 }
