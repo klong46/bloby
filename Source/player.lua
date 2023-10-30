@@ -16,6 +16,8 @@ function Player:init(position, direction)
     Player.super.init(self, image)
     self.position = position
     self.direction = direction
+    self.pastMoves = {}
+    self.isBlocked = false
     self:setDirection(direction)
     self.canTurn = false
     self:setZIndex(1)
@@ -23,7 +25,25 @@ function Player:init(position, direction)
     self:add()
 end
 
-function Player:move(step)
+function Player:addPastMove()
+    local newPos = PD.geometry.point.new(self.position.x, self.position.y)
+    local newDir = self.direction
+    table.insert(self.pastMoves, {position = newPos, direction = newDir})
+end
+
+function Player:moveBack()
+    if self:hasPastMoves() then
+        local lastMove = table.remove(self.pastMoves)
+        self.position = lastMove.position
+        self:setDirection(lastMove.direction)
+    end
+end
+
+function Player:hasPastMoves()
+    return #self.pastMoves >= 1
+end
+
+function Player:moveForward(step)
     if (self.direction == DIRECTIONS.UP) then
         self.position.y -= step
     elseif (self.direction == DIRECTIONS.DOWN) then
@@ -32,6 +52,15 @@ function Player:move(step)
         self.position.x -= step
     elseif (self.direction == DIRECTIONS.RIGHT) then
         self.position.x += step
+    end
+end
+
+function Player:move(step, isForward)
+    if isForward then
+        self:addPastMove()
+        self:moveForward(step)
+    else
+        self:moveBack()
     end
     self:setPlayerPosition()
 end
@@ -71,7 +100,7 @@ function Player:onLaser(laserBases, turn)
     local allLaserTilePosition = {}
     for i, laserBase in ipairs(laserBases) do
         if laserBase.laser:isVisible(turn) then
-            table.insert( allLaserTilePosition, laserBase.laser:getTilePositions() )
+            table.insert(allLaserTilePosition, laserBase.laser:getTilePositions())
         end
     end
     for i, positionTable in ipairs(allLaserTilePosition) do
@@ -84,40 +113,15 @@ function Player:onLaser(laserBases, turn)
     return false
 end
 
-function Player:moveValid(grid, isForward)
-    local isBlocked
+function Player:setIsBlocked(grid)
     if (self.direction == DIRECTIONS.UP) then
-        if isForward then
-            isBlocked = self:upIsBlocked(grid)
-        else
-            isBlocked = self:downIsBlocked(grid)
-        end
-        self.canTurn = isBlocked
-        return not isBlocked
+        self.isBlocked = self:upIsBlocked(grid)
     elseif (self.direction == DIRECTIONS.DOWN) then
-        if isForward then
-            isBlocked = self:downIsBlocked(grid)
-        else
-            isBlocked = self:upIsBlocked(grid)
-        end
-        self.canTurn = isBlocked
-        return not isBlocked
+        self.isBlocked = self:downIsBlocked(grid)
     elseif (self.direction == DIRECTIONS.LEFT) then
-        if isForward then
-            isBlocked = self:leftIsBlocked(grid)
-        else
-            isBlocked = self:rightIsBlocked(grid)
-        end
-        self.canTurn = isBlocked
-        return not isBlocked
+        self.isBlocked = self:leftIsBlocked(grid)
     elseif (self.direction == DIRECTIONS.RIGHT) then
-        if isForward then
-            isBlocked = self:rightIsBlocked(grid)
-        else
-            isBlocked = self:leftIsBlocked(grid)
-        end
-        self.canTurn = isBlocked
-        return not isBlocked
+        self.isBlocked = self:rightIsBlocked(grid)
     end
 end
 
@@ -139,16 +143,16 @@ end
 
 function Player:update()
     Player.super.update(self)
-    if PD.buttonIsPressed(PD.kButtonUp) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then
         self:setDirection(DIRECTIONS.UP)
     end
-    if PD.buttonIsPressed(PD.kButtonDown) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonDown) and self.isBlocked then
         self:setDirection(DIRECTIONS.DOWN)
     end
-    if PD.buttonIsPressed(PD.kButtonLeft) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonLeft) and self.isBlocked then
         self:setDirection(DIRECTIONS.LEFT)
     end
-    if PD.buttonIsPressed(PD.kButtonRight) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonRight) and self.isBlocked then
         self:setDirection(DIRECTIONS.RIGHT)
     end
 end

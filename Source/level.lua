@@ -90,8 +90,8 @@ function Level:init(file)
     self:add()
 end
 
-local function updateGameObjectSteps(player, laserBases, step, turn)
-    player:move(step)
+local function updateGameObjectSteps(player, laserBases, step, turn, isForward)
+    player:move(step, isForward)
     for i, laserBase in ipairs(laserBases) do
         laserBase.laser:setVisible(turn)
     end
@@ -104,15 +104,21 @@ function Level:incrementTurn(step)
     else
         isForward = false
     end
-    if self.player:moveValid(self.grid, isForward) then
-        self.turn += step
-        updateGameObjectSteps(self.player, self.laserBases, step, self.turn)
-        if self.player:onLaser(self.laserBases, self.turn) then
-            ResetLevel()
-        elseif self.player:onLadder(self.grid) then
-            NextLevel()
+    if isForward then
+        self.player:setIsBlocked(self.grid)
+        if not self.player.isBlocked then
+            self.turn += step
+            updateGameObjectSteps(self.player, self.laserBases, step, self.turn, isForward)
+            if self.player:onLaser(self.laserBases, self.turn) then
+                ResetLevel()
+            elseif self.player:onLadder(self.grid) then
+                NextLevel()
+            end
+            self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
         end
-        self.player:moveValid(self.grid, isForward) -- check if move is valid after turn ends
+    elseif self.player:hasPastMoves() then
+        self.turn += step
+        updateGameObjectSteps(self.player, self.laserBases, step, self.turn, isForward)
     end
 end
 
