@@ -9,6 +9,8 @@ local PLAYER_IMAGES <const> = {
     right = GFX.image.new('img/player/player_right')
 }
 
+local lastDirection
+
 class('Player').extends(GameObject)
 
 function Player:init(position, direction)
@@ -19,6 +21,7 @@ function Player:init(position, direction)
     self.pastMoves = {}
     self.isBlocked = false
     self:setDirection(direction)
+    lastDirection = direction
     self.canTurn = false
     self:setZIndex(1)
     self:setPlayerPosition()
@@ -32,13 +35,20 @@ end
 function Player:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
-    table.insert(self.pastMoves, {position = newPos, direction = newDir})
+    local isBlocked = false
+    if newDir ~= lastDirection then
+        isBlocked = true
+        lastDirection = newDir
+    end
+    -- allows player to turn if reversed to a tile they turned at previously
+    table.insert(self.pastMoves, {position = newPos, direction = newDir, isBlocked = isBlocked})
 end
 
 function Player:moveBack()
     if self:hasPastMoves() then
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
+        self.isBlocked = lastMove.isBlocked
         self:setDirection(lastMove.direction)
     end
 end
