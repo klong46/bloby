@@ -25,6 +25,10 @@ function Player:init(position, direction)
     self:add()
 end
 
+local function getTile(x, y)
+    return ((y-1)*TILES_PER_ROW)+x
+end
+
 function Player:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
@@ -88,12 +92,12 @@ function Player:setDirection(direction)
 end
 
 local function nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[(y-1)*TILES_PER_ROW+x]
+    local nextTile = grid[getTile(x, y)]
     return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE or  nextTile == PLAYER_TILE)
 end
 
 function Player:onLadder(grid)
-    return grid[(self.position.y-1)*TILES_PER_ROW+self.position.x] == LADDER_TILE
+    return grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
 function Player:onLaser(laserBases, turn)
