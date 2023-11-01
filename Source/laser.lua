@@ -6,6 +6,11 @@ class('Laser').extends(GameObject)
 
 local imagePath = 'img/laser/laser_'
 
+local HORIZONTAL_Y_OFFSET = 10
+local HORIZONTAL_X_OFFSET = 17
+local VERTICAL_X_OFFSET = 12
+local VERTICAL_Y_OFFSET = 15
+
 function Laser:init(position, grid, direction, cadence, offset)
     Laser.super.init(self)
     self.origin = position
@@ -16,22 +21,26 @@ function Laser:init(position, grid, direction, cadence, offset)
     local image = GFX.image.new(imagePath..self.length)
     self:setImage(image)
     self:setCenter(0, 0.5)
-    if self.direction == DIRECTIONS.RIGHT then
-        self:moveTo((self.origin.x * TILE_SIZE), (self.origin.y * TILE_SIZE) - 10)
-    elseif self.direction == DIRECTIONS.LEFT then
-        self:moveTo((self.origin.x * TILE_SIZE) - self.width - 17, (self.origin.y * TILE_SIZE) - 10)
-    elseif self.direction == DIRECTIONS.UP then
-        self:setImage(image:rotatedImage(90))
-        self:moveTo((self.origin.x * TILE_SIZE) - 12, (self.origin.y * TILE_SIZE) - (self.height/2) - 15)
-    elseif self.direction == DIRECTIONS.DOWN then
-        self:setImage(image:rotatedImage(90))
-        self:moveTo((self.origin.x * TILE_SIZE) - 12, (self.origin.y * TILE_SIZE) + (self.height/2))
-    end
+    self:setInitialPosition()
     self:add()
 end
 
+function Laser:setInitialPosition()
+    if self.direction == DIRECTIONS.RIGHT then
+        self:moveTo((self.origin.x * TILE_SIZE), (self.origin.y * TILE_SIZE) - HORIZONTAL_Y_OFFSET)
+    elseif self.direction == DIRECTIONS.LEFT then
+        self:moveTo((self.origin.x * TILE_SIZE) - self.width - HORIZONTAL_X_OFFSET, (self.origin.y * TILE_SIZE) - HORIZONTAL_Y_OFFSET)
+    elseif self.direction == DIRECTIONS.UP then
+        self:setImage(image:rotatedImage(90))
+        self:moveTo((self.origin.x * TILE_SIZE) - VERTICAL_X_OFFSET, (self.origin.y * TILE_SIZE) - (self.height/2) - VERTICAL_Y_OFFSET)
+    elseif self.direction == DIRECTIONS.DOWN then
+        self:setImage(image:rotatedImage(90))
+        self:moveTo((self.origin.x * TILE_SIZE) - VERTICAL_X_OFFSET, (self.origin.y * TILE_SIZE) + (self.height/2))
+    end
+end
+
 function Laser:setVisible(turn)
-    if (turn + self.offset) % self.cadence == 0 then
+    if self:isVisible(turn) then
         self:remove()
     else
         self:add()
@@ -39,42 +48,43 @@ function Laser:setVisible(turn)
 end
 
 function Laser:isVisible(turn)
-    if (turn + self.offset) % self.cadence == 0 then
-        return false
+    return not ((turn + self.offset) % self.cadence == 0)
+end
+
+local function laserBlocked(position)
+    return position ~= EMPTY_TILE
+end
+
+local function getTile(x, y, grid)
+    return grid[(y-1) * TILES_PER_ROW + x]
+end
+
+local function getLaserPositionValue(direction, origin, i, grid)
+    if (direction == DIRECTIONS.UP) then
+        return getTile(origin.x, origin.y-i, grid)
+    elseif (direction == DIRECTIONS.DOWN) then
+        return getTile(origin.x, origin.y+i, grid)
+    elseif (direction == DIRECTIONS.LEFT) then
+        return getTile(origin.x-i, origin.y, grid)
+    elseif (direction == DIRECTIONS.RIGHT) then
+        return getTile(origin.x+i, origin.y, grid)
     end
-    return true
 end
 
 function Laser:setLength(grid)
-    if (self.direction == DIRECTIONS.UP) then
-        for i=1,TILES_PER_COLUMN do
-            local pos = grid[(self.origin.y-1-i)*TILES_PER_ROW+(self.origin.x)]
-            if not (pos == EMPTY_TILE) then
-                return i-1
-            end
-        end
-    elseif (self.direction == DIRECTIONS.DOWN) then
-        for i=1,TILES_PER_COLUMN do
-            local pos = grid[(self.origin.y-1+i)*TILES_PER_ROW+(self.origin.x)]
-            if not (pos == EMPTY_TILE) then
-                return i-1
-            end
-        end
-    elseif (self.direction == DIRECTIONS.LEFT) then
-        for i=1,TILES_PER_ROW do
-            local pos = grid[(self.origin.y-1)*TILES_PER_ROW+(self.origin.x-i)]
-            if not (pos == EMPTY_TILE) then
-                return i-1
-            end
-        end
-    elseif (self.direction == DIRECTIONS.RIGHT) then
-        for i=1,TILES_PER_ROW do
-            local pos = grid[(self.origin.y-1)*TILES_PER_ROW+(self.origin.x+i)]
-            if not (pos == EMPTY_TILE) then
-                return i-1
-            end
+    local maxLength
+    if self.direction == DIRECTIONS.UP or self.direction == DIRECTIONS.DOWN then
+        maxLength = TILES_PER_COLUMN-1
+    else
+        maxLength = TILES_PER_ROW-1
+    end
+    for i=1,maxLength do
+        local position = getLaserPositionValue(self.direction, self.origin, i, grid)
+        if laserBlocked(position) then
+            return i-1
         end
     end
+    return maxLength -- if laser if full length of screen (no obstacles)
 end
 
 function Laser:getTilePositions()
