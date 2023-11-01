@@ -9,6 +9,8 @@ local PLAYER_IMAGES <const> = {
     right = GFX.image.new('img/player/player_right')
 }
 
+local lastDirection
+
 class('Player').extends(GameObject)
 
 function Player:init(position, direction)
@@ -16,14 +18,46 @@ function Player:init(position, direction)
     Player.super.init(self, image)
     self.position = position
     self.direction = direction
+    self.pastMoves = {}
+    self.isBlocked = false
     self:setDirection(direction)
+    lastDirection = direction
     self.canTurn = false
     self:setZIndex(1)
     self:setPlayerPosition()
     self:add()
 end
 
-function Player:move(step)
+local function getTile(x, y)
+    return ((y-1)*TILES_PER_ROW)+x
+end
+
+function Player:addPastMove()
+    local newPos = PD.geometry.point.new(self.position.x, self.position.y)
+    local newDir = self.direction
+    local isBlocked = false
+    if newDir ~= lastDirection then
+        isBlocked = true
+        lastDirection = newDir
+    end
+    -- allows player to turn if reversed to a tile they turned at previously
+    table.insert(self.pastMoves, {position = newPos, direction = newDir, isBlocked = isBlocked})
+end
+
+function Player:moveBack()
+    if self:hasPastMoves() then
+        local lastMove = table.remove(self.pastMoves)
+        self.position = lastMove.position
+        self.isBlocked = lastMove.isBlocked
+        self:setDirection(lastMove.direction)
+    end
+end
+
+function Player:hasPastMoves()
+    return #self.pastMoves >= 1
+end
+
+function Player:moveForward(step)
     if (self.direction == DIRECTIONS.UP) then
         self.position.y -= step
     elseif (self.direction == DIRECTIONS.DOWN) then
@@ -32,6 +66,15 @@ function Player:move(step)
         self.position.x -= step
     elseif (self.direction == DIRECTIONS.RIGHT) then
         self.position.x += step
+    end
+end
+
+function Player:move(step, isForward)
+    if isForward then
+        self:addPastMove()
+        self:moveForward(step)
+    else
+        self:moveBack()
     end
     self:setPlayerPosition()
 end
@@ -59,19 +102,19 @@ function Player:setDirection(direction)
 end
 
 local function nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[(y-1)*TILES_PER_ROW+x]
-    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE)
+    local nextTile = grid[getTile(x, y)]
+    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE or  nextTile == PLAYER_TILE)
 end
 
 function Player:onLadder(grid)
-    return grid[(self.position.y-1)*TILES_PER_ROW+self.position.x] == LADDER_TILE
+    return grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
 function Player:onLaser(laserBases, turn)
     local allLaserTilePosition = {}
     for i, laserBase in ipairs(laserBases) do
         if laserBase.laser:isVisible(turn) then
-            table.insert( allLaserTilePosition, laserBase.laser:getTilePositions() )
+            table.insert(allLaserTilePosition, laserBase.laser:getTilePositions())
         end
     end
     for i, positionTable in ipairs(allLaserTilePosition) do
@@ -84,43 +127,46 @@ function Player:onLaser(laserBases, turn)
     return false
 end
 
-function Player:moveValid(grid)
-    local isBlocked
+function Player:setIsBlocked(grid)
     if (self.direction == DIRECTIONS.UP) then
-        isBlocked = self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
-        self:setCanTurn(isBlocked)
-        return not isBlocked
+        self.isBlocked = self:upIsBlocked(grid)
     elseif (self.direction == DIRECTIONS.DOWN) then
-        isBlocked = self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
-        self:setCanTurn(isBlocked)
-        return not isBlocked
+        self.isBlocked = self:downIsBlocked(grid)
     elseif (self.direction == DIRECTIONS.LEFT) then
-        isBlocked = self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
-        self:setCanTurn(isBlocked)
-        return not isBlocked
+        self.isBlocked = self:leftIsBlocked(grid)
     elseif (self.direction == DIRECTIONS.RIGHT) then
-        isBlocked = self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
-        self:setCanTurn(isBlocked)
-        return not isBlocked
+        self.isBlocked = self:rightIsBlocked(grid)
     end
 end
 
-function Player:setCanTurn(isBlocked)
-    self.canTurn = isBlocked -- player can only turn when stopped by obstacle
+function Player:upIsBlocked(grid)
+    return self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
+end
+
+function Player:downIsBlocked(grid)
+    return self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
+end
+
+function Player:leftIsBlocked(grid)
+    return self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
+end
+
+function Player:rightIsBlocked(grid)
+    return self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
 end
 
 function Player:update()
     Player.super.update(self)
-    if PD.buttonIsPressed(PD.kButtonUp) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then
         self:setDirection(DIRECTIONS.UP)
     end
-    if PD.buttonIsPressed(PD.kButtonDown) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonDown) and self.isBlocked then
         self:setDirection(DIRECTIONS.DOWN)
     end
-    if PD.buttonIsPressed(PD.kButtonLeft) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonLeft) and self.isBlocked then
         self:setDirection(DIRECTIONS.LEFT)
     end
-    if PD.buttonIsPressed(PD.kButtonRight) and self.canTurn then
+    if PD.buttonIsPressed(PD.kButtonRight) and self.isBlocked then
         self:setDirection(DIRECTIONS.RIGHT)
     end
 end
