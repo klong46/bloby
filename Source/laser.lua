@@ -40,7 +40,7 @@ function Laser:setInitialPosition()
 end
 
 function Laser:setVisible(turn)
-    if self:isVisible(turn) then
+    if not self:isVisible(turn) then
         self:remove()
     else
         self:add()

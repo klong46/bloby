@@ -111,13 +111,13 @@ function Player:onLadder(grid)
 end
 
 function Player:onLaser(laserBases, turn)
-    local allLaserTilePosition = {}
+    local allLaserTilePositions = {}
     for i, laserBase in ipairs(laserBases) do
         if laserBase.laser:isVisible(turn) then
-            table.insert(allLaserTilePosition, laserBase.laser:getTilePositions())
+            table.insert(allLaserTilePositions, laserBase.laser:getTilePositions())
         end
     end
-    for i, positionTable in ipairs(allLaserTilePosition) do
+    for i, positionTable in ipairs(allLaserTilePositions) do
         for y, position in ipairs(positionTable) do
             if position == self.position then
                 return true
