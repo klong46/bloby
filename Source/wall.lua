@@ -8,5 +8,6 @@ local image = GFX.image.new('img/wall')
 
 function Wall:init(position)
     Wall.super.init(self, position, image)
+    self:setZIndex(1)
     self:add()
 end
