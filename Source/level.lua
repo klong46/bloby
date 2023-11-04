@@ -98,10 +98,15 @@ local function updatePlayer(player, step, isForward)
     player:move(step, isForward)
 end
 
-local function updateGuards(guards, step, isForward, playerDirection)
+local function updateGuards(guards, step, isForward)
+    for i, guard in ipairs(guards) do
+        guard:move(step, isForward)
+    end
+end
+
+local function updateGuardDirections(guards, playerDirection)
     for i, guard in ipairs(guards) do
         guard:setDirection(playerDirection)
-        guard:move(step, isForward)
     end
 end
 
@@ -139,11 +144,12 @@ function Level:updateGameObjects(step, isForward)
     self.turn += step
     updatePlayer(self.player, step, isForward)
     updateLasers(self.laserBases, self.turn)
-    updateGuards(self.guards, step, isForward, self.player.direction)
+    updateGuards(self.guards, step, isForward)
 end
 
 function Level:updateTurn(step, isForward)
     if isForward then
+        updateGuardDirections(self.guards, self.player.direction)
         checkForBlocks(self.player, self.guards, self.grid)
         if not self.player.isBlocked then
             self:updateGameObjects(step, isForward)
