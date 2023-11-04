@@ -2,7 +2,7 @@ import "CoreLibs/sprites"
 import "level"
 import "constants"
 
-local TEST_LEVEL = 3
+local TEST_LEVEL = 5
 
 class('LevelManager').extends(SLIB)
 

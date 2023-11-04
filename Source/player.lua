@@ -24,7 +24,7 @@ function Player:init(position, direction)
     lastDirection = direction
     self.canTurn = false
     self:setZIndex(1)
-    self:setPlayerPosition()
+    self:setPosition()
     self:add()
 end
 
@@ -76,10 +76,10 @@ function Player:move(step, isForward)
     else
         self:moveBack()
     end
-    self:setPlayerPosition()
+    self:setPosition()
 end
 
-function Player:setPlayerPosition()
+function Player:setPosition()
     self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
 end
 

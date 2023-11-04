@@ -5,12 +5,14 @@ import "ladder"
 import "wall"
 import "laserBase"
 import "laser"
+import "guard"
 import "constants"
 
 class('Level').extends(SLIB)
 
 local laserCadenceIndex
 local laserOffsetIndex
+local guardDirectionIndex
 -- laser offsets and cadences match with the lasers left to right on the grid 
 -- (top to bottom for lasers in the same column)
 
@@ -32,6 +34,15 @@ function Level:getLaserOffset()
     return DEFAULT_LASER_OFFSET
 end
 
+function Level:getGuardDirection()
+    if guardDirectionIndex <= #(self.guardDirections) then
+        local direction = self.guardDirections[guardDirectionIndex]
+        guardDirectionIndex += 1
+        return direction
+    end
+    return DEFAULT_GUARD_POSITION
+end
+
 local function getTile(x, y)
     return ((y-1)*TILES_PER_ROW)+x
 end
@@ -43,6 +54,8 @@ function Level:drawTiles(playerDirection)
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
                 Wall(position) -- create new wall at position
+            elseif tile == GUARD_TILE then
+                table.insert(self.guards, Guard(position, self:getGuardDirection()))
             else
                 if tile == RIGHT_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence(), self:getLaserOffset()))
@@ -68,18 +81,30 @@ function Level:init(file)
     self.turn = 1
     laserCadenceIndex = 1
     laserOffsetIndex = 1
+    guardDirectionIndex = 1
     local levelData = PD.datastore.read("levels/"..file)
     self.grid = levelData.grid
     self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
     self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
+    self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
     local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
     self.laserBases = {}
+    self.guards = {}
     self:drawTiles(playerDirection)
     self:add()
 end
 
 local function updatePlayer(player, step, isForward)
     player:move(step, isForward)
+end
+
+local function updateGuards(guards, step, isForward, playerDirection)
+    for i, guard in ipairs(guards) do
+        guard:setDirection(playerDirection)
+        if not guard.isBlocked then
+            guard:move(step, isForward)
+        end
+    end
 end
 
 local function updateLasers(laserBases, turn)
@@ -100,6 +125,13 @@ local function checkPlayerWin(player, grid)
     end
 end
 
+local function checkForBlocks(player, guards, grid)
+    player:setIsBlocked(grid)
+    for i, guard in ipairs(guards) do
+        guard:setIsBlocked(grid)
+    end
+end
+
 function Level:checkPlayerInteractions()
     checkPlayerDeath(self.player, self.laserBases, self.turn)
     checkPlayerWin(self.player, self.grid)
@@ -109,15 +141,16 @@ function Level:updateGameObjects(step, isForward)
     self.turn += step
     updatePlayer(self.player, step, isForward)
     updateLasers(self.laserBases, self.turn)
+    updateGuards(self.guards, step, isForward, self.player.direction)
 end
 
 function Level:updateTurn(step, isForward)
     if isForward then
-        self.player:setIsBlocked(self.grid)
+        checkForBlocks(self.player, self.guards, self.grid)
         if not self.player.isBlocked then
             self:updateGameObjects(step, isForward)
             self:checkPlayerInteractions()
-            self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
+            checkForBlocks(self.player, self.guards, self.grid) -- check if move is valid after turn ends
         end
     elseif self.player:hasPastMoves() then
         self:updateGameObjects(step, isForward)
@@ -134,6 +167,6 @@ function Level:checkCrankTurns()
 end
 
 function Level:update()
-    Player.super.update(self)
+    Level.super.update(self)
     self:checkCrankTurns()
 end
