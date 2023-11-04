@@ -101,9 +101,7 @@ end
 local function updateGuards(guards, step, isForward, playerDirection)
     for i, guard in ipairs(guards) do
         guard:setDirection(playerDirection)
-        if not guard.isBlocked then
-            guard:move(step, isForward)
-        end
+        guard:move(step, isForward)
     end
 end
 

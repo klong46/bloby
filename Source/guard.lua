@@ -56,8 +56,10 @@ end
 
 function Guard:move(step, isForward)
     if isForward then
-        -- self:addPastMove()
-        self:moveForward(step)
+        self:addPastMove()
+        if not self.isBlocked then
+            self:moveForward(step)
+        end
     else
         self:moveBack()
     end
