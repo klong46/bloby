@@ -11,6 +11,7 @@ local HORIZONTAL_X_OFFSET = 17
 local VERTICAL_X_OFFSET = 12
 local VERTICAL_Y_OFFSET = 15
 
+
 function Laser:init(position, grid, direction, cadence, offset)
     Laser.super.init(self)
     self.origin = position
@@ -18,14 +19,21 @@ function Laser:init(position, grid, direction, cadence, offset)
     self.cadence = cadence
     self.offset = offset
     self.length = self:setLength(grid)
-    local image = GFX.image.new(imagePath..self.length)
+    local image = self:getImage()
     self:setImage(image)
+    self:setPosition(image)
     self:setCenter(0, 0.5)
-    self:setInitialPosition()
     self:add()
 end
 
-function Laser:setInitialPosition()
+function Laser:getImage()
+    if self.length < 1 then
+        return GFX.image.new(1)
+    end
+    return GFX.image.new(imagePath..self.length)
+end
+
+function Laser:setPosition(image)
     if self.direction == DIRECTIONS.RIGHT then
         self:moveTo((self.origin.x * TILE_SIZE), (self.origin.y * TILE_SIZE) - HORIZONTAL_Y_OFFSET)
     elseif self.direction == DIRECTIONS.LEFT then
@@ -52,7 +60,7 @@ function Laser:isVisible(turn)
 end
 
 local function laserBlocked(position)
-    return position ~= EMPTY_TILE
+    return (position ~= EMPTY_TILE) and (position ~= PLAYER_TILE)
 end
 
 local function getTile(x, y, grid)
