@@ -21,7 +21,7 @@ function Laser:init(position, grid, direction, cadence, offset)
     self.length = self:setLength(grid)
     local image = self:getImage()
     self:setImage(image)
-    self:setInitialPosition(image)
+    self:setPosition(image)
     self:setCenter(0, 0.5)
     self:add()
 end
@@ -33,7 +33,7 @@ function Laser:getImage()
     return GFX.image.new(imagePath..self.length)
 end
 
-function Laser:setInitialPosition(image)
+function Laser:setPosition(image)
     if self.direction == DIRECTIONS.RIGHT then
         self:moveTo((self.origin.x * TILE_SIZE), (self.origin.y * TILE_SIZE) - HORIZONTAL_Y_OFFSET)
     elseif self.direction == DIRECTIONS.LEFT then

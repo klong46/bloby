@@ -69,9 +69,7 @@ function Player:moveForward(step)
     end
 end
 
-function Player:move(step, isForward, grid)
-    local tile = grid[getTile(self.position.x, self.position.y)]
-    tile = EMPTY_TILE
+function Player:move(step, isForward)
     if isForward then
         self:addPastMove()
         self:moveForward(step)
@@ -79,9 +77,6 @@ function Player:move(step, isForward, grid)
         self:moveBack()
     end
     self:setPosition()
-    if tile ~= LADDER_TILE then
-        tile = PLAYER_TILE
-    end
 end
 
 function Player:setPosition()
@@ -107,23 +102,42 @@ function Player:setDirection(direction)
 end
 
 local function isObstacle(tile)
-    return not (tile == EMPTY_TILE or tile == LADDER_TILE or  tile == PLAYER_TILE)
+    return not (tile == EMPTY_TILE or tile == LADDER_TILE)
+end
+
+local function getNextTilePosition(x, y, direction)
+    if (direction == DIRECTIONS.UP) then
+        y -= 1
+    elseif (direction == DIRECTIONS.DOWN) then
+        y += 1
+    elseif (direction == DIRECTIONS.LEFT) then
+        x -= 1
+    elseif (direction == DIRECTIONS.RIGHT) then
+        x += 1
+    end
+    return PD.geometry.point.new(x, y)
+end
+
+local function onBorder(x, y, direction)
+    if (direction == DIRECTIONS.UP) then
+        return y < 1
+    elseif (direction == DIRECTIONS.DOWN) then
+        return y > TILES_PER_COLUMN
+    elseif (direction == DIRECTIONS.LEFT) then
+        return x < 1
+    elseif (direction == DIRECTIONS.RIGHT) then
+        return x > TILES_PER_ROW
+    end
 end
 
 local function nextTileIsObstacle(grid, x, y, direction)
-    local nextTile = grid[getTile(x, y)]
+    local nextTilePosition = getNextTilePosition(x, y, direction)
+    local nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
     if nextTile == GUARD_TILE then
-        if (direction == DIRECTIONS.UP) then
-            return isObstacle(grid[getTile(x, y-1)])
-        elseif (direction == DIRECTIONS.DOWN) then
-            return isObstacle(grid[getTile(x, y+1)])
-        elseif (direction == DIRECTIONS.LEFT) then
-            return isObstacle(grid[getTile(x-1, y)])
-        elseif (direction == DIRECTIONS.RIGHT) then
-            return isObstacle(grid[getTile(x+1, y-1)])
-        end
+        nextTilePosition = getNextTilePosition(nextTilePosition.x, nextTilePosition.y, direction)
+        nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
     end
-    return isObstacle(nextTile)
+    return isObstacle(nextTile) or onBorder(nextTilePosition.x, nextTilePosition.y, direction)
 end
 
 function Player:onLadder(grid)
@@ -148,31 +162,7 @@ function Player:onLaser(laserBases, turn)
 end
 
 function Player:setIsBlocked(grid)
-    if (self.direction == DIRECTIONS.UP) then
-        self.isBlocked = self:upIsBlocked(grid)
-    elseif (self.direction == DIRECTIONS.DOWN) then
-        self.isBlocked = self:downIsBlocked(grid)
-    elseif (self.direction == DIRECTIONS.LEFT) then
-        self.isBlocked = self:leftIsBlocked(grid)
-    elseif (self.direction == DIRECTIONS.RIGHT) then
-        self.isBlocked = self:rightIsBlocked(grid)
-    end
-end
-
-function Player:upIsBlocked(grid)
-    return self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1, self.direction)
-end
-
-function Player:downIsBlocked(grid)
-    return self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1, self.direction)
-end
-
-function Player:leftIsBlocked(grid)
-    return self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y, self.direction)
-end
-
-function Player:rightIsBlocked(grid)
-    return self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y, self.direction)
+    self.isBlocked = nextTileIsObstacle(grid, self.position.x, self.position.y, self.direction)
 end
 
 function Player:update()

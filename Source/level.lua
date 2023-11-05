@@ -16,31 +16,21 @@ local guardDirectionIndex
 -- laser offsets and cadences match with the lasers left to right on the grid 
 -- (top to bottom for lasers in the same column)
 
-function Level:getLaserCadence()
-    if laserCadenceIndex <= #(self.laserCadences) then
-        local cadence = self.laserCadences[laserCadenceIndex]
-        laserCadenceIndex += 1
-        return cadence
+local function getLevelArrayData(array, index, defaultValue)
+    if index <= #(array) then
+        local data = array[index]
+        index += 1
+        return data
     end
-    return DEFAULT_LASER_CADENCE
+    return defaultValue
+end
+
+function Level:getLaserCadence()
+    return getLevelArrayData(self.laserCadences, laserCadenceIndex, DEFAULT_LASER_CADENCE)
 end
 
 function Level:getLaserOffset()
-    if laserOffsetIndex <= #(self.laserOffsets) then
-        local offset = self.laserOffsets[laserOffsetIndex]
-        laserOffsetIndex += 1
-        return offset
-    end
-    return DEFAULT_LASER_OFFSET
-end
-
-function Level:getGuardDirection()
-    if guardDirectionIndex <= #(self.guardDirections) then
-        local direction = self.guardDirections[guardDirectionIndex]
-        guardDirectionIndex += 1
-        return direction
-    end
-    return DEFAULT_GUARD_POSITION
+    return getLevelArrayData(self.laserOffsets, laserOffsetIndex, DEFAULT_LASER_OFFSET)
 end
 
 local function getTile(x, y)
@@ -55,7 +45,7 @@ function Level:drawTiles(playerDirection)
             if tile == WALL_TILE then
                 Wall(position) -- create new wall at position
             elseif tile == GUARD_TILE then
-                table.insert(self.guards, Guard(position, self:getGuardDirection()))
+                table.insert(self.guards, Guard(position))
             else
                 if tile == RIGHT_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence(), self:getLaserOffset()))
@@ -67,6 +57,7 @@ function Level:drawTiles(playerDirection)
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence(), self:getLaserOffset()))
                 elseif tile == PLAYER_TILE then
                     self.player = Player(position, playerDirection)
+                    self.grid[getTile(x, y)] = EMPTY_TILE
                 elseif tile == LADDER_TILE then
                     self.ladder = Ladder(position)
                 end
@@ -77,11 +68,9 @@ end
 
 function Level:init(file)
     Level.super.init(self)
-    self.move = 0
     self.turn = 1
     laserCadenceIndex = 1
     laserOffsetIndex = 1
-    guardDirectionIndex = 1
     local levelData = PD.datastore.read("levels/"..file)
     self.grid = levelData.grid
     self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
@@ -94,8 +83,8 @@ function Level:init(file)
     self:add()
 end
 
-local function updatePlayer(player, step, isForward, grid)
-    player:move(step, isForward, grid)
+local function updatePlayer(player, step, isForward)
+    player:move(step, isForward)
 end
 
 local function updateGuards(guards, step, isForward, grid)
@@ -117,7 +106,7 @@ local function updateLasers(laserBases, turn, grid)
         l.length = l:setLength(grid)
         local image = l:getImage()
         l:setImage(image)
-        l:setInitialPosition(image)
+        l:setPosition(image)
     end
 end
 
@@ -147,7 +136,7 @@ end
 
 function Level:updateGameObjects(step, isForward)
     self.turn += step
-    updatePlayer(self.player, step, isForward, self.grid)
+    updatePlayer(self.player, step, isForward)
     updateGuards(self.guards, step, isForward, self.grid)
     updateLasers(self.laserBases, self.turn, self.grid)
 end

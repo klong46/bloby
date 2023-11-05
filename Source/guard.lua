@@ -8,10 +8,10 @@ local image = GFX.image.new('img/guard')
 
 class('Guard').extends(GameObject)
 
-function Guard:init(position, direction)
+function Guard:init(position)
     Guard.super.init(self, image)
     self.position = position
-    self.direction = direction
+    self.direction = DEFAULT_GUARD_DIRECTION
     self.pastMoves = {}
     self.isBlocked = false
     self:setDirection(direction)
