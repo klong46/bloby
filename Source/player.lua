@@ -106,9 +106,24 @@ function Player:setDirection(direction)
     self.direction = direction
 end
 
-local function nextTileIsObstacle(grid, x, y)
+local function isObstacle(tile)
+    return not (tile == EMPTY_TILE or tile == LADDER_TILE or  tile == PLAYER_TILE)
+end
+
+local function nextTileIsObstacle(grid, x, y, direction)
     local nextTile = grid[getTile(x, y)]
-    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE or  nextTile == PLAYER_TILE)
+    if nextTile == GUARD_TILE then
+        if (direction == DIRECTIONS.UP) then
+            return isObstacle(grid[getTile(x, y-1)])
+        elseif (direction == DIRECTIONS.DOWN) then
+            return isObstacle(grid[getTile(x, y+1)])
+        elseif (direction == DIRECTIONS.LEFT) then
+            return isObstacle(grid[getTile(x-1, y)])
+        elseif (direction == DIRECTIONS.RIGHT) then
+            return isObstacle(grid[getTile(x+1, y-1)])
+        end
+    end
+    return isObstacle(nextTile)
 end
 
 function Player:onLadder(grid)
@@ -145,19 +160,19 @@ function Player:setIsBlocked(grid)
 end
 
 function Player:upIsBlocked(grid)
-    return self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
+    return self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1, self.direction)
 end
 
 function Player:downIsBlocked(grid)
-    return self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
+    return self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1, self.direction)
 end
 
 function Player:leftIsBlocked(grid)
-    return self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
+    return self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y, self.direction)
 end
 
 function Player:rightIsBlocked(grid)
-    return self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
+    return self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y, self.direction)
 end
 
 function Player:update()

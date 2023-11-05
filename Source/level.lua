@@ -150,7 +150,6 @@ function Level:updateGameObjects(step, isForward)
     updatePlayer(self.player, step, isForward, self.grid)
     updateGuards(self.guards, step, isForward, self.grid)
     updateLasers(self.laserBases, self.turn, self.grid)
-    
 end
 
 function Level:updateTurn(step, isForward)
