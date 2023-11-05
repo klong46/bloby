@@ -12,7 +12,6 @@ class('Level').extends(SLIB)
 
 local laserCadenceIndex
 local laserOffsetIndex
-local guardDirectionIndex
 -- laser offsets and cadences match with the lasers left to right on the grid 
 -- (top to bottom for lasers in the same column)
 
@@ -26,11 +25,15 @@ local function getLevelArrayData(array, index, defaultValue)
 end
 
 function Level:getLaserCadence()
-    return getLevelArrayData(self.laserCadences, laserCadenceIndex, DEFAULT_LASER_CADENCE)
+    local cadence = getLevelArrayData(self.laserCadences, laserCadenceIndex, DEFAULT_LASER_CADENCE)
+    laserCadenceIndex += 1
+    return cadence
 end
 
 function Level:getLaserOffset()
-    return getLevelArrayData(self.laserOffsets, laserOffsetIndex, DEFAULT_LASER_OFFSET)
+    local offset = getLevelArrayData(self.laserOffsets, laserOffsetIndex, DEFAULT_LASER_OFFSET)
+    laserOffsetIndex += 1
+    return offset
 end
 
 local function getTile(x, y)
