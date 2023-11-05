@@ -94,13 +94,13 @@ function Level:init(file)
     self:add()
 end
 
-local function updatePlayer(player, step, isForward)
-    player:move(step, isForward)
+local function updatePlayer(player, step, isForward, grid)
+    player:move(step, isForward, grid)
 end
 
-local function updateGuards(guards, step, isForward)
+local function updateGuards(guards, step, isForward, grid)
     for i, guard in ipairs(guards) do
-        guard:move(step, isForward)
+        guard:move(step, isForward, grid)
     end
 end
 
@@ -110,9 +110,14 @@ local function updateGuardDirections(guards, playerDirection)
     end
 end
 
-local function updateLasers(laserBases, turn)
+local function updateLasers(laserBases, turn, grid)
     for i, laserBase in ipairs(laserBases) do
-        laserBase.laser:setVisible(turn)
+        local l = laserBase.laser
+        l:setVisible(turn)
+        l.length = l:setLength(grid)
+        local image = l:getImage()
+        l:setImage(image)
+        l:setInitialPosition(image)
     end
 end
 
@@ -142,9 +147,10 @@ end
 
 function Level:updateGameObjects(step, isForward)
     self.turn += step
-    updatePlayer(self.player, step, isForward)
-    updateLasers(self.laserBases, self.turn)
-    updateGuards(self.guards, step, isForward)
+    updatePlayer(self.player, step, isForward, self.grid)
+    updateGuards(self.guards, step, isForward, self.grid)
+    updateLasers(self.laserBases, self.turn, self.grid)
+    
 end
 
 function Level:updateTurn(step, isForward)

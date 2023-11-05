@@ -54,7 +54,8 @@ function Guard:moveForward(step)
     end
 end
 
-function Guard:move(step, isForward)
+function Guard:move(step, isForward, grid)
+    grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
     if isForward then
         self:addPastMove()
         if not self.isBlocked then
@@ -64,6 +65,7 @@ function Guard:move(step, isForward)
         self:moveBack()
     end
     self:setPosition()
+    grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
 end
 
 function Guard:setPosition()
@@ -76,7 +78,7 @@ end
 
 local function nextTileIsObstacle(grid, x, y)
     local nextTile = grid[getTile(x, y)]
-    return not (nextTile == EMPTY_TILE or nextTile == LADDER_TILE or  nextTile == PLAYER_TILE)
+    return not (nextTile == EMPTY_TILE)
 end
 
 function Guard:setIsBlocked(grid)

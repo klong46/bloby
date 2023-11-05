@@ -69,7 +69,9 @@ function Player:moveForward(step)
     end
 end
 
-function Player:move(step, isForward)
+function Player:move(step, isForward, grid)
+    local tile = grid[getTile(self.position.x, self.position.y)]
+    tile = EMPTY_TILE
     if isForward then
         self:addPastMove()
         self:moveForward(step)
@@ -77,6 +79,9 @@ function Player:move(step, isForward)
         self:moveBack()
     end
     self:setPosition()
+    if tile ~= LADDER_TILE then
+        tile = PLAYER_TILE
+    end
 end
 
 function Player:setPosition()
