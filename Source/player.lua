@@ -49,6 +49,7 @@ function Player:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
+        lastDirection = lastMove.direction
         self:setDirection(lastMove.direction)
     end
 end
