@@ -160,12 +160,12 @@ local function updateMouse(mice, player, isForward, delays)
             end
         end
         if mouse.active then
-            if mouseDelays[i] > 0 then
+            if mouseDelays[i] >= 0 then
                 mouseDelays[i] -= 1
             else
                 local nextMove = mouse.position
-                if #player.pastMoves >= mouseDelays[i]-1 then
-                    nextMove = player.pastMoves[#player.pastMoves-mouseDelays[i]-1].position
+                if #player.pastMoves > delays[i] then
+                    nextMove = player.pastMoves[#player.pastMoves-delays[i]].position
                 end
                 mouse:move(nextMove, isForward)
             end
