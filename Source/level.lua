@@ -6,12 +6,13 @@ import "wall"
 import "laserBase"
 import "laser"
 import "guard"
-import "constants"
+import "mouse"
 
 class('Level').extends(SLIB)
 
 local laserCadenceIndex
 local laserOffsetIndex
+local mouseDelays = {}
 -- laser offsets and cadences match with the lasers left to right on the grid 
 -- (top to bottom for lasers in the same column)
 
@@ -40,6 +41,12 @@ local function getTile(x, y)
     return ((y-1)*TILES_PER_ROW)+x
 end
 
+local function copyMouseDelays(delays)
+    for i, delay in ipairs(delays) do
+        table.insert( mouseDelays, delay )
+    end
+end
+
 function Level:drawTiles(playerDirection)
     for x = 1, TILES_PER_ROW do
         for y = 1, TILES_PER_COLUMN do
@@ -49,6 +56,8 @@ function Level:drawTiles(playerDirection)
                 Wall(position) -- create new wall at position
             elseif tile == GUARD_TILE then
                 table.insert(self.guards, Guard(position))
+            elseif tile == MOUSE_TILE then
+                table.insert(self.mice, Mouse(position))
             else
                 if tile == RIGHT_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence(), self:getLaserOffset()))
@@ -78,10 +87,13 @@ function Level:init(file)
     self.grid = levelData.grid
     self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
     self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
+    self.mouseDelays = levelData.mouseDelays and levelData.mouseDelays or {}
+    copyMouseDelays(self.mouseDelays)
     self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
     local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
     self.laserBases = {}
     self.guards = {}
+    self.mice = {}
     self:drawTiles(playerDirection)
     self:add()
 end
@@ -137,11 +149,36 @@ function Level:checkPlayerInteractions()
     checkPlayerWin(self.player, self.grid)
 end
 
+local function updateMouse(mice, player, isForward, delays)
+    for i, mouse in ipairs(mice) do
+        if mouse.position == player.position then
+            if isForward then
+                mouse.active = true
+            else
+                mouse.active = false
+                mouseDelays[i] = delays[i]
+            end
+        end
+        if mouse.active then
+            if mouseDelays[i] > 0 then
+                mouseDelays[i] -= 1
+            else
+                local nextMove = mouse.position
+                if #player.pastMoves >= mouseDelays[i]-1 then
+                    nextMove = player.pastMoves[#player.pastMoves-mouseDelays[i]-1].position
+                end
+                mouse:move(nextMove, isForward)
+            end
+        end
+    end
+end
+
 function Level:updateGameObjects(step, isForward)
     self.turn += step
     updatePlayer(self.player, step, isForward)
     updateGuards(self.guards, step, isForward, self.grid)
     updateLasers(self.laserBases, self.turn, self.grid)
+    updateMouse(self.mice, self.player, isForward, self.mouseDelays)
 end
 
 function Level:updateTurn(step, isForward)

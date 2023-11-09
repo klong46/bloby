@@ -1,8 +1,4 @@
 import "CoreLibs/sprites"
-import "tile"
-import "constants"
-
-class('Guard').extends(Tile)
 
 local image = GFX.image.new('img/guard')
 
