@@ -162,6 +162,15 @@ function Player:onLaser(laserBases, turn)
     return false
 end
 
+function Player:onMouse(mice)
+    for i, mouse in ipairs(mice) do
+        if mouse.position == self.position and mouse.moving then
+            return true
+        end
+    end
+    return false
+end
+
 function Player:setIsBlocked(grid)
     self.isBlocked = nextTileIsObstacle(grid, self.position.x, self.position.y, self.direction)
 end

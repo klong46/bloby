@@ -34,6 +34,15 @@ function Guard:moveBack()
     end
 end
 
+function Guard:onMouse(mice)
+    for i, mouse in ipairs(mice) do
+        if self.position == mouse.position then
+            return true
+        end
+    end
+    return false
+end
+
 function Guard:hasPastMoves()
     return #self.pastMoves >= 1
 end

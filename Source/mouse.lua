@@ -6,13 +6,15 @@ local image = GFX.image.new('img/mouse')
 
 class('Mouse').extends(GameObject)
 
-function Mouse:init(position)
+function Mouse:init(position, delay)
     Mouse.super.init(self, image)
     self.position = position
     self.direction = DEFAULT_MOUSE_DIRECTION
     self.pastMoves = {}
     self.isBlocked = false
     self.active = false
+    self.moving = false
+    self.delay = delay
     self:setDirection(direction)
     self.canTurn = false
     self:setZIndex(1)
