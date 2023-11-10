@@ -13,12 +13,13 @@ local lastDirection
 
 class('Player').extends(GameObject)
 
-function Player:init(position, direction)
+function Player:init(position, direction, grid)
     local image = PLAYER_IMAGES.down
     Player.super.init(self, image)
     self.position = position
     self.direction = direction
     self.pastMoves = {}
+    self.grid = grid
     self.isBlocked = false
     self:setDirection(direction)
     lastDirection = direction
@@ -36,6 +37,8 @@ function Player:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
     local isBlocked = false
+    self:setIsBlocked()
+    print(self.isBlocked)
     if newDir ~= lastDirection then
         isBlocked = true
         lastDirection = newDir
@@ -131,18 +134,21 @@ local function onBorder(x, y, direction)
     end
 end
 
-local function nextTileIsObstacle(grid, x, y, direction)
+function Player:nextTileIsObstacle()
+    local x = self.position.x
+    local y = self.position.y
+    local direction = self.direction
     local nextTilePosition = getNextTilePosition(x, y, direction)
-    local nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+    local nextTile = self.grid[getTile(nextTilePosition.x, nextTilePosition.y)]
     if nextTile == GUARD_TILE then
         nextTilePosition = getNextTilePosition(nextTilePosition.x, nextTilePosition.y, direction)
-        nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+        nextTile = self.grid[getTile(nextTilePosition.x, nextTilePosition.y)]
     end
     return isObstacle(nextTile) or onBorder(nextTilePosition.x, nextTilePosition.y, direction)
 end
 
-function Player:onLadder(grid)
-    return grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
+function Player:onLadder()
+    return self.grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
 function Player:onLaser(laserBases, turn)
@@ -174,8 +180,8 @@ function Player:onMouse(mice)
     return false
 end
 
-function Player:setIsBlocked(grid)
-    self.isBlocked = nextTileIsObstacle(grid, self.position.x, self.position.y, self.direction)
+function Player:setIsBlocked()
+    self.isBlocked = self:nextTileIsObstacle()
 end
 
 function Player:update()

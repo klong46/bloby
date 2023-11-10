@@ -68,7 +68,7 @@ function Level:drawTiles(playerDirection)
                 elseif tile == DOWN_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence(), self:getLaserOffset()))
                 elseif tile == PLAYER_TILE then
-                    self.player = Player(position, playerDirection)
+                    self.player = Player(position, playerDirection, self.grid)
                     self.grid[getTile(x, y)] = EMPTY_TILE
                 elseif tile == LADDER_TILE then
                     self.ladder = Ladder(position)
@@ -131,14 +131,14 @@ local function checkPlayerDeath(player, laserBases, turn, mice)
     end
 end
 
-local function checkPlayerWin(player, grid)
+local function checkPlayerWin(player)
     if player:onLadder(grid) then
         NextLevel()
     end
 end
 
 local function checkForBlocks(player, guards, grid)
-    player:setIsBlocked(grid)
+    player:setIsBlocked()
     for i, guard in ipairs(guards) do
         guard:setIsBlocked(grid)
     end
@@ -149,7 +149,7 @@ end
 
 function Level:checkPlayerInteractions()
     checkPlayerDeath(self.player, self.laserBases, self.turn, self.mice)
-    checkPlayerWin(self.player, self.grid)
+    checkPlayerWin(self.player)
 end
 
 local function updateMouse(mice, player, isForward, delays)
