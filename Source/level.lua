@@ -104,7 +104,9 @@ end
 
 local function updateGuards(guards, step, isForward, grid)
     for i, guard in ipairs(guards) do
-        guard:move(step, isForward, grid)
+        if guard.alive then
+            guard:move(step, isForward, grid)
+        end
     end
 end
 
@@ -175,7 +177,7 @@ end
 function Level:checkGuardInteractions()
     for i, guard in ipairs(self.guards) do
         if guard:onMouse(self.mice) then
-            guard:remove()
+            guard:destroy(self.grid)
         end
     end
 end

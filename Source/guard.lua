@@ -10,6 +10,7 @@ function Guard:init(position)
     self.direction = DEFAULT_GUARD_DIRECTION
     self.pastMoves = {}
     self.isBlocked = false
+    self.alive = true
     self:setDirection(direction)
     self:setPosition()
     self:add()
@@ -71,6 +72,12 @@ function Guard:move(step, isForward, grid)
     end
     self:setPosition()
     grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+end
+
+function Guard:destroy(grid)
+    grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
+    self.alive = false
+    self:remove()
 end
 
 function Guard:setPosition()
