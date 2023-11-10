@@ -104,9 +104,7 @@ end
 
 local function updateGuards(guards, step, isForward, grid)
     for i, guard in ipairs(guards) do
-        if guard.alive then
-            guard:move(step, isForward, grid)
-        end
+        guard:move(step, isForward, grid)
     end
 end
 
@@ -129,7 +127,7 @@ end
 
 local function checkPlayerDeath(player, laserBases, turn, mice)
     if player:onLaser(laserBases, turn) or player:onMouse(mice) then
-        ResetLevel()
+        -- ResetLevel()
     end
 end
 

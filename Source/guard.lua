@@ -23,7 +23,9 @@ end
 function Guard:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
-    table.insert(self.pastMoves, {position = newPos, direction = newDir})
+    local newAlive = self.alive
+    print(newAlive)
+    table.insert(self.pastMoves, {position = newPos, direction = newDir, alive = newAlive})
 end
 
 function Guard:moveBack()
@@ -31,6 +33,7 @@ function Guard:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
+        self.alive = lastMove.alive
         self:setDirection(lastMove.direction)
     end
 end
@@ -67,20 +70,25 @@ function Guard:move(step, isForward, grid)
     grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
     if isForward then
         self:addPastMove()
-        if not self.isBlocked then
+        if (not self.isBlocked) and (self.alive) then
             self:moveForward(step)
         end
     else
         self:moveBack()
+        if self.alive then
+            self:setVisible(true)
+        end
     end
     self:setPosition()
-    grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+    if self.alive then
+        grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+    end
 end
 
 function Guard:destroy(grid)
     grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
     self.alive = false
-    self:remove()
+    self:setVisible(false)
 end
 
 function Guard:setPosition()
@@ -93,7 +101,7 @@ end
 
 local function nextTileIsObstacle(grid, x, y)
     local nextTile = grid[getTile(x, y)]
-    return not (nextTile == EMPTY_TILE)
+    return not (nextTile == EMPTY_TILE or nextTile == MOUSE_TILE)
 end
 
 function Guard:setIsBlocked(grid)
