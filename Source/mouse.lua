@@ -14,7 +14,7 @@ function Mouse:init(position, delay)
     self.isBlocked = false
     self.active = false
     self.moving = false
-    self.delay = delay
+    self.delay = delay-1
     self:setDirection(direction)
     self.canTurn = false
     self:setZIndex(1)
@@ -26,18 +26,26 @@ local function getTile(x, y)
     return ((y-1)*TILES_PER_ROW)+x
 end
 
+function Mouse:setActive(delay, playerPosition, isForward)
+    if isForward and (self.position == playerPosition) then
+        self.active = true
+    elseif (not isForward) and (self.delay == delay) and (self.position ~= playerPosition) then
+        self.active = false
+    end
+end
+
 function Mouse:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
-    local isBlocked = false
-    table.insert(self.pastMoves, {position = newPos, direction = newDir, isBlocked = isBlocked})
+    local newDelay = self.delay
+    table.insert(self.pastMoves, {position = newPos, direction = newDir, delay = newDelay})
 end
 
 function Mouse:moveBack()
     if self:hasPastMoves() then
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
-        self.isBlocked = lastMove.isBlocked
+        self.delay = lastMove.delay
         self:setDirection(lastMove.direction)
     end
 end
@@ -53,7 +61,13 @@ end
 function Mouse:move(playerPosition, isForward)
     if isForward then
         self:addPastMove()
-        self:moveForward(playerPosition)
+        if self.active then
+            if self.delay == 0 then
+                self:moveForward(playerPosition)
+            else
+                self.delay -= 1
+            end
+        end
     else
         self:moveBack()
     end

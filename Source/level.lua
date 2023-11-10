@@ -154,28 +154,13 @@ end
 
 local function updateMouse(mice, player, isForward, delays)
     for i, mouse in ipairs(mice) do
-        local delay = delays[i]
-        if mouse.active then
-            if mouse.delay >= 0 then
-                mouse.delay -= 1
-            else
-                mouse.moving = true
-                local nextMove = mouse.position
-                if #player.pastMoves > delay then
-                    nextMove = player.pastMoves[#player.pastMoves-delay].position
-                end
-                mouse:move(nextMove, isForward)
-            end
+        local delay = delays[i] and delays[i]-1 or DEFAULT_MOUSE_DELAY
+        local nextMove = mouse.position
+        if #player.pastMoves > delay then
+            nextMove = player.pastMoves[#player.pastMoves-delay].position
         end
-        if mouse.position == player.position then
-            if isForward then
-                mouse.active = true
-            else
-                mouse.active = false
-                mouse.moving = false
-                mouse.delay = delay
-            end
-        end
+        mouse:move(nextMove, isForward)
+        mouse:setActive(delay, player.position, isForward)
     end
 end
 
