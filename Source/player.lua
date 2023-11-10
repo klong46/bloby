@@ -37,8 +37,6 @@ function Player:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
     local isBlocked = false
-    self:setIsBlocked()
-    print(self.isBlocked)
     if newDir ~= lastDirection then
         isBlocked = true
         lastDirection = newDir
@@ -52,7 +50,7 @@ function Player:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
-        lastDirection = lastMove.direction
+        lastDirection = self.pastMoves[#self.pastMoves].direction
         self:setDirection(lastMove.direction)
     end
 end
