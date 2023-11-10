@@ -164,7 +164,10 @@ end
 
 function Player:onMouse(mice)
     for i, mouse in ipairs(mice) do
-        if mouse.position == self.position and mouse.moving then
+        local lastPosition = self.pastMoves[#self.pastMoves].position
+        if ((mouse.position == self.position) or
+           (mouse.position == lastPosition)) and
+           (mouse.delay == 0) then
             return true
         end
     end

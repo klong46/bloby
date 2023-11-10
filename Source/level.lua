@@ -156,7 +156,7 @@ end
 
 local function updateMouse(mice, player, isForward, delays)
     for i, mouse in ipairs(mice) do
-        local delay = delays[i] and delays[i]-1 or DEFAULT_MOUSE_DELAY
+        local delay = delays[i]-1
         local nextMove = mouse.position
         if #player.pastMoves > delay then
             nextMove = player.pastMoves[#player.pastMoves-delay].position
