@@ -127,7 +127,7 @@ end
 
 local function checkPlayerDeath(player, laserBases, turn, mice)
     if player:onLaser(laserBases, turn) or player:onMouse(mice) then
-        -- ResetLevel()
+        ResetLevel()
     end
 end
 
