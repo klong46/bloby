@@ -24,7 +24,6 @@ function Guard:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
     local newAlive = self.alive
-    print(newAlive)
     table.insert(self.pastMoves, {position = newPos, direction = newDir, alive = newAlive})
 end
 
