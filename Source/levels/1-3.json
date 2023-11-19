@@ -12,7 +12,7 @@
 1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,8
 ],
-"playerDirection": "right",
+"playerDirection": 2,
 "laserCadences":[3,4],
 "laserOffsets": [0,0]
 }
