@@ -46,11 +46,12 @@ function Player:addPastMove()
 end
 
 function Player:moveBack()
+    print(#self.pastMoves)
     if self:hasPastMoves() then
+        lastDirection = self.pastMoves[#self.pastMoves].direction
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
-        lastDirection = self.pastMoves[#self.pastMoves].direction
         self:setDirection(lastMove.direction)
     end
 end
