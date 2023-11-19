@@ -1,8 +1,4 @@
 import "CoreLibs/sprites"
-import "tile"
-import "constants"
-
-class('Guard').extends(Tile)
 
 local image = GFX.image.new('img/guard')
 
@@ -14,6 +10,7 @@ function Guard:init(position)
     self.direction = DEFAULT_GUARD_DIRECTION
     self.pastMoves = {}
     self.isBlocked = false
+    self.alive = true
     self:setDirection(direction)
     self:setPosition()
     self:add()
@@ -26,7 +23,8 @@ end
 function Guard:addPastMove()
     local newPos = PD.geometry.point.new(self.position.x, self.position.y)
     local newDir = self.direction
-    table.insert(self.pastMoves, {position = newPos, direction = newDir})
+    local newAlive = self.alive
+    table.insert(self.pastMoves, {position = newPos, direction = newDir, alive = newAlive})
 end
 
 function Guard:moveBack()
@@ -34,8 +32,21 @@ function Guard:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
+        self.alive = lastMove.alive
         self:setDirection(lastMove.direction)
     end
+end
+
+function Guard:onMouse(mice)
+    for i, mouse in ipairs(mice) do
+        local lastPosition = self.pastMoves[#self.pastMoves].position
+        if ((mouse.position == self.position) or
+           (mouse.position == lastPosition)) and
+           (mouse.delay == 0) then
+            return true
+        end
+    end
+    return false
 end
 
 function Guard:hasPastMoves()
@@ -58,14 +69,25 @@ function Guard:move(step, isForward, grid)
     grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
     if isForward then
         self:addPastMove()
-        if not self.isBlocked then
+        if (not self.isBlocked) and (self.alive) then
             self:moveForward(step)
         end
     else
         self:moveBack()
+        if self.alive then
+            self:setVisible(true)
+        end
     end
     self:setPosition()
-    grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+    if self.alive then
+        grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+    end
+end
+
+function Guard:destroy(grid)
+    grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
+    self.alive = false
+    self:setVisible(false)
 end
 
 function Guard:setPosition()
@@ -78,7 +100,7 @@ end
 
 local function nextTileIsObstacle(grid, x, y)
     local nextTile = grid[getTile(x, y)]
-    return not (nextTile == EMPTY_TILE)
+    return not (nextTile == EMPTY_TILE or nextTile == MOUSE_TILE)
 end
 
 function Guard:setIsBlocked(grid)

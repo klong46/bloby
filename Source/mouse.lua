@@ -2,27 +2,20 @@ import "CoreLibs/sprites"
 import "gameObject"
 import "constants"
 
-local PLAYER_IMAGES <const> = {
-    up = GFX.image.new('img/player/player_up'),
-    down = GFX.image.new('img/player/player_down'),
-    left = GFX.image.new('img/player/player_left'),
-    right = GFX.image.new('img/player/player_right')
-}
+local image = GFX.image.new('img/mouse')
 
-local lastDirection
+class('Mouse').extends(GameObject)
 
-class('Player').extends(GameObject)
-
-function Player:init(position, direction, grid)
-    local image = PLAYER_IMAGES.down
-    Player.super.init(self, image)
+function Mouse:init(position, delay)
+    Mouse.super.init(self, image)
     self.position = position
-    self.direction = direction
+    self.direction = DEFAULT_MOUSE_DIRECTION
     self.pastMoves = {}
-    self.grid = grid
     self.isBlocked = false
+    self.active = false
+    self.moving = false
+    self.delay = delay-1
     self:setDirection(direction)
-    lastDirection = direction
     self.canTurn = false
     self:setZIndex(1)
     self:setPosition()
@@ -33,78 +26,64 @@ local function getTile(x, y)
     return ((y-1)*TILES_PER_ROW)+x
 end
 
-function Player:addPastMove()
-    local newPos = PD.geometry.point.new(self.position.x, self.position.y)
-    local newDir = self.direction
-    local isBlocked = false
-    if newDir ~= lastDirection then
-        isBlocked = true
-        lastDirection = newDir
+function Mouse:setActive(delay, playerPosition, isForward)
+    if isForward and (self.position == playerPosition) then
+        self.active = true
+    elseif (not isForward) and (self.delay == delay) and (self.position ~= playerPosition) then
+        self.active = false
     end
-    -- allows player to turn if reversed to a tile they turned at previously
-    table.insert(self.pastMoves, {position = newPos, direction = newDir, isBlocked = isBlocked})
 end
 
-function Player:moveBack()
+function Mouse:addPastMove()
+    local newPos = PD.geometry.point.new(self.position.x, self.position.y)
+    local newDir = self.direction
+    local newDelay = self.delay
+    table.insert(self.pastMoves, {position = newPos, direction = newDir, delay = newDelay})
+end
+
+function Mouse:moveBack()
     if self:hasPastMoves() then
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
-        self.isBlocked = lastMove.isBlocked
-        lastDirection = self.pastMoves[#self.pastMoves].direction
+        self.delay = lastMove.delay
         self:setDirection(lastMove.direction)
     end
 end
 
-function Player:hasPastMoves()
+function Mouse:hasPastMoves()
     return #self.pastMoves >= 1
 end
 
-function Player:moveForward(step)
-    if (self.direction == DIRECTIONS.UP) then
-        self.position.y -= step
-    elseif (self.direction == DIRECTIONS.DOWN) then
-        self.position.y += step
-    elseif (self.direction == DIRECTIONS.LEFT) then
-        self.position.x -= step
-    elseif (self.direction == DIRECTIONS.RIGHT) then
-        self.position.x += step
-    end
+function Mouse:moveForward(playerPosition)
+    self.position = playerPosition
 end
 
-function Player:move(step, isForward)
+function Mouse:move(playerPosition, isForward)
     if isForward then
         self:addPastMove()
-        self:moveForward(step)
+        if self.active then
+            if self.delay == 0 then
+                self:moveForward(playerPosition)
+            else
+                self.delay -= 1
+            end
+        end
     else
         self:moveBack()
     end
     self:setPosition()
 end
 
-function Player:setPosition()
+function Mouse:setPosition()
     self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
 end
 
-local function getDirectionImage(direction)
-    if direction == DIRECTIONS.LEFT then
-        return PLAYER_IMAGES.left
-    elseif direction == DIRECTIONS.RIGHT then
-        return PLAYER_IMAGES.right
-    elseif direction == DIRECTIONS.UP then
-        return PLAYER_IMAGES.up
-    elseif direction == DIRECTIONS.DOWN then
-        return PLAYER_IMAGES.down
-    end
-end
-
-function Player:setDirection(direction)
-    local image = getDirectionImage(direction)
-    self:setImage(image)
+function Mouse:setDirection(direction)
     self.direction = direction
 end
 
 local function isObstacle(tile)
-    return not (tile == EMPTY_TILE or tile == LADDER_TILE or tile == MOUSE_TILE)
+    return not (tile == EMPTY_TILE or tile == LADDER_TILE)
 end
 
 local function getNextTilePosition(x, y, direction)
@@ -132,24 +111,21 @@ local function onBorder(x, y, direction)
     end
 end
 
-function Player:nextTileIsObstacle()
-    local x = self.position.x
-    local y = self.position.y
-    local direction = self.direction
+local function nextTileIsObstacle(grid, x, y, direction)
     local nextTilePosition = getNextTilePosition(x, y, direction)
-    local nextTile = self.grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+    local nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
     if nextTile == GUARD_TILE then
         nextTilePosition = getNextTilePosition(nextTilePosition.x, nextTilePosition.y, direction)
-        nextTile = self.grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+        nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
     end
     return isObstacle(nextTile) or onBorder(nextTilePosition.x, nextTilePosition.y, direction)
 end
 
-function Player:onLadder()
-    return self.grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
+function Mouse:onLadder(grid)
+    return grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
-function Player:onLaser(laserBases, turn)
+function Mouse:onLaser(laserBases, turn)
     local allLaserTilePositions = {}
     for i, laserBase in ipairs(laserBases) do
         if laserBase.laser:isVisible(turn) then
@@ -166,24 +142,12 @@ function Player:onLaser(laserBases, turn)
     return false
 end
 
-function Player:onMouse(mice)
-    for i, mouse in ipairs(mice) do
-        local lastPosition = self.pastMoves[#self.pastMoves].position
-        if ((mouse.position == self.position) or
-           (mouse.position == lastPosition)) and
-           (mouse.delay == 0) then
-            return true
-        end
-    end
-    return false
+function Mouse:setIsBlocked(grid)
+    self.isBlocked = nextTileIsObstacle(grid, self.position.x, self.position.y, self.direction)
 end
 
-function Player:setIsBlocked()
-    self.isBlocked = self:nextTileIsObstacle()
-end
-
-function Player:update()
-    Player.super.update(self)
+function Mouse:update()
+    Mouse.super.update(self)
     if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then
         self:setDirection(DIRECTIONS.UP)
     end
