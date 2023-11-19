@@ -65,9 +65,9 @@ end
 function Mouse:moveBack()
     if self:hasPastMoves() then
         local lastMove = table.remove(self.pastMoves)
-        self.position = lastMove.position
         self.delay = lastMove.delay
-        self.direction = self:setDirection(lastMove.direction)
+        self.position = lastMove.position
+        self:setDirection(lastMove.direction)
     end
 end
 
@@ -77,7 +77,7 @@ end
 
 function Mouse:moveForward(playerMove)
     self.position = playerMove.position
-    self.direction = self:setDirection(playerMove.direction)
+    self:setDirection(playerMove.direction)
 end
 
 function Mouse:move(playerMove, isForward)
