@@ -157,7 +157,7 @@ local function updateMouse(mice, player, isForward, delays)
         local delay = delays[i]-1
         local nextMove = mouse
         if #player.pastMoves > delay then
-            nextMove = player.pastMoves[#player.pastMoves-delay]
+            nextMove = player.pastMoves[#player.pastMoves-delay+1]
         end
         mouse:move(nextMove, isForward)
         mouse:setActive(delay, player.position, isForward)
