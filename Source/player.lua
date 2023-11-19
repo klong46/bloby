@@ -46,7 +46,6 @@ function Player:addPastMove()
 end
 
 function Player:moveBack()
-    print(#self.pastMoves)
     if self:hasPastMoves() then
         lastDirection = self.pastMoves[#self.pastMoves].direction
         local lastMove = table.remove(self.pastMoves)
@@ -170,8 +169,9 @@ end
 function Player:onMouse(mice)
     for i, mouse in ipairs(mice) do
         local lastPosition = self.pastMoves[#self.pastMoves].position
+        local lastMousePosition = mouse.pastMoves[#mouse.pastMoves].position
         if ((mouse.position == self.position) or
-           (mouse.position == lastPosition)) and
+           ((mouse.position == lastPosition) and (lastMousePosition == self.position))) and
            (mouse.delay == 0) then
             return true
         end

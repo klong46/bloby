@@ -13,9 +13,7 @@ function Mouse:init(position, delay)
     self.pastMoves = {}
     self.isBlocked = false
     self.active = false
-    self.moving = false
     self.delay = delay-1
-    self:setDirection(direction)
     self.canTurn = false
     self:setZIndex(1)
     self:setPosition()
@@ -46,7 +44,7 @@ function Mouse:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.delay = lastMove.delay
-        self:setDirection(lastMove.direction)
+        self.direction = lastMove.direction
     end
 end
 
@@ -54,16 +52,17 @@ function Mouse:hasPastMoves()
     return #self.pastMoves >= 1
 end
 
-function Mouse:moveForward(playerPosition)
-    self.position = playerPosition
+function Mouse:moveForward(playerMove)
+    self.position = playerMove.position
+    self.direction = playerMove.direction
 end
 
-function Mouse:move(playerPosition, isForward)
+function Mouse:move(playerMove, isForward)
     if isForward then
         self:addPastMove()
         if self.active then
             if self.delay == 0 then
-                self:moveForward(playerPosition)
+                self:moveForward(playerMove)
             else
                 self.delay -= 1
             end
@@ -76,10 +75,6 @@ end
 
 function Mouse:setPosition()
     self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
-end
-
-function Mouse:setDirection(direction)
-    self.direction = direction
 end
 
 local function isObstacle(tile)
@@ -144,20 +139,4 @@ end
 
 function Mouse:setIsBlocked(grid)
     self.isBlocked = nextTileIsObstacle(grid, self.position.x, self.position.y, self.direction)
-end
-
-function Mouse:update()
-    Mouse.super.update(self)
-    if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then
-        self:setDirection(DIRECTIONS.UP)
-    end
-    if PD.buttonIsPressed(PD.kButtonDown) and self.isBlocked then
-        self:setDirection(DIRECTIONS.DOWN)
-    end
-    if PD.buttonIsPressed(PD.kButtonLeft) and self.isBlocked then
-        self:setDirection(DIRECTIONS.LEFT)
-    end
-    if PD.buttonIsPressed(PD.kButtonRight) and self.isBlocked then
-        self:setDirection(DIRECTIONS.RIGHT)
-    end
 end
