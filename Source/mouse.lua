@@ -2,12 +2,17 @@ import "CoreLibs/sprites"
 import "gameObject"
 import "constants"
 
-local image = GFX.image.new('img/mouse')
+local MOUSE_IMAGES <const> = {
+    up = GFX.image.new('img/mouse/mouse_up'),
+    down = GFX.image.new('img/mouse/mouse_down'),
+    left = GFX.image.new('img/mouse/mouse_left'),
+    right = GFX.image.new('img/mouse/mouse_right')
+}
 
 class('Mouse').extends(GameObject)
 
 function Mouse:init(position, delay)
-    Mouse.super.init(self, image)
+    Mouse.super.init(self, MOUSE_IMAGES.down)
     self.position = position
     self.direction = DEFAULT_MOUSE_DIRECTION
     self.pastMoves = {}
@@ -18,6 +23,24 @@ function Mouse:init(position, delay)
     self:setZIndex(1)
     self:setPosition()
     self:add()
+end
+
+local function getDirectionImage(direction)
+    if direction == DIRECTIONS.LEFT then
+        return MOUSE_IMAGES.left
+    elseif direction == DIRECTIONS.RIGHT then
+        return MOUSE_IMAGES.right
+    elseif direction == DIRECTIONS.UP then
+        return MOUSE_IMAGES.up
+    elseif direction == DIRECTIONS.DOWN then
+        return MOUSE_IMAGES.down
+    end
+end
+
+function Mouse:setDirection(direction)
+    local image = getDirectionImage(direction)
+    self:setImage(image)
+    self.direction = direction
 end
 
 local function getTile(x, y)
@@ -44,7 +67,7 @@ function Mouse:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.delay = lastMove.delay
-        self.direction = lastMove.direction
+        self.direction = self:setDirection(lastMove.direction)
     end
 end
 
@@ -54,7 +77,7 @@ end
 
 function Mouse:moveForward(playerMove)
     self.position = playerMove.position
-    self.direction = playerMove.direction
+    self.direction = self:setDirection(playerMove.direction)
 end
 
 function Mouse:move(playerMove, isForward)
