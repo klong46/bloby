@@ -103,9 +103,9 @@ function Player:setDirection(direction)
     self.direction = direction
 end
 
-local function isObstacle(tile)
-    return not (tile == EMPTY_TILE or tile == LADDER_TILE or tile == MOUSE_TILE)
-end
+-- local function isObstacle(tile)
+--     return not (tile == EMPTY_TILE or tile == LADDER_TILE or tile == MOUSE_TILE)
+-- end
 
 local function getNextTilePosition(x, y, direction)
     if (direction == DIRECTIONS.UP) then
@@ -132,17 +132,24 @@ local function onBorder(x, y, direction)
     end
 end
 
-function Player:nextTileIsObstacle()
-    local x = self.position.x
-    local y = self.position.y
-    local direction = self.direction
-    local nextTilePosition = getNextTilePosition(x, y, direction)
-    local nextTile = self.grid[getTile(nextTilePosition.x, nextTilePosition.y)]
-    if nextTile == GUARD_TILE then
-        nextTilePosition = getNextTilePosition(nextTilePosition.x, nextTilePosition.y, direction)
-        nextTile = self.grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+function Player:nextTileIsObstacle(grid, x, y)
+    local nextTile = grid[getTile(x, y)]
+    -- print(nextTile)
+    if nextTile == WALL_TILE or nextTile == nil or x > TILES_PER_ROW or x < 1 then
+        return true
+    elseif nextTile == GUARD_TILE then
+        if self.direction == DIRECTIONS.UP then
+            return self:nextTileIsObstacle(grid, x, y-1)
+        elseif self.direction == DIRECTIONS.DOWN then
+            return self:nextTileIsObstacle(grid, x, y+1)
+        elseif self.direction == DIRECTIONS.LEFT then
+            return self:nextTileIsObstacle(grid, x-1, y)
+        elseif self.direction == DIRECTIONS.RIGHT then
+            return self:nextTileIsObstacle(grid, x+1, y)
+        end
+    elseif nextTile == EMPTY_TILE or nextTile == MOUSE_TILE or tile == LADDER_TILE then
+        return false
     end
-    return isObstacle(nextTile) or onBorder(nextTilePosition.x, nextTilePosition.y, direction)
 end
 
 function Player:onLadder()
@@ -179,8 +186,9 @@ function Player:onMouse(mice)
     return false
 end
 
-function Player:setIsBlocked()
-    self.isBlocked = self:nextTileIsObstacle()
+function Player:setIsBlocked(grid)
+    local nextPos = getNextTilePosition(self.position.x, self.position.y, self.direction)
+    self.isBlocked = self:nextTileIsObstacle(grid, nextPos.x, nextPos.y)
 end
 
 function Player:update()

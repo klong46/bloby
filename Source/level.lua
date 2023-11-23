@@ -102,9 +102,25 @@ local function updatePlayer(player, step, isForward)
     player:move(step, isForward)
 end
 
+local function guardListIncludes(list, value)
+    for i, g in ipairs(list) do
+        if g.position == value then
+            return true
+        end
+    end
+    return false
+end
+
 local function updateGuards(guards, step, isForward, grid)
+    local lastMoves = {}
     for i, guard in ipairs(guards) do
         guard:move(step, isForward, grid)
+        table.insert(lastMoves, guard.lastPosition)
+    end
+    for x, position in ipairs(lastMoves) do
+        if not guardListIncludes(guards, position) and grid[getTile(position.x, position.y)] ~= LADDER_TILE and grid[getTile(position.x, position.y)] ~= MOUSE_TILE  then
+            grid[getTile(position.x, position.y)] = EMPTY_TILE
+        end
     end
 end
 
@@ -138,7 +154,7 @@ local function checkPlayerWin(player)
 end
 
 local function checkForBlocks(player, guards, grid)
-    player:setIsBlocked()
+    player:setIsBlocked(grid)
     for i, guard in ipairs(guards) do
         guard:setIsBlocked(grid)
     end
@@ -166,8 +182,8 @@ end
 
 function Level:updateGameObjects(step, isForward)
     self.turn += step
-    updatePlayer(self.player, step, isForward)
     updateGuards(self.guards, step, isForward, self.grid)
+    updatePlayer(self.player, step, isForward)
     updateLasers(self.laserBases, self.turn, self.grid)
     updateMouse(self.mice, self.player, isForward, self.mouseDelays)
 end
@@ -188,7 +204,7 @@ function Level:updateTurn(step, isForward)
             self:updateGameObjects(step, isForward)
             self:checkGuardInteractions()
             self:checkPlayerInteractions()
-            checkForBlocks(self.player, self.guards, self.grid) -- check if move is valid after turn ends
+            self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
         end
     elseif self.player:hasPastMoves() then
         self:updateGameObjects(step, isForward)
