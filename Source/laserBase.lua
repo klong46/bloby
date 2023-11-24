@@ -1,13 +1,11 @@
 import "CoreLibs/sprites"
-import "tile"
 import "constants"
 
-class('LaserBase').extends(Tile)
+class('LaserBase').extends(StaticObject)
 
 local image = GFX.image.new('img/laser/laser_base')
 
 function LaserBase:init(position, grid, direction, cadence, offset)
-    LaserBase.super.init(self, position, image)
+    LaserBase.super.init(self, image, position)
     self.laser = Laser(position, grid, direction, cadence, offset)
-    self:add()
 end

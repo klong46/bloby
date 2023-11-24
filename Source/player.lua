@@ -1,36 +1,24 @@
 import "CoreLibs/sprites"
-import "gameObject"
+import "dynamicObject"
 import "constants"
 
 local PLAYER_IMAGES <const> = {
-    up = GFX.image.new('img/player/player_up'),
-    down = GFX.image.new('img/player/player_down'),
-    left = GFX.image.new('img/player/player_left'),
-    right = GFX.image.new('img/player/player_right')
+    GFX.image.new('img/player/player_up'),
+    GFX.image.new('img/player/player_down'),
+    GFX.image.new('img/player/player_left'),
+    GFX.image.new('img/player/player_right')
 }
 
 local lastDirection
 
-class('Player').extends(GameObject)
+class('Player').extends(DynamicObject)
 
 function Player:init(position, direction, grid)
-    local image = PLAYER_IMAGES.down
-    Player.super.init(self, image)
-    self.position = position
-    self.direction = direction
+    Player.super.init(self, PLAYER_IMAGES[1], position, direction, grid)
     self.pastMoves = {}
-    self.grid = grid
-    self.isBlocked = false
-    self:setDirection(direction)
+    self:setDirectionImage(PLAYER_IMAGES, direction)
     lastDirection = direction
     self.canTurn = false
-    self:setZIndex(1)
-    self:setPosition()
-    self:add()
-end
-
-local function getTile(x, y)
-    return ((y-1)*TILES_PER_ROW)+x
 end
 
 function Player:addPastMove()
@@ -51,7 +39,7 @@ function Player:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
-        self:setDirection(lastMove.direction)
+        self:setDirectionImage(PLAYER_IMAGES, lastMove.direction)
     end
 end
 
@@ -78,30 +66,10 @@ function Player:move(step, isForward)
     else
         self:moveBack()
     end
-    self:setPosition()
+    self:setPosition(self.position)
 end
 
-function Player:setPosition()
-    self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
-end
 
-local function getDirectionImage(direction)
-    if direction == DIRECTIONS.LEFT then
-        return PLAYER_IMAGES.left
-    elseif direction == DIRECTIONS.RIGHT then
-        return PLAYER_IMAGES.right
-    elseif direction == DIRECTIONS.UP then
-        return PLAYER_IMAGES.up
-    elseif direction == DIRECTIONS.DOWN then
-        return PLAYER_IMAGES.down
-    end
-end
-
-function Player:setDirection(direction)
-    local image = getDirectionImage(direction)
-    self:setImage(image)
-    self.direction = direction
-end
 
 -- local function isObstacle(tile)
 --     return not (tile == EMPTY_TILE or tile == LADDER_TILE or tile == MOUSE_TILE)
@@ -133,7 +101,7 @@ local function onBorder(x, y, direction)
 end
 
 function Player:nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[getTile(x, y)]
+    local nextTile = grid[GetTile(x, y)]
     -- print(nextTile)
     if nextTile == WALL_TILE or nextTile == nil or x > TILES_PER_ROW or x < 1 then
         return true
@@ -153,7 +121,7 @@ function Player:nextTileIsObstacle(grid, x, y)
 end
 
 function Player:onLadder()
-    return self.grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
+    return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
 function Player:onLaser(laserBases, turn)
@@ -194,15 +162,19 @@ end
 function Player:update()
     Player.super.update(self)
     if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then
-        self:setDirection(DIRECTIONS.UP)
+        self:setDirectionImage(PLAYER_IMAGES, DIRECTIONS.UP)
+        self.direction = DIRECTIONS.UP
     end
     if PD.buttonIsPressed(PD.kButtonDown) and self.isBlocked then
-        self:setDirection(DIRECTIONS.DOWN)
+        self:setDirectionImage(PLAYER_IMAGES, DIRECTIONS.DOWN)
+        self.direction = DIRECTIONS.DOWN
     end
     if PD.buttonIsPressed(PD.kButtonLeft) and self.isBlocked then
-        self:setDirection(DIRECTIONS.LEFT)
+        self:setDirectionImage(PLAYER_IMAGES, DIRECTIONS.LEFT)
+        self.direction = DIRECTIONS.LEFT
     end
     if PD.buttonIsPressed(PD.kButtonRight) and self.isBlocked then
-        self:setDirection(DIRECTIONS.RIGHT)
+        self:setDirectionImage(PLAYER_IMAGES, DIRECTIONS.RIGHT)
+        self.direction = DIRECTIONS.RIGHT
     end
 end

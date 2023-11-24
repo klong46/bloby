@@ -1,50 +1,22 @@
 import "CoreLibs/sprites"
-import "gameObject"
 import "constants"
 
 local MOUSE_IMAGES <const> = {
-    up = GFX.image.new('img/mouse/mouse_up'),
-    down = GFX.image.new('img/mouse/mouse_down'),
-    left = GFX.image.new('img/mouse/mouse_left'),
-    right = GFX.image.new('img/mouse/mouse_right')
+    GFX.image.new('img/mouse/mouse_up'),
+    GFX.image.new('img/mouse/mouse_down'),
+    GFX.image.new('img/mouse/mouse_left'),
+    GFX.image.new('img/mouse/mouse_right')
 }
 
-class('Mouse').extends(GameObject)
+class('Mouse').extends(DynamicObject)
 
-function Mouse:init(position, delay)
-    Mouse.super.init(self, MOUSE_IMAGES.down)
-    self.position = position
-    self.direction = DEFAULT_MOUSE_DIRECTION
+function Mouse:init(position, delay, grid)
+    Mouse.super.init(self, MOUSE_IMAGES[1], position, DEFAULT_MOUSE_DIRECTION, grid)
     self.pastMoves = {}
-    self.isBlocked = false
     self.active = false
     self.delay = delay-1
     self.canTurn = false
-    self:setZIndex(1)
-    self:setPosition()
     self:add()
-end
-
-local function getDirectionImage(direction)
-    if direction == DIRECTIONS.LEFT then
-        return MOUSE_IMAGES.left
-    elseif direction == DIRECTIONS.RIGHT then
-        return MOUSE_IMAGES.right
-    elseif direction == DIRECTIONS.UP then
-        return MOUSE_IMAGES.up
-    elseif direction == DIRECTIONS.DOWN then
-        return MOUSE_IMAGES.down
-    end
-end
-
-function Mouse:setDirection(direction)
-    local image = getDirectionImage(direction)
-    self:setImage(image)
-    self.direction = direction
-end
-
-local function getTile(x, y)
-    return ((y-1)*TILES_PER_ROW)+x
 end
 
 function Mouse:setActive(delay, playerPosition, isForward)
@@ -67,7 +39,7 @@ function Mouse:moveBack()
         local lastMove = table.remove(self.pastMoves)
         self.delay = lastMove.delay
         self.position = lastMove.position
-        self:setDirection(lastMove.direction)
+        self:setDirectionImage(MOUSE_IMAGES, lastMove.direction)
     end
 end
 
@@ -77,7 +49,7 @@ end
 
 function Mouse:moveForward(playerMove)
     self.position = playerMove.position
-    self:setDirection(playerMove.direction)
+    self:setDirectionImage(MOUSE_IMAGES, playerMove.direction)
 end
 
 function Mouse:move(playerMove, isForward)
@@ -93,11 +65,7 @@ function Mouse:move(playerMove, isForward)
     else
         self:moveBack()
     end
-    self:setPosition()
-end
-
-function Mouse:setPosition()
-    self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
+    self:setPosition(self.position)
 end
 
 local function isObstacle(tile)
@@ -131,16 +99,16 @@ end
 
 local function nextTileIsObstacle(grid, x, y, direction)
     local nextTilePosition = getNextTilePosition(x, y, direction)
-    local nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+    local nextTile = grid[GetTile(nextTilePosition.x, nextTilePosition.y)]
     if nextTile == GUARD_TILE then
         nextTilePosition = getNextTilePosition(nextTilePosition.x, nextTilePosition.y, direction)
-        nextTile = grid[getTile(nextTilePosition.x, nextTilePosition.y)]
+        nextTile = grid[GetTile(nextTilePosition.x, nextTilePosition.y)]
     end
     return isObstacle(nextTile) or onBorder(nextTilePosition.x, nextTilePosition.y, direction)
 end
 
 function Mouse:onLadder(grid)
-    return grid[getTile(self.position.x, self.position.y)] == LADDER_TILE
+    return grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
 function Mouse:onLaser(laserBases, turn)

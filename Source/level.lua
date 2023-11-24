@@ -43,21 +43,17 @@ function Level:getMouseDelay()
     return delay
 end
 
-local function getTile(x, y)
-    return ((y-1)*TILES_PER_ROW)+x
-end
-
 function Level:drawTiles(playerDirection)
     for x = 1, TILES_PER_ROW do
         for y = 1, TILES_PER_COLUMN do
-            local tile = self.grid[getTile(x, y)]
+            local tile = self.grid[GetTile(x, y)]
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
                 Wall(position) -- create new wall at position
             elseif tile == GUARD_TILE then
-                table.insert(self.guards, Guard(position))
+                table.insert(self.guards, Guard(position, self.grid))
             elseif tile == MOUSE_TILE then
-                table.insert(self.mice, Mouse(position, self:getMouseDelay()))
+                table.insert(self.mice, Mouse(position, self:getMouseDelay(), self.grid))
             else
                 if tile == RIGHT_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence(), self:getLaserOffset()))
@@ -69,7 +65,7 @@ function Level:drawTiles(playerDirection)
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence(), self:getLaserOffset()))
                 elseif tile == PLAYER_TILE then
                     self.player = Player(position, playerDirection, self.grid)
-                    self.grid[getTile(x, y)] = EMPTY_TILE
+                    self.grid[GetTile(x, y)] = EMPTY_TILE
                 elseif tile == LADDER_TILE then
                     self.ladder = Ladder(position)
                 end
@@ -118,15 +114,15 @@ local function updateGuards(guards, step, isForward, grid)
         table.insert(lastMoves, guard.lastPosition)
     end
     for x, position in ipairs(lastMoves) do
-        if not guardListIncludes(guards, position) and grid[getTile(position.x, position.y)] ~= LADDER_TILE and grid[getTile(position.x, position.y)] ~= MOUSE_TILE  then
-            grid[getTile(position.x, position.y)] = EMPTY_TILE
+        if not guardListIncludes(guards, position) and grid[GetTile(position.x, position.y)] ~= LADDER_TILE and grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
+            grid[GetTile(position.x, position.y)] = EMPTY_TILE
         end
     end
 end
 
 local function updateGuardDirections(guards, playerDirection)
     for i, guard in ipairs(guards) do
-        guard:setDirection(playerDirection)
+        guard.direction = playerDirection
     end
 end
 

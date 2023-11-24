@@ -1,8 +1,7 @@
 import "CoreLibs/sprites"
-import "gameObject"
 import "constants"
 
-class('Laser').extends(GameObject)
+class('Laser').extends(SLIB)
 
 local imagePath = 'img/laser/laser_'
 

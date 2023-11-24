@@ -1,23 +1,15 @@
 import "CoreLibs/sprites"
+import "dynamicObject"
 
 local image = GFX.image.new('img/guard')
 
-class('Guard').extends(GameObject)
+class('Guard').extends(DynamicObject)
 
-function Guard:init(position)
-    Guard.super.init(self, image)
-    self.position = position
-    self.direction = DEFAULT_GUARD_DIRECTION
+function Guard:init(position, grid)
+    Guard.super.init(self, image, position, DEFAULT_GUARD_DIRECTION, grid)
     self.pastMoves = {}
-    self.isBlocked = false
     self.alive = true
-    self:setDirection(direction)
-    self:setPosition()
-    self:add()
-end
-
-local function getTile(x, y)
-    return ((y-1)*TILES_PER_ROW)+x
+    self.lastPosition = position
 end
 
 function Guard:addPastMove()
@@ -33,7 +25,7 @@ function Guard:moveBack()
         self.position = lastMove.position
         self.isBlocked = lastMove.isBlocked
         self.alive = lastMove.alive
-        self:setDirection(lastMove.direction)
+        self.direction = lastMove.direction
     end
 end
 
@@ -65,6 +57,7 @@ function Guard:moveForward(step)
     end
 end
 
+
 function Guard:move(step, isForward, grid)
     self.lastPosition = PD.geometry.point.new(self.position.x, self.position.y)
     if isForward then
@@ -80,12 +73,12 @@ function Guard:move(step, isForward, grid)
     end
     self:setPosition()
     if self.alive then
-        grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+        grid[GetTile(self.position.x, self.position.y)] = GUARD_TILE
     end
 end
 
 function Guard:destroy(grid)
-    grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
+    grid[GetTile(self.position.x, self.position.y)] = EMPTY_TILE
     self.alive = false
     self:setVisible(false)
 end
@@ -94,13 +87,9 @@ function Guard:setPosition()
     self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
 end
 
-function Guard:setDirection(direction)
-    self.direction = direction
-end
-
 -- FIX COLLISIONS WITH EVERYTHING
 function Guard:nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[getTile(x, y)]
+    local nextTile = grid[GetTile(x, y)]
     if nextTile == WALL_TILE or nextTile == nil or x > TILES_PER_ROW or x < 1 then
         return true
     elseif nextTile == GUARD_TILE then
