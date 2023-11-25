@@ -1,31 +1,25 @@
 import "CoreLibs/sprites"
 import "dynamicObject"
 
-local image = GFX.image.new('img/guard')
+local GUARD_IMAGES <const> = {
+    GFX.image.new('img/guard'),
+    GFX.image.new('img/guard'),
+    GFX.image.new('img/guard'),
+    GFX.image.new('img/guard')
+}
 
 class('Guard').extends(DynamicObject)
 
 function Guard:init(position, grid)
-    Guard.super.init(self, image, position, DEFAULT_GUARD_DIRECTION, grid)
-    self.pastMoves = {}
+    Guard.super.init(self, GUARD_IMAGES[1], position, DEFAULT_GUARD_DIRECTION, grid, GUARD_IMAGES)
     self.alive = true
     self.lastPosition = position
 end
 
-function Guard:addPastMove()
-    local newPos = PD.geometry.point.new(self.position.x, self.position.y)
-    local newDir = self.direction
-    local newAlive = self.alive
-    table.insert(self.pastMoves, {position = newPos, direction = newDir, alive = newAlive})
-end
-
 function Guard:moveBack()
-    if self:hasPastMoves() then
-        local lastMove = table.remove(self.pastMoves)
-        self.position = lastMove.position
-        self.isBlocked = lastMove.isBlocked
+    local lastMove = Guard.super.moveBack(self)
+    if lastMove then
         self.alive = lastMove.alive
-        self.direction = lastMove.direction
     end
 end
 
@@ -41,24 +35,7 @@ function Guard:onMouse(mice)
     return false
 end
 
-function Guard:hasPastMoves()
-    return #self.pastMoves >= 1
-end
-
-function Guard:moveForward(step)
-    if (self.direction == DIRECTIONS.UP) then
-        self.position.y -= step
-    elseif (self.direction == DIRECTIONS.DOWN) then
-        self.position.y += step
-    elseif (self.direction == DIRECTIONS.LEFT) then
-        self.position.x -= step
-    elseif (self.direction == DIRECTIONS.RIGHT) then
-        self.position.x += step
-    end
-end
-
-
-function Guard:move(step, isForward, grid)
+function Guard:move(step, isForward)
     self.lastPosition = PD.geometry.point.new(self.position.x, self.position.y)
     if isForward then
         self:addPastMove()
@@ -73,64 +50,60 @@ function Guard:move(step, isForward, grid)
     end
     self:setPosition()
     if self.alive then
-        grid[GetTile(self.position.x, self.position.y)] = GUARD_TILE
+        self.grid[GetTile(self.position.x, self.position.y)] = GUARD_TILE
     end
 end
 
-function Guard:destroy(grid)
-    grid[GetTile(self.position.x, self.position.y)] = EMPTY_TILE
+function Guard:destroy()
+    self.grid[GetTile(self.position.x, self.position.y)] = EMPTY_TILE
     self.alive = false
     self:setVisible(false)
 end
 
-function Guard:setPosition()
-    self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
-end
-
 -- FIX COLLISIONS WITH EVERYTHING
-function Guard:nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[GetTile(x, y)]
+function Guard:nextTileIsObstacle(x, y)
+    local nextTile = self.grid[GetTile(x, y)]
     if nextTile == WALL_TILE or nextTile == nil or x > TILES_PER_ROW or x < 1 then
         return true
     elseif nextTile == GUARD_TILE then
         if self.direction == DIRECTIONS.UP then
-            return self:nextTileIsObstacle(grid, x, y-1)
+            return self:nextTileIsObstacle(x, y-1)
         elseif self.direction == DIRECTIONS.DOWN then
-            return self:nextTileIsObstacle(grid, x, y+1)
+            return self:nextTileIsObstacle(x, y+1)
         elseif self.direction == DIRECTIONS.LEFT then
-            return self:nextTileIsObstacle(grid, x-1, y)
+            return self:nextTileIsObstacle(x-1, y)
         elseif self.direction == DIRECTIONS.RIGHT then
-            return self:nextTileIsObstacle(grid, x+1, y)
+            return self:nextTileIsObstacle(x+1, y)
         end
     elseif nextTile == EMPTY_TILE or nextTile == MOUSE_TILE then
         return false
     end
 end
 
-function Guard:setIsBlocked(grid)
+function Guard:setIsBlocked()
     if (self.direction == DIRECTIONS.UP) then
-        self.isBlocked = self:upIsBlocked(grid)
+        self.isBlocked = self:upIsBlocked()
     elseif (self.direction == DIRECTIONS.DOWN) then
-        self.isBlocked = self:downIsBlocked(grid)
+        self.isBlocked = self:downIsBlocked()
     elseif (self.direction == DIRECTIONS.LEFT) then
-        self.isBlocked = self:leftIsBlocked(grid)
+        self.isBlocked = self:leftIsBlocked()
     elseif (self.direction == DIRECTIONS.RIGHT) then
-        self.isBlocked = self:rightIsBlocked(grid)
+        self.isBlocked = self:rightIsBlocked()
     end
 end
 
-function Guard:upIsBlocked(grid)
-    return self.position.y == 1 or self:nextTileIsObstacle(grid, self.position.x, self.position.y-1)
+function Guard:upIsBlocked()
+    return self.position.y == 1 or self:nextTileIsObstacle(self.position.x, self.position.y-1)
 end
 
-function Guard:downIsBlocked(grid)
-    return self.position.y == TILES_PER_COLUMN or self:nextTileIsObstacle(grid, self.position.x, self.position.y+1)
+function Guard:downIsBlocked()
+    return self.position.y == TILES_PER_COLUMN or self:nextTileIsObstacle(self.position.x, self.position.y+1)
 end
 
-function Guard:leftIsBlocked(grid)
-    return self.position.x == 1 or self:nextTileIsObstacle(grid, self.position.x-1, self.position.y)
+function Guard:leftIsBlocked()
+    return self.position.x == 1 or self:nextTileIsObstacle(self.position.x-1, self.position.y)
 end
 
-function Guard:rightIsBlocked(grid)
-    return self.position.x == TILES_PER_ROW or self:nextTileIsObstacle(grid, self.position.x+1, self.position.y)
+function Guard:rightIsBlocked()
+    return self.position.x == TILES_PER_ROW or self:nextTileIsObstacle(self.position.x+1, self.position.y)
 end
