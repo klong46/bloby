@@ -26,24 +26,6 @@ function Player:move(step, isForward)
     self:setPosition()
 end
 
-
-
--- local function isObstacle(tile)
---     return not (tile == EMPTY_TILE or tile == LADDER_TILE or tile == MOUSE_TILE)
--- end
-
-local function onBorder(x, y, direction)
-    if (direction == DIRECTIONS.UP) then
-        return y < 1
-    elseif (direction == DIRECTIONS.DOWN) then
-        return y > TILES_PER_COLUMN
-    elseif (direction == DIRECTIONS.LEFT) then
-        return x < 1
-    elseif (direction == DIRECTIONS.RIGHT) then
-        return x > TILES_PER_ROW
-    end
-end
-
 function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
@@ -76,10 +58,6 @@ function Player:onMouse(mice)
         end
     end
     return false
-end
-
-function Player:setIsBlocked(grid)
-    self.isBlocked = self:nextTileIsObstacle(self.position.x, self.position.y)
 end
 
 function Player:update()

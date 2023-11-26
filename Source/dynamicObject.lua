@@ -87,22 +87,21 @@ end
 function DynamicObject:nextTileIsObstacle(x, y)
     local nextPosition = self:getNextTilePosition(x, y)
     local nextTile = self.grid[(GetTile(nextPosition[1], nextPosition[2]))]
-    if nextTile == WALL_TILE or nextTile == nil or x > TILES_PER_ROW or x < 1 then
-        return true
-    elseif nextTile == GUARD_TILE then
+    if nextTile == GUARD_TILE then
         local adjacentPosition = self:getNextTilePosition(x, y)
-        self:nextTileIsObstacle(adjacentPosition[1], adjacentPosition[2])
-
-        -- if self.direction == DIRECTIONS.UP then
-        --     return self:nextTileIsObstacle(x, y-1)
-        -- elseif self.direction == DIRECTIONS.DOWN then
-        --     return self:nextTileIsObstacle(x, y+1)
-        -- elseif self.direction == DIRECTIONS.LEFT then
-        --     return self:nextTileIsObstacle(x-1, y)
-        -- elseif self.direction == DIRECTIONS.RIGHT then
-        --     return self:nextTileIsObstacle(x+1, y)
-        -- end
-    elseif nextTile == EMPTY_TILE or nextTile == MOUSE_TILE or tile == LADDER_TILE then
+        return self:nextTileIsObstacle(adjacentPosition[1], adjacentPosition[2])
+    elseif nextTile == WALL_TILE or
+           nextPosition[1] > TILES_PER_ROW or
+           nextPosition[1] < 1 or
+           nextPosition[2] > TILES_PER_COLUMN or
+           nextPosition[2] < 1
+           then
+        return true
+    else
         return false
     end
+end
+
+function DynamicObject:setIsBlocked()
+    self.isBlocked = self:nextTileIsObstacle(self.position.x, self.position.y)
 end
