@@ -89,7 +89,7 @@ function DynamicObject:nextTileIsObstacle(x, y, obstacles)
     local nextTile = self.grid[(GetTile(nextPosition[1], nextPosition[2]))]
     if nextTile == GUARD_TILE then
         local adjacentPosition = self:getNextTilePosition(x, y)
-        return self:nextTileIsObstacle(adjacentPosition[1], adjacentPosition[2], obstacles)
+        return self:nextTileIsObstacle(adjacentPosition[1], adjacentPosition[2], GUARD_OBSTACLES)
     elseif self:isObstacleTile(nextTile, obstacles) or
            nextPosition[1] > TILES_PER_ROW or
            nextPosition[1] < 1 or
