@@ -1,39 +1,25 @@
 import "CoreLibs/sprites"
+import "dynamicObject"
 
-local image = GFX.image.new('img/guard')
+local GUARD_IMAGES <const> = {
+    GFX.image.new('img/guard'),
+    GFX.image.new('img/guard'),
+    GFX.image.new('img/guard'),
+    GFX.image.new('img/guard')
+}
 
-class('Guard').extends(GameObject)
+class('Guard').extends(DynamicObject)
 
-function Guard:init(position)
-    Guard.super.init(self, image)
-    self.position = position
-    self.direction = DEFAULT_GUARD_DIRECTION
-    self.pastMoves = {}
-    self.isBlocked = false
+function Guard:init(position, grid)
+    Guard.super.init(self, GUARD_IMAGES[1], position, DEFAULT_GUARD_DIRECTION, grid, GUARD_IMAGES)
     self.alive = true
-    self:setDirection(direction)
-    self:setPosition()
-    self:add()
-end
-
-local function getTile(x, y)
-    return ((y-1)*TILES_PER_ROW)+x
-end
-
-function Guard:addPastMove()
-    local newPos = PD.geometry.point.new(self.position.x, self.position.y)
-    local newDir = self.direction
-    local newAlive = self.alive
-    table.insert(self.pastMoves, {position = newPos, direction = newDir, alive = newAlive})
+    self.lastPosition = position
 end
 
 function Guard:moveBack()
-    if self:hasPastMoves() then
-        local lastMove = table.remove(self.pastMoves)
-        self.position = lastMove.position
-        self.isBlocked = lastMove.isBlocked
+    local lastMove = Guard.super.moveBack(self)
+    if lastMove then
         self.alive = lastMove.alive
-        self:setDirection(lastMove.direction)
     end
 end
 
@@ -49,24 +35,8 @@ function Guard:onMouse(mice)
     return false
 end
 
-function Guard:hasPastMoves()
-    return #self.pastMoves >= 1
-end
-
-function Guard:moveForward(step)
-    if (self.direction == DIRECTIONS.UP) then
-        self.position.y -= step
-    elseif (self.direction == DIRECTIONS.DOWN) then
-        self.position.y += step
-    elseif (self.direction == DIRECTIONS.LEFT) then
-        self.position.x -= step
-    elseif (self.direction == DIRECTIONS.RIGHT) then
-        self.position.x += step
-    end
-end
-
-function Guard:move(step, isForward, grid)
-    grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
+function Guard:move(step, isForward)
+    self.lastPosition = PD.geometry.point.new(self.position.x, self.position.y)
     if isForward then
         self:addPastMove()
         if (not self.isBlocked) and (self.alive) then
@@ -80,53 +50,12 @@ function Guard:move(step, isForward, grid)
     end
     self:setPosition()
     if self.alive then
-        grid[getTile(self.position.x, self.position.y)] = GUARD_TILE
+        self.grid[GetTile(self.position.x, self.position.y)] = GUARD_TILE
     end
 end
 
-function Guard:destroy(grid)
-    grid[getTile(self.position.x, self.position.y)] = EMPTY_TILE
+function Guard:destroy()
+    self.grid[GetTile(self.position.x, self.position.y)] = EMPTY_TILE
     self.alive = false
     self:setVisible(false)
-end
-
-function Guard:setPosition()
-    self:moveTo((self.position.x * TILE_SIZE) - TILE_SPRITE_OFFSET, (self.position.y * TILE_SIZE) - TILE_SPRITE_OFFSET)
-end
-
-function Guard:setDirection(direction)
-    self.direction = direction
-end
-
-local function nextTileIsObstacle(grid, x, y)
-    local nextTile = grid[getTile(x, y)]
-    return not (nextTile == EMPTY_TILE or nextTile == MOUSE_TILE)
-end
-
-function Guard:setIsBlocked(grid)
-    if (self.direction == DIRECTIONS.UP) then
-        self.isBlocked = self:upIsBlocked(grid)
-    elseif (self.direction == DIRECTIONS.DOWN) then
-        self.isBlocked = self:downIsBlocked(grid)
-    elseif (self.direction == DIRECTIONS.LEFT) then
-        self.isBlocked = self:leftIsBlocked(grid)
-    elseif (self.direction == DIRECTIONS.RIGHT) then
-        self.isBlocked = self:rightIsBlocked(grid)
-    end
-end
-
-function Guard:upIsBlocked(grid)
-    return self.position.y == 1 or nextTileIsObstacle(grid, self.position.x, self.position.y-1)
-end
-
-function Guard:downIsBlocked(grid)
-    return self.position.y == TILES_PER_COLUMN or nextTileIsObstacle(grid, self.position.x, self.position.y+1)
-end
-
-function Guard:leftIsBlocked(grid)
-    return self.position.x == 1 or nextTileIsObstacle(grid, self.position.x-1, self.position.y)
-end
-
-function Guard:rightIsBlocked(grid)
-    return self.position.x == TILES_PER_ROW or nextTileIsObstacle(grid, self.position.x+1, self.position.y)
 end
