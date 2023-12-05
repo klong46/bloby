@@ -43,6 +43,26 @@ function Level:getMouseDelay()
     return delay
 end
 
+function Level:init(file)
+    Level.super.init(self)
+    self.turn = 1
+    laserCadenceIndex = 1
+    laserOffsetIndex = 1
+    mouseDelayIndex = 1
+    local levelData = PD.datastore.read("levels/"..file)
+    self.grid = levelData.grid
+    self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
+    self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
+    self.mouseDelays = levelData.mouseDelays and levelData.mouseDelays or {}
+    self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
+    local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
+    self.laserBases = {}
+    self.guards = {}
+    self.mice = {}
+    self:drawTiles(playerDirection)
+    self:add()
+end
+
 function Level:drawTiles(playerDirection)
     for x = 1, TILES_PER_ROW do
         for y = 1, TILES_PER_COLUMN do
@@ -74,114 +94,56 @@ function Level:drawTiles(playerDirection)
     end
 end
 
-function Level:init(file)
-    Level.super.init(self)
-    self.turn = 1
-    laserCadenceIndex = 1
-    laserOffsetIndex = 1
-    mouseDelayIndex = 1
-    local levelData = PD.datastore.read("levels/"..file)
-    self.grid = levelData.grid
-    self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
-    self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
-    self.mouseDelays = levelData.mouseDelays and levelData.mouseDelays or {}
-    self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
-    local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
-    self.laserBases = {}
-    self.guards = {}
-    self.mice = {}
-    self:drawTiles(playerDirection)
-    self:add()
+function Level:update()
+    Level.super.update(self)
+    self:checkCrankTurns()
 end
 
-local function updatePlayer(player, step, isForward)
-    player:move(step, isForward)
-end
-
-local function guardListIncludes(list, value)
-    for i, g in ipairs(list) do
-        if g.position == value then
-            return true
-        end
-    end
-    return false
-end
-
-local function updateGuards(guards, step, isForward, grid)
-    local lastMoves = {}
-    for i, guard in ipairs(guards) do
-        guard:move(step, isForward, grid)
-        table.insert(lastMoves, guard.lastPosition)
-    end
-    for x, position in ipairs(lastMoves) do
-        if not guardListIncludes(guards, position) and grid[GetTile(position.x, position.y)] ~= LADDER_TILE and grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
-            grid[GetTile(position.x, position.y)] = EMPTY_TILE
-        end
+function Level:checkCrankTurns()
+	local ticks = PD.getCrankTicks(CRANK_SPEED)
+    if ticks > 0 then
+        self:moveForward()
+    elseif ticks < 0 then
+        self:moveBack()
     end
 end
 
-local function updateGuardDirections(guards, playerDirection)
-    for i, guard in ipairs(guards) do
-        guard.direction = playerDirection
+function Level:moveForward()
+    self:updateGuardDirections()
+    self:checkForBlocks()
+    if not self.player.isBlocked then
+        self:updateGameObjects(FORWARD_STEP, true)
+        self:checkGuardInteractions()
+        self:checkPlayerInteractions()
+        self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
     end
 end
 
-local function updateLasers(laserBases, turn, grid)
-    for i, laserBase in ipairs(laserBases) do
-        local l = laserBase.laser
-        l:setVisible(turn)
-        l.length = l:setLength(grid)
-        local image = l:getImage()
-        l:setImage(image)
-        l:setPosition(image)
+function Level:moveBack()
+    if self.player:hasPastMoves() then
+        self:updateGameObjects(BACKWARD_STEP, false)
     end
 end
 
-local function checkPlayerDeath(player, laserBases, turn, mice)
-    if player:onLaser(laserBases, turn) or player:onMouse(mice) then
-        ResetLevel()
+function Level:updateGuardDirections()
+    for i, guard in ipairs(self.guards) do
+        guard.direction = self.player.direction
     end
 end
 
-local function checkPlayerWin(player)
-    if player:onLadder(grid) then
-        NextLevel()
-    end
-end
-
-local function checkForBlocks(player, guards, grid)
-    player:setIsBlocked(grid)
-    for i, guard in ipairs(guards) do
-        guard:setIsBlocked(grid)
-    end
-end
-
-function Level:checkMouseInteractions()
-end
-
-function Level:checkPlayerInteractions()
-    checkPlayerDeath(self.player, self.laserBases, self.turn, self.mice)
-    checkPlayerWin(self.player)
-end
-
-local function updateMouse(mice, player, isForward, delays)
-    for i, mouse in ipairs(mice) do
-        local delay = delays[i]-1
-        local nextMove = mouse
-        if #player.pastMoves > delay then
-            nextMove = player.pastMoves[#player.pastMoves-delay+1]
-        end
-        mouse:move(nextMove, isForward)
-        mouse:setActive(delay, player.position, isForward)
+function Level:checkForBlocks()
+    self.player:setIsBlocked()
+    for i, guard in ipairs(self.guards) do
+        guard:setIsBlocked()
     end
 end
 
 function Level:updateGameObjects(step, isForward)
     self.turn += step
-    updateGuards(self.guards, step, isForward, self.grid)
-    updatePlayer(self.player, step, isForward)
-    updateLasers(self.laserBases, self.turn, self.grid)
-    updateMouse(self.mice, self.player, isForward, self.mouseDelays)
+    self:updateGuards(step, isForward)
+    self.player:move(step, isForward)
+    self:updateLasers()
+    self:updateMouse(isForward)
 end
 
 function Level:checkGuardInteractions()
@@ -192,31 +154,68 @@ function Level:checkGuardInteractions()
     end
 end
 
-function Level:updateTurn(step, isForward)
-    if isForward then
-        updateGuardDirections(self.guards, self.player.direction)
-        checkForBlocks(self.player, self.guards, self.grid)
-        if not self.player.isBlocked then
-            self:updateGameObjects(step, isForward)
-            self:checkGuardInteractions()
-            self:checkPlayerInteractions()
-            self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
+function Level:checkPlayerInteractions()
+    self:checkPlayerDeath()
+    self:checkPlayerWin()
+end
+
+function Level:guardListIncludes(value)
+    for i, guard in ipairs(self.guards) do
+        if guard.position == value then
+            return true
         end
-    elseif self.player:hasPastMoves() then
-        self:updateGameObjects(step, isForward)
+    end
+    return false
+end
+
+function Level:updateGuards(step, isForward)
+    local lastMoves = {}
+    for i, guard in ipairs(self.guards) do
+        guard:move(step, isForward, self.grid)
+        table.insert(lastMoves, guard.lastPosition)
+    end
+    -- determines what tiles to rewrite as empty or as a guard
+    for x, position in ipairs(lastMoves) do
+        if not self:guardListIncludes(position) and self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
+            self.grid[GetTile(position.x, position.y)] = EMPTY_TILE
+        end
     end
 end
 
-function Level:checkCrankTurns()
-	local ticks = PD.getCrankTicks(CRANK_SPEED)
-    if ticks > 0 then
-        self:updateTurn(1, true)
-    elseif ticks < 0 then
-        self:updateTurn(-1, false)
+function Level:updateLasers()
+    for i, laserBase in ipairs(self.laserBases) do
+        local laser = laserBase.laser
+        laser:setVisible(self.turn)
+        laser.length = laser:setLength(self.grid)
+        local image = laser:getImage()
+        laser:setImage(image)
+        laser:setPosition(image)
     end
 end
 
-function Level:update()
-    Level.super.update(self)
-    self:checkCrankTurns()
+function Level:checkPlayerDeath()
+    if self.player:onLaser(self.laserBases, self.turn) or self.player:onMouse(self.mice) then
+        ResetLevel()
+    end
 end
+
+function Level:checkPlayerWin()
+    if self.player:onLadder(self.grid) then
+        NextLevel()
+    end
+end
+
+function Level:updateMouse(isForward)
+    for i, mouse in ipairs(self.mice) do
+        local delay = self.mouseDelays[i]-1
+        local nextMove = mouse
+        if #self.player.pastMoves > delay then
+            nextMove = self.player.pastMoves[#self.player.pastMoves-delay+1]
+        end
+        mouse:move(nextMove, isForward)
+        mouse:setActive(delay, self.player.position, isForward)
+    end
+end
+
+
+
