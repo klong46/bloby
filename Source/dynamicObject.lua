@@ -84,24 +84,32 @@ function DynamicObject:getNextTilePosition(x, y)
     return GetByDirection(tileList, self.direction)
 end
 
-function DynamicObject:nextTileIsObstacle(x, y)
+function DynamicObject:nextTileIsObstacle(x, y, obstacles)
     local nextPosition = self:getNextTilePosition(x, y)
     local nextTile = self.grid[(GetTile(nextPosition[1], nextPosition[2]))]
     if nextTile == GUARD_TILE then
         local adjacentPosition = self:getNextTilePosition(x, y)
-        return self:nextTileIsObstacle(adjacentPosition[1], adjacentPosition[2])
-    elseif nextTile == WALL_TILE or
+        return self:nextTileIsObstacle(adjacentPosition[1], adjacentPosition[2], obstacles)
+    elseif self:isObstacleTile(nextTile, obstacles) or
            nextPosition[1] > TILES_PER_ROW or
            nextPosition[1] < 1 or
            nextPosition[2] > TILES_PER_COLUMN or
-           nextPosition[2] < 1
-           then
+           nextPosition[2] < 1 then
         return true
     else
         return false
     end
 end
 
-function DynamicObject:setIsBlocked()
-    self.isBlocked = self:nextTileIsObstacle(self.position.x, self.position.y)
+function DynamicObject:setIsBlocked(obstacles)
+    self.isBlocked = self:nextTileIsObstacle(self.position.x, self.position.y, obstacles)
+end
+
+function DynamicObject:isObstacleTile(tile, obstacles)
+    for i, obstacle in ipairs(obstacles) do
+        if obstacle == tile then
+            return true
+        end
+    end
+    return false
 end

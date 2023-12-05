@@ -115,7 +115,7 @@ function Level:moveForward()
         self:updateGameObjects(FORWARD_STEP, true)
         self:checkGuardInteractions()
         self:checkPlayerInteractions()
-        self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
+        self.player:setIsBlocked(PLAYER_OBSTACLES) -- check if move is valid after turn ends
     end
 end
 
@@ -132,9 +132,9 @@ function Level:updateGuardDirections()
 end
 
 function Level:checkForBlocks()
-    self.player:setIsBlocked()
+    self.player:setIsBlocked(PLAYER_OBSTACLES)
     for i, guard in ipairs(self.guards) do
-        guard:setIsBlocked()
+        guard:setIsBlocked(GUARD_OBSTACLES)
     end
 end
 
