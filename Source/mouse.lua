@@ -14,6 +14,7 @@ function Mouse:init(position, delay, grid)
     Mouse.super.init(self, MOUSE_IMAGES[1], position, DEFAULT_MOUSE_DIRECTION, grid, MOUSE_IMAGES)
     self.active = false
     self.delay = delay-1
+    self.stalledTurns = 0
 end
 
 function Mouse:setActive(delay, playerPosition, isForward)
@@ -28,6 +29,7 @@ function Mouse:moveBack()
     local lastMove = Mouse.super.moveBack(self)
     if lastMove then
         self.delay = lastMove.delay
+        self.stalledTurns = lastMove.stalledTurns
     end
 end
 
@@ -37,15 +39,20 @@ function Mouse:moveForward(playerMove)
     self.direction = playerMove.direction
 end
 
-function Mouse:move(playerMove, isForward)
+function Mouse:move(playerMove, isForward, isStalled)
     if isForward then
         self:addPastMove()
         if self.active then
-            if self.delay == 0 then
-                self:moveForward(playerMove)
+            if isStalled then
+                self.stalledTurns += 1
             else
-                self.delay -= 1
+                if self.delay == 0 then
+                    self:moveForward(playerMove)
+                else
+                    self.delay -= 1
+                end
             end
+
         end
     else
         self:moveBack()

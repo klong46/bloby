@@ -36,6 +36,7 @@ function DynamicObject:addPastMove()
     local del = self.delay
     local blocked = false
     local living = self.alive
+    local st = self.stalledTurns
     if dir ~= self.lastDirection then
         blocked = true
         self.lastDirection = dir
@@ -44,7 +45,8 @@ function DynamicObject:addPastMove()
                                   direction = dir,
                                   delay = del,
                                   isBlocked = blocked,
-                                  alive = living})
+                                  alive = living,
+                                  stalledTurns = st})
 end
 
 function DynamicObject:moveBack()
@@ -109,6 +111,23 @@ function DynamicObject:isObstacleTile(tile, obstacles)
     for i, obstacle in ipairs(obstacles) do
         if obstacle == tile then
             return true
+        end
+    end
+    return false
+end
+
+function DynamicObject:onLaser(laserBases, turn)
+    local allLaserTilePositions = {}
+    for i, laserBase in ipairs(laserBases) do
+        if laserBase.laser:isVisible(turn) then
+            table.insert(allLaserTilePositions, laserBase.laser:getTilePositions())
+        end
+    end
+    for i, positionTable in ipairs(allLaserTilePositions) do
+        for y, position in ipairs(positionTable) do
+            if position == self.position then
+                return true
+            end
         end
     end
     return false

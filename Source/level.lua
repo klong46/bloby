@@ -207,12 +207,12 @@ end
 
 function Level:updateMouse(isForward)
     for i, mouse in ipairs(self.mice) do
-        local delay = self.mouseDelays[i]-1
+        local delay = self.mouseDelays[i]-1 + mouse.stalledTurns
         local nextMove = mouse
         if #self.player.pastMoves > delay then
             nextMove = self.player.pastMoves[#self.player.pastMoves-delay+1]
         end
-        mouse:move(nextMove, isForward)
+        mouse:move(nextMove, isForward, mouse:onLaser(self.laserBases, self.turn))
         mouse:setActive(delay, self.player.position, isForward)
     end
 end

@@ -30,23 +30,6 @@ function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
-function Player:onLaser(laserBases, turn)
-    local allLaserTilePositions = {}
-    for i, laserBase in ipairs(laserBases) do
-        if laserBase.laser:isVisible(turn) then
-            table.insert(allLaserTilePositions, laserBase.laser:getTilePositions())
-        end
-    end
-    for i, positionTable in ipairs(allLaserTilePositions) do
-        for y, position in ipairs(positionTable) do
-            if position == self.position then
-                return true
-            end
-        end
-    end
-    return false
-end
-
 function Player:onMouse(mice)
     for i, mouse in ipairs(mice) do
         local lastPosition = self.pastMoves[#self.pastMoves].position
