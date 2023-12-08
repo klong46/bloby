@@ -113,7 +113,6 @@ function Level:moveForward()
     self:checkForBlocks()
     if not self.player.isBlocked then
         self:updateGameObjects(FORWARD_STEP, true)
-        self:checkGuardInteractions()
         self:checkPlayerInteractions()
         self.player:setIsBlocked(PLAYER_OBSTACLES) -- check if move is valid after turn ends
     end
@@ -142,8 +141,9 @@ function Level:updateGameObjects(step, isForward)
     self.turn += step
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
-    self:updateLasers()
     self:updateMouse(isForward)
+    self:checkGuardInteractions()
+    self:updateLasers()
 end
 
 function Level:checkGuardInteractions()

@@ -23,18 +23,6 @@ function Guard:moveBack()
     end
 end
 
-function Guard:onMouse(mice)
-    for i, mouse in ipairs(mice) do
-        local lastPosition = self.pastMoves[#self.pastMoves].position
-        if ((mouse.position == self.position) or
-           (mouse.position == lastPosition)) and
-           (mouse.delay == 0) then
-            return true
-        end
-    end
-    return false
-end
-
 function Guard:move(step, isForward)
     self.lastPosition = PD.geometry.point.new(self.position.x, self.position.y)
     if isForward then

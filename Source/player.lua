@@ -30,19 +30,6 @@ function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
-function Player:onMouse(mice)
-    for i, mouse in ipairs(mice) do
-        local lastPosition = self.pastMoves[#self.pastMoves].position
-        local lastMousePosition = mouse.pastMoves[#mouse.pastMoves].position
-        if ((mouse.position == self.position) or
-           ((mouse.position == lastPosition) and (lastMousePosition == self.position))) and
-           (mouse.delay == 0) then
-            return true
-        end
-    end
-    return false
-end
-
 function Player:update()
     Player.super.update(self)
     if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then

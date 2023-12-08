@@ -132,3 +132,16 @@ function DynamicObject:onLaser(laserBases, turn)
     end
     return false
 end
+
+function DynamicObject:onMouse(mice)
+    for i, mouse in ipairs(mice) do
+        local lastPosition = self.pastMoves[#self.pastMoves].position
+        local lastMousePosition = mouse.pastMoves[#mouse.pastMoves].position
+        if ((mouse.position == self.position) or
+           ((mouse.position == lastPosition) and (lastMousePosition == self.position))) and
+           (mouse.delay == 0) then
+            return true
+        end
+    end
+    return false
+end
