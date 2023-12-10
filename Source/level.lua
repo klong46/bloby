@@ -8,7 +8,12 @@ import "laser"
 import "guard"
 import "mouse"
 
+local background = GFX.image.new('img/grid-background')
+
 class('Level').extends(SLIB)
+
+-- LEVEL: mirror image sides, control guard on other side
+-- LEVEL: use holes in a wall to stop guards until you can finish
 
 local laserCadenceIndex
 local laserOffsetIndex
@@ -60,6 +65,8 @@ function Level:init(file)
     self.guards = {}
     self.mice = {}
     self:drawTiles(playerDirection)
+    self:setImage(background)
+    self:moveTo(200,120)
     self:add()
 end
 
