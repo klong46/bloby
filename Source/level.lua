@@ -8,7 +8,7 @@ import "laser"
 import "guard"
 import "mouse"
 
-local background = GFX.image.new('img/grid-background')
+local background = GFX.image.new('img/background_grid')
 
 class('Level').extends(SLIB)
 
@@ -103,7 +103,9 @@ end
 
 function Level:update()
     Level.super.update(self)
-    self:checkCrankTurns()
+    if not self.player.isDead then
+        self:checkCrankTurns()
+    end
 end
 
 function Level:checkCrankTurns()
@@ -202,7 +204,7 @@ end
 
 function Level:checkPlayerDeath()
     if self.player:onLaser(self.laserBases, self.turn) or self.player:onMouse(self.mice) then
-        ResetLevel()
+        self.player.isDead = true
     end
 end
 

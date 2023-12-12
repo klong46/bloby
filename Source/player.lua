@@ -1,6 +1,9 @@
 import "CoreLibs/sprites"
+import "CoreLibs/animation"
 import "dynamicObject"
 import "constants"
+
+local DEATH_ANIMATION_SPEED = 22
 
 local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_up'),
@@ -8,11 +11,15 @@ local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_left'),
     GFX.image.new('img/player/player_right')
 }
+local deathAnimationTable = playdate.graphics.imagetable.new('img/player/death_animation')
 
 class('Player').extends(DynamicObject)
 
 function Player:init(position, direction, grid)
     Player.super.init(self, PLAYER_IMAGES[1], position, direction, grid, PLAYER_IMAGES)
+    self.isDead = false
+    self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
+    self.deathAnimation.paused = true
     self:setDirectionImage(direction)
 end
 
@@ -47,5 +54,13 @@ function Player:update()
     if PD.buttonIsPressed(PD.kButtonRight) and self.isBlocked then
         self:setDirectionImage(DIRECTIONS.RIGHT)
         self.direction = DIRECTIONS.RIGHT
+    end
+
+    if self.isDead then
+        self.deathAnimation.paused = false
+        self:setImage(self.deathAnimation:image())
+        if not self.deathAnimation:isValid() then
+            ResetLevel()
+        end
     end
 end
