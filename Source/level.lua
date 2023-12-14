@@ -194,8 +194,9 @@ end
 function Level:updateLasers()
     for i, laserBase in ipairs(self.laserBases) do
         local laser = laserBase.laser
-        laser:setVisible(self.turn)
         laser.length = laser:setLength(self.grid)
+        laser:setVisible(self.turn)
+        
     end
 end
 

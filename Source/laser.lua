@@ -39,10 +39,9 @@ function Laser:setVisible(turn)
         for i, seg in ipairs(self.segments) do
             seg:remove()
         end
+        self.segments = {}
     else
-        for i = 1, self.length, 1 do
-            self.segments[i]:add()
-        end
+        self:createSegments()
     end
 end
 
