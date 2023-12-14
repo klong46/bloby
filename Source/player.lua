@@ -11,7 +11,7 @@ local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_left'),
     GFX.image.new('img/player/player_right')
 }
-local deathAnimationTable = playdate.graphics.imagetable.new('img/player/death_animation')
+local deathAnimationTable = GFX.imagetable.new('img/player/death_animation')
 
 class('Player').extends(DynamicObject)
 

@@ -76,7 +76,7 @@ function Level:drawTiles(playerDirection)
             local tile = self.grid[GetTile(x, y)]
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
-                Wall(position) -- create new wall at position
+                Wall(position)
             elseif tile == GUARD_TILE then
                 table.insert(self.guards, Guard(position, self.grid))
             elseif tile == MOUSE_TILE then
@@ -196,9 +196,6 @@ function Level:updateLasers()
         local laser = laserBase.laser
         laser:setVisible(self.turn)
         laser.length = laser:setLength(self.grid)
-        local image = laser:getImage()
-        laser:setImage(image)
-        laser:setPosition(image)
     end
 end
 
