@@ -1,6 +1,7 @@
 import "CoreLibs/sprites"
 import "constants"
 
+local inactiveImage = GFX.image.new('img/mouse/mouse_inactive')
 local MOUSE_IMAGES <const> = {
     GFX.image.new('img/mouse/mouse_up'),
     GFX.image.new('img/mouse/mouse_down'),
@@ -11,9 +12,10 @@ local MOUSE_IMAGES <const> = {
 class('Mouse').extends(DynamicObject)
 
 function Mouse:init(position, delay, grid)
-    Mouse.super.init(self, MOUSE_IMAGES[1], position, DEFAULT_MOUSE_DIRECTION, grid, MOUSE_IMAGES)
+    Mouse.super.init(self, inactiveImage, position, DEFAULT_MOUSE_DIRECTION, grid, MOUSE_IMAGES)
     self.active = false
     self.delay = delay-1
+    self.totalDelay = delay-1
     self.stalledTurns = 0
 end
 
@@ -30,6 +32,10 @@ function Mouse:moveBack()
     if lastMove then
         self.delay = lastMove.delay
         self.stalledTurns = lastMove.stalledTurns
+    end
+    if #self.pastMoves <= 1 or
+      (#self.pastMoves > 1 and self.pastMoves[#self.pastMoves].delay ~= 0) then
+        self:setImage(inactiveImage)
     end
 end
 
