@@ -196,7 +196,6 @@ function Level:updateLasers()
         local laser = laserBase.laser
         laser.length = laser:setLength(self.grid)
         laser:setVisible(self.turn)
-        
     end
 end
 
