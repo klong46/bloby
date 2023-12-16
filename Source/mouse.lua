@@ -94,7 +94,6 @@ function Mouse:update()
     if self.eating then
         self.eatAnimation.paused = false
         self:setImage(self.eatAnimation:image())
-        print(self.eatAnimation:isValid(), self.eatAnimation.frame)
         if not self.eatAnimation:isValid() then
             self:restartEatAnimation()
             if self.gameOver then

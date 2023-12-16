@@ -147,7 +147,6 @@ function DynamicObject:onMouse(mice, isForward)
                 (mouse.delay == 0) then
                 if isForward then
                     mouse.eating = true
-                    -- print('EAT')
                 end
                 if self:isa(Player) then
                     mouse.gameOver = true
