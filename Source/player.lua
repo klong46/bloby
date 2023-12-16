@@ -20,6 +20,7 @@ function Player:init(position, direction, grid)
     self.isDead = false
     self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
     self.deathAnimation.paused = true
+    self:setZIndex(3)
     self:setDirectionImage(direction)
 end
 

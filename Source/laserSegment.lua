@@ -19,6 +19,7 @@ function LaserSegment:init(direction, position, isEnd)
     self.direction = direction
     self.animation = GFX.animation.loop.new(ANIMATION_SPEED, GFX.imagetable.new(imageTable), true)
     self:setOffsets()
+    self:setZIndex(5)
     self:moveTo((position.x * TILE_SIZE) - offset[1], (position.y * TILE_SIZE) - offset[2])
     self:add()
 end

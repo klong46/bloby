@@ -66,6 +66,7 @@ function Level:init(file)
     self.mice = {}
     self:drawTiles(playerDirection)
     self:setImage(background)
+    self:setZIndex(4)
     self:moveTo(200,120)
     self:add()
 end
@@ -151,14 +152,14 @@ function Level:updateGameObjects(step, isForward)
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
     self:updateMouse(isForward)
-    self:checkGuardInteractions()
+    self:checkGuardInteractions(isForward)
     self:updateLasers()
 end
 
-function Level:checkGuardInteractions()
+function Level:checkGuardInteractions(isForward)
     for i, guard in ipairs(self.guards) do
-        if guard:onMouse(self.mice) then
-            guard:destroy(self.grid)
+        if guard:onMouse(self.mice, isForward) then
+            guard:destroy()
         end
     end
 end
@@ -200,8 +201,11 @@ function Level:updateLasers()
 end
 
 function Level:checkPlayerDeath()
-    if self.player:onLaser(self.laserBases, self.turn) or self.player:onMouse(self.mice) then
+    if self.player:onLaser(self.laserBases, self.turn) then
         self.player.isDead = true
+    elseif self.player:onMouse(self.mice, true) then
+        self.player.isDead = true
+        self.player:remove()
     end
 end
 

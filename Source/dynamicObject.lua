@@ -137,7 +137,7 @@ function DynamicObject:onLaser(laserBases, turn)
     return false
 end
 
-function DynamicObject:onMouse(mice)
+function DynamicObject:onMouse(mice, isForward)
     for i, mouse in ipairs(mice) do
         if #self.pastMoves > 0 then
             local lastPosition = self.pastMoves[#self.pastMoves].position
@@ -145,6 +145,13 @@ function DynamicObject:onMouse(mice)
             if ((mouse.position == self.position) or
                     ((mouse.position == lastPosition) and (lastMousePosition == self.position))) and
                 (mouse.delay == 0) then
+                if isForward then
+                    mouse.eating = true
+                    -- print('EAT')
+                end
+                if self:isa(Player) then
+                    mouse.gameOver = true
+                end
                 return true
             end
         end
