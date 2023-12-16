@@ -41,7 +41,9 @@ function Laser:setVisible(turn)
         end
         self.segments = {}
     else
+        if #self.segments == 0 then
         self:createSegments()
+        end
     end
 end
 

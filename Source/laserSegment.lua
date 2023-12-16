@@ -8,6 +8,8 @@ local laserHitAnimationTable = 'img/laser/laser_hit_animation'
 local ANIMATION_SPEED = 40
 local offset = {}
 
+-- LASERS ARE DUPLICATING
+
 function LaserSegment:init(direction, position, isEnd)
     LaserSegment.super.init(self)
     local imageTable = laserAnimationTable

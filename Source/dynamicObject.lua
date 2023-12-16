@@ -37,6 +37,7 @@ function DynamicObject:addPastMove()
     local blocked = false
     local living = self.alive
     local st = self.stalledTurns
+    local isStalled = self.stalled
     if dir ~= self.lastDirection then
         blocked = true
         self.lastDirection = dir
@@ -47,7 +48,8 @@ function DynamicObject:addPastMove()
         delay = del,
         isBlocked = blocked,
         alive = living,
-        stalledTurns = st
+        stalledTurns = st,
+        stalled = isStalled
     })
 end
 
