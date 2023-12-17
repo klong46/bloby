@@ -23,24 +23,37 @@ local function moveBack()
     end
 end
 
-function PD.AButtonDown()
-    moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-end
-
-function PD.AButtonUp()
+local function removeForwardTimer()
     if moveForwardTimer then
         moveForwardTimer:remove()
     end
 end
 
+local function removeBackTimer()
+    if moveBackTimer then
+        moveBackTimer:remove()
+    end
+end
+
+function PD.AButtonDown()
+    removeBackTimer()
+    moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+    if PD.buttonIsPressed(playdate.kButtonLeft) then
+        NextLevel()
+    end
+end
+
+function PD.AButtonUp()
+    removeForwardTimer()
+end
+
 function PD.BButtonDown()
+    removeForwardTimer()
     moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
 end
 
 function PD.BButtonUp()
-    if moveBackTimer then
-        moveBackTimer:remove()
-    end
+    removeBackTimer()
 end
 
 function ResetLevel()
