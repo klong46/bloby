@@ -158,7 +158,7 @@ end
 
 function Level:checkGuardInteractions(isForward)
     for i, guard in ipairs(self.guards) do
-        if guard:onMouse(self.mice, isForward) then
+        if guard.alive and guard:onMouse(self.mice, isForward) then
             guard:destroy()
         end
     end
