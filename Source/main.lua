@@ -12,11 +12,15 @@ local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 
 local function moveForward()
-	levelManager.level:moveForward()
+    if not levelManager.level.player.isDead then
+	    levelManager.level:moveForward()
+    end
 end
 
 local function moveBack()
-	levelManager.level:moveBack()
+    if not levelManager.level.player.isDead then
+	    levelManager.level:moveBack()
+    end
 end
 
 function PD.AButtonDown()
