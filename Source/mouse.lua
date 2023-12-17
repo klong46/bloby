@@ -6,6 +6,7 @@ local stallAnimationTable = GFX.imagetable.new('img/mouse/mouse_stalling_animati
 local eatAnimationTable = GFX.imagetable.new('img/mouse/mouse_eat_animation')
 local STALL_ANIMATION_SPEED = 30
 local EAT_ANIMATION_SPEED = 30
+
 local MOUSE_IMAGES <const> = {
     GFX.image.new('img/mouse/mouse_up'),
     GFX.image.new('img/mouse/mouse_down'),
