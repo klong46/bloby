@@ -12,13 +12,13 @@ function Laser:init(position, grid, direction, cadence, offset)
     self.offset = offset
     self.length = self:setLength(grid)
     self.segments = {}
-    self:createSegments()
+    self:createSegments(1, self.length)
     self:setCenter(0, 0.5)
     self:add()
 end
 
-function Laser:createSegments()
-    for i = 1, self.length, 1 do
+function Laser:createSegments(start, numSegments)
+    for i = start, numSegments, 1 do
         local position = self:getLaserSegmentPosition(i)
         table.insert(self.segments, LaserSegment(self.direction, position, (i == self.length)))
     end
@@ -41,6 +41,9 @@ function Laser:setVisible(turn)
             self.segments[i]:setAnimation(false)
         end
     else
+        if self.length > #self.segments then
+            self:createSegments(#self.segments+1, self.length)
+        end
         if self.length > 0 then
             self.segments[self.length]:setAnimation(true)
         end
