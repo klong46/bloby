@@ -7,7 +7,11 @@ import "constants"
 local levelManager = LevelManager()
 
 function PD.AButtonDown()
-	levelManager:nextLevel()
+	NextLevel()
+end
+
+function PD.BButtonDown()
+	ResetLevel()
 end
 
 function ResetLevel()
