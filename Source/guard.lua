@@ -13,11 +13,14 @@ function Guard:init(position, grid)
     self.animationCount = 0
     self.alive = true
     self.lastPosition = position
+    self:setImage(self.animation:image())
 end
 
 function Guard:moveBack()
-    local lastMove = Guard.super.moveBack(self)
-    if lastMove then
+    if self:hasPastMoves() then
+        local lastMove = table.remove(self.pastMoves)
+        self.position = lastMove.position
+        self.isBlocked = lastMove.isBlocked
         self.alive = lastMove.alive
     end
 end
