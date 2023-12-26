@@ -14,5 +14,6 @@
 "playerDirection": 2,
 "laserCadences":[],
 "laserOffsets": [],
-"mouseDelays":[5]
+"mouseDelays":[5],
+"starTargets":[173,172,164]
 }
