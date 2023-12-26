@@ -1,17 +1,16 @@
 import "CoreLibs/sprites"
 import "dynamicObject"
 
-local GUARD_IMAGES <const> = {
-    GFX.image.new('img/guard'),
-    GFX.image.new('img/guard'),
-    GFX.image.new('img/guard'),
-    GFX.image.new('img/guard')
-}
+local animationTable = GFX.imagetable.new('img/guard_animation')
+local ANIMATION_SPEED = 10
+local ANIMATION_DELAY = 75
 
 class('Guard').extends(DynamicObject)
 
 function Guard:init(position, grid)
-    Guard.super.init(self, GUARD_IMAGES[1], position, DEFAULT_GUARD_DIRECTION, grid, GUARD_IMAGES)
+    Guard.super.init(self, nil, position, DEFAULT_GUARD_DIRECTION, grid, {})
+    self.animation = GFX.animation.loop.new(ANIMATION_SPEED, animationTable, false)
+    self.animationCount = 0
     self.alive = true
     self.lastPosition = position
 end
@@ -46,4 +45,17 @@ function Guard:destroy()
     self.grid[GetTile(self.position.x, self.position.y)] = EMPTY_TILE
     self.alive = false
     self:setVisible(false)
+end
+
+function Guard:update()
+    Guard.super.update(self)
+    self:setImage(self.animation:image())
+    if not self.animation:isValid() then
+        self.animationCount += 1
+        if self.animationCount > ANIMATION_DELAY then
+            self.animationCount = 0
+            self.animation.frame = 1
+            self.animation.paused = false
+        end
+    end
 end

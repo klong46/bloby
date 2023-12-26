@@ -14,6 +14,7 @@ function Laser:init(position, grid, direction, cadence, offset)
     self.segments = {}
     self:createSegments(1, self.length)
     self:setCenter(0, 0.5)
+    self:setVisible(Turn)
     self:add()
 end
 

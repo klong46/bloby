@@ -51,6 +51,7 @@ end
 function Level:init(file)
     Level.super.init(self)
     self.turn = 1
+    Turn = self.turn
     laserCadenceIndex = 1
     laserOffsetIndex = 1
     mouseDelayIndex = 1
@@ -149,6 +150,7 @@ end
 
 function Level:updateGameObjects(step, isForward)
     self.turn += step
+    Turn = self.turn
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
     self:updateMouse(isForward)

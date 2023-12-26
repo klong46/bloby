@@ -3,25 +3,37 @@ import "constants"
 
 class('LaserBase').extends(StaticObject)
 
-local image = GFX.image.new('img/laser/laser_base')
+local animationTable = GFX.imagetable.new('img/laser/laser_base_animation')
+local ANIMATION_SPEED = 125
 
 function LaserBase:init(position, grid, direction, cadence, offset)
     LaserBase.super.init(self, image, position)
-    self:setImage(self:getDirectionImage(direction))
+    self.animation = GFX.animation.loop.new(ANIMATION_SPEED, animationTable, true)
+    self.direction = direction
     self:moveTo((position.x * TILE_SIZE) - 10, (position.y * TILE_SIZE) - 10)
     self.laser = Laser(position, grid, direction, cadence, offset)
+    self.animation.frame = math.random(1, animationTable:getLength())
+    self:setAnimation()
 end
 
-function LaserBase:getDirectionImage(direction)
-    local img = image
-    if direction == DIRECTIONS.LEFT then
-        img = image:rotatedImage(-90)
-    elseif direction == DIRECTIONS.RIGHT then
-        img = image:rotatedImage(90)
-    elseif direction == DIRECTIONS.UP then
-        img = image
-    elseif direction == DIRECTIONS.DOWN then
-        img = image:rotatedImage(180)
+function LaserBase:getDirectionImage(img)
+    if self.direction == DIRECTIONS.UP then
+        return img
+    elseif self.direction == DIRECTIONS.RIGHT then
+        return img:rotatedImage(90)
+    elseif self.direction == DIRECTIONS.LEFT then
+        return img:rotatedImage(-90)
+    else
+        return img:rotatedImage(180)
     end
-    return img
+end
+
+function LaserBase:setAnimation()
+    self:setImage(self:getDirectionImage(self.animation:image()))
+    self.animation.paused = not self.laser:isVisible(Turn)
+end
+
+function LaserBase:update()
+    LaserBase.super.update(self)
+    self:setAnimation()
 end
