@@ -74,7 +74,7 @@ function NextLevel()
     EscapeTile()
     Stars(3)
     EscapeText()
-    MovesText(levelManager.level.turn or 0)
+    MovesText(levelManager.level.turn-1 or 0)
     LevelFinished = true
 end
 

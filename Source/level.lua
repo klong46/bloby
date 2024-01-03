@@ -50,7 +50,7 @@ end
 
 function Level:init(file)
     Level.super.init(self)
-    self.turn = 0
+    self.turn = 1
     Turn = self.turn
     laserCadenceIndex = 1
     laserOffsetIndex = 1
