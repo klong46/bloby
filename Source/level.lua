@@ -104,9 +104,11 @@ function Level:drawTiles(playerDirection)
 end
 
 function Level:update()
-    Level.super.update(self)
-    if not self.player.isDead then
-        self:checkCrankTurns()
+    if not LevelFinished then
+        Level.super.update(self)
+        if not self.player.isDead then
+            self:checkCrankTurns()
+        end
     end
 end
 
