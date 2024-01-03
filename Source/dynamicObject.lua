@@ -26,6 +26,10 @@ function DynamicObject:setDirectionImage(direction)
     self:setImage(GetByDirection(self.imageList, direction))
 end
 
+function DynamicObject:getImage()
+    return GetByDirection(self.imageList, self.direction)
+end
+
 function DynamicObject:hasPastMoves()
     return #self.pastMoves >= 1
 end

@@ -32,10 +32,3 @@ function Stars:init(num)
     limit = num
     PD.timer.performAfterDelay(ANIMATION_DURATION, startAnimation)
 end
-
-
-
--- function Stars:update()
---     Stars.super.udpate()
---     PD.timer.updateTimers()
--- end

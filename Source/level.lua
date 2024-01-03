@@ -50,7 +50,7 @@ end
 
 function Level:init(file)
     Level.super.init(self)
-    self.turn = 1
+    self.turn = 0
     Turn = self.turn
     laserCadenceIndex = 1
     laserOffsetIndex = 1
@@ -215,7 +215,8 @@ end
 
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
-        NextLevel()
+        self.ladder:remove()
+        self.player:startFadeTimer()
     end
 end
 

@@ -20,6 +20,7 @@ function Player:init(position, direction, grid)
     self.isDead = false
     self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
     self.deathAnimation.paused = true
+    self.fadeAnimator = nil
     self:setZIndex(3)
     self:setDirectionImage(direction)
 end
@@ -36,6 +37,10 @@ end
 
 function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
+end
+
+function Player:startFadeTimer()
+    self.fadeAnimator = GFX.animator.new(1500, 1, 0, PD.easingFunctions.outCubic)
 end
 
 function Player:update()
@@ -64,4 +69,14 @@ function Player:update()
             ResetLevel()
         end
     end
+
+    if self.fadeAnimator then
+        local fadedImage = self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBurkes)
+        self:setImage(fadedImage)
+        if self.fadeAnimator:ended() then
+            NextLevel()
+            self:remove()
+        end
+    end
+
 end
