@@ -74,7 +74,7 @@ function Player:update()
         local fadedImage = self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBurkes)
         self:setImage(fadedImage)
         if self.fadeAnimator:ended() then
-            NextLevel()
+            LevelOver()
             self:remove()
         end
     end

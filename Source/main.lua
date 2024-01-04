@@ -13,6 +13,7 @@ local levelManager = LevelManager()
 local moveForwardTimer = nil
 local moveBackTimer = nil
 LevelFinished = false
+-- ReadyToContinue = false
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 
@@ -45,8 +46,13 @@ function PD.AButtonDown()
         removeBackTimer()
         moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
         if PD.buttonIsPressed(playdate.kButtonLeft) then
-            NextLevel()
+            LevelOver()
         end
+    end
+    if ReadyToContinue then
+        ReadyToContinue = false
+        LevelFinished = false
+        levelManager:nextLevel()
     end
 end
 
@@ -69,10 +75,9 @@ function ResetLevel()
 	levelManager:resetLevel()
 end
 
-function NextLevel()
-	-- levelManager:nextLevel()
+function LevelOver()
     EscapeTile()
-    Stars(3)
+    Stars(2)
     EscapeText()
     MovesText(levelManager.level.turn-1 or 0)
     LevelFinished = true
