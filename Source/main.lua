@@ -77,10 +77,13 @@ end
 
 function LevelOver()
     EscapeTile()
-    Stars(2)
+    LevelFinished = true
+end
+
+function ShowFinishScreen()
+    Stars(3)
     EscapeText()
     MovesText(levelManager.level.turn-1 or 0)
-    LevelFinished = true
 end
 
 function PD.update()

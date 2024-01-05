@@ -2,7 +2,7 @@ import "CoreLibs/sprites"
 import "staticObject"
 import "constants"
 
-local STAR_DISTANCE = 85
+local STAR_DISTANCE = 110
 local ANIMATOR_DURATION = 1000
 
 class('Star').extends(SLIB)
@@ -20,7 +20,7 @@ function Star:init(order)
 end
 
 function Star:getPosition(order)
-    local pos = PD.geometry.point.new(115, 120)
+    local pos = PD.geometry.point.new(100, 120)
     if order == 2 then
         pos.x += STAR_DISTANCE
     elseif order == 3 then

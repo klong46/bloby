@@ -5,6 +5,8 @@ import "constants"
 
 local DEATH_ANIMATION_SPEED = 22
 
+-- player can't turn using B button to move back
+
 local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_up'),
     GFX.image.new('img/player/player_down'),

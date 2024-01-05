@@ -8,14 +8,12 @@ class('EscapeText').extends(SLIB)
 function EscapeText:init()
     EscapeText.super.init(self)
     self:setSize(200, 100)
-    self:moveTo(226, 93)
+    self:moveTo(226, 85)
     self:setZIndex(6)
     self:add()
 end
 
 function EscapeText:draw()
-	GFX.pushContext()
     GFX.setFont(bigFont, "bold")
     GFX.drawText("*Escape!*", 0, 0)
-	GFX.popContext()
 end
