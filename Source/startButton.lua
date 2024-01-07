@@ -1,0 +1,15 @@
+import "CoreLibs/sprites"
+import "constants"
+
+local image = GFX.image.new('img/start_button')
+
+class('StartButton').extends(SLIB)
+
+function StartButton:init()
+    StartButton.super.init(self)
+    self:setImage(image)
+    self:moveTo(140, 160)
+    self:setZIndex(6)
+    self:add()
+end
+
