@@ -1,15 +1,8 @@
 import "CoreLibs/sprites"
 import "constants"
+import "laserSegment"
 
 class('Laser').extends(SLIB)
-
-local imagePath = 'img/laser/laser_'
-
-local HORIZONTAL_Y_OFFSET = 10
-local HORIZONTAL_X_OFFSET = 17
-local VERTICAL_X_OFFSET = 12
-local VERTICAL_Y_OFFSET = 15
-
 
 function Laser:init(position, grid, direction, cadence, offset)
     Laser.super.init(self)
@@ -18,39 +11,46 @@ function Laser:init(position, grid, direction, cadence, offset)
     self.cadence = cadence
     self.offset = offset
     self.length = self:setLength(grid)
-    local image = self:getImage()
-    self:setImage(image)
-    self:setPosition(image)
+    self.segments = {}
+    self:createSegments(1, self.length)
     self:setCenter(0, 0.5)
+    self:setVisible(Turn)
     self:add()
 end
 
-function Laser:getImage()
-    if self.length < 1 then
-        return GFX.image.new(1)
+function Laser:createSegments(start, numSegments)
+    for i = start, numSegments, 1 do
+        local position = self:getLaserSegmentPosition(i)
+        table.insert(self.segments, LaserSegment(self.direction, position, (i == self.length)))
     end
-    return GFX.image.new(imagePath..self.length)
 end
 
-function Laser:setPosition(image)
-    if self.direction == DIRECTIONS.RIGHT then
-        self:moveTo((self.origin.x * TILE_SIZE), (self.origin.y * TILE_SIZE) - HORIZONTAL_Y_OFFSET)
-    elseif self.direction == DIRECTIONS.LEFT then
-        self:moveTo((self.origin.x * TILE_SIZE) - self.width - HORIZONTAL_X_OFFSET, (self.origin.y * TILE_SIZE) - HORIZONTAL_Y_OFFSET)
-    elseif self.direction == DIRECTIONS.UP then
-        self:setImage(image:rotatedImage(90))
-        self:moveTo((self.origin.x * TILE_SIZE) - VERTICAL_X_OFFSET, (self.origin.y * TILE_SIZE) - (self.height/2) - VERTICAL_Y_OFFSET)
-    elseif self.direction == DIRECTIONS.DOWN then
-        self:setImage(image:rotatedImage(90))
-        self:moveTo((self.origin.x * TILE_SIZE) - VERTICAL_X_OFFSET, (self.origin.y * TILE_SIZE) + (self.height/2))
-    end
+function Laser:getLaserSegmentPosition(segmentNum)
+    local opts = {
+        PD.geometry.point.new(self.origin.x, self.origin.y - segmentNum),
+        PD.geometry.point.new(self.origin.x, self.origin.y + segmentNum),
+        PD.geometry.point.new(self.origin.x - segmentNum, self.origin.y),
+        PD.geometry.point.new(self.origin.x + segmentNum, self.origin.y)
+    }
+    return GetByDirection(opts, self.direction)
 end
 
 function Laser:setVisible(turn)
     if not self:isVisible(turn) then
-        self:remove()
+        for i = 1, #self.segments, 1 do
+            self.segments[i]:remove()
+            self.segments[i]:setAnimation(false)
+        end
     else
-        self:add()
+        if self.length > #self.segments then
+            self:createSegments(#self.segments+1, self.length)
+        end
+        if self.length > 0 then
+            self.segments[self.length]:setAnimation(true)
+        end
+        for i = 1, self.length, 1 do
+            self.segments[i]:add()
+        end
     end
 end
 

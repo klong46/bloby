@@ -8,7 +8,12 @@ import "laser"
 import "guard"
 import "mouse"
 
+local background = GFX.image.new('img/background_grid')
+
 class('Level').extends(SLIB)
+
+-- LEVEL: mirror image sides, control guard on other side
+-- LEVEL: use holes in a wall to stop guards until you can finish
 
 local laserCadenceIndex
 local laserOffsetIndex
@@ -46,6 +51,7 @@ end
 function Level:init(file)
     Level.super.init(self)
     self.turn = 1
+    Turn = self.turn
     laserCadenceIndex = 1
     laserOffsetIndex = 1
     mouseDelayIndex = 1
@@ -60,6 +66,9 @@ function Level:init(file)
     self.guards = {}
     self.mice = {}
     self:drawTiles(playerDirection)
+    self:setImage(background)
+    self:setZIndex(4)
+    self:moveTo(200,120)
     self:add()
 end
 
@@ -69,7 +78,7 @@ function Level:drawTiles(playerDirection)
             local tile = self.grid[GetTile(x, y)]
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
-                Wall(position) -- create new wall at position
+                Wall(position)
             elseif tile == GUARD_TILE then
                 table.insert(self.guards, Guard(position, self.grid))
             elseif tile == MOUSE_TILE then
@@ -95,8 +104,12 @@ function Level:drawTiles(playerDirection)
 end
 
 function Level:update()
-    Level.super.update(self)
-    self:checkCrankTurns()
+    if not LevelFinished then
+        Level.super.update(self)
+        if not self.player.isDead then
+            self:checkCrankTurns()
+        end
+    end
 end
 
 function Level:checkCrankTurns()
@@ -113,9 +126,8 @@ function Level:moveForward()
     self:checkForBlocks()
     if not self.player.isBlocked then
         self:updateGameObjects(FORWARD_STEP, true)
-        self:checkGuardInteractions()
         self:checkPlayerInteractions()
-        self.player:setIsBlocked(self.grid) -- check if move is valid after turn ends
+        self.player:setIsBlocked(PLAYER_OBSTACLES) -- check if move is valid after turn ends
     end
 end
 
@@ -132,24 +144,26 @@ function Level:updateGuardDirections()
 end
 
 function Level:checkForBlocks()
-    self.player:setIsBlocked()
+    self.player:setIsBlocked(PLAYER_OBSTACLES)
     for i, guard in ipairs(self.guards) do
-        guard:setIsBlocked()
+        guard:setIsBlocked(GUARD_OBSTACLES)
     end
 end
 
 function Level:updateGameObjects(step, isForward)
     self.turn += step
+    Turn = self.turn
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
-    self:updateLasers()
     self:updateMouse(isForward)
+    self:checkGuardInteractions(isForward)
+    self:updateLasers()
 end
 
-function Level:checkGuardInteractions()
+function Level:checkGuardInteractions(isForward)
     for i, guard in ipairs(self.guards) do
-        if guard:onMouse(self.mice) then
-            guard:destroy(self.grid)
+        if guard.alive and guard:onMouse(self.mice, isForward) then
+            guard:destroy()
         end
     end
 end
@@ -185,34 +199,35 @@ end
 function Level:updateLasers()
     for i, laserBase in ipairs(self.laserBases) do
         local laser = laserBase.laser
-        laser:setVisible(self.turn)
         laser.length = laser:setLength(self.grid)
-        local image = laser:getImage()
-        laser:setImage(image)
-        laser:setPosition(image)
+        laser:setVisible(self.turn)
     end
 end
 
 function Level:checkPlayerDeath()
-    if self.player:onLaser(self.laserBases, self.turn) or self.player:onMouse(self.mice) then
-        ResetLevel()
+    if self.player:onLaser(self.laserBases, self.turn) then
+        self.player.isDead = true
+    elseif self.player:onMouse(self.mice, true) then
+        self.player.isDead = true
+        self.player:remove()
     end
 end
 
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
-        NextLevel()
+        self.ladder:remove()
+        self.player:startFadeTimer()
     end
 end
 
 function Level:updateMouse(isForward)
     for i, mouse in ipairs(self.mice) do
-        local delay = self.mouseDelays[i]-1
+        local delay = self.mouseDelays[i]-1 + mouse.stalledTurns
         local nextMove = mouse
         if #self.player.pastMoves > delay then
             nextMove = self.player.pastMoves[#self.player.pastMoves-delay+1]
         end
-        mouse:move(nextMove, isForward)
+        mouse:move(nextMove, isForward, self.laserBases, self.turn)
         mouse:setActive(delay, self.player.position, isForward)
     end
 end

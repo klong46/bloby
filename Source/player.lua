@@ -1,6 +1,11 @@
 import "CoreLibs/sprites"
+import "CoreLibs/animation"
 import "dynamicObject"
 import "constants"
+
+local DEATH_ANIMATION_SPEED = 22
+
+-- player can't turn using B button to move back
 
 local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_up'),
@@ -8,11 +13,17 @@ local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_left'),
     GFX.image.new('img/player/player_right')
 }
+local deathAnimationTable = GFX.imagetable.new('img/player/death_animation')
 
 class('Player').extends(DynamicObject)
 
 function Player:init(position, direction, grid)
     Player.super.init(self, PLAYER_IMAGES[1], position, direction, grid, PLAYER_IMAGES)
+    self.isDead = false
+    self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
+    self.deathAnimation.paused = true
+    self.fadeAnimator = nil
+    self:setZIndex(3)
     self:setDirectionImage(direction)
 end
 
@@ -30,34 +41,8 @@ function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
-function Player:onLaser(laserBases, turn)
-    local allLaserTilePositions = {}
-    for i, laserBase in ipairs(laserBases) do
-        if laserBase.laser:isVisible(turn) then
-            table.insert(allLaserTilePositions, laserBase.laser:getTilePositions())
-        end
-    end
-    for i, positionTable in ipairs(allLaserTilePositions) do
-        for y, position in ipairs(positionTable) do
-            if position == self.position then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-function Player:onMouse(mice)
-    for i, mouse in ipairs(mice) do
-        local lastPosition = self.pastMoves[#self.pastMoves].position
-        local lastMousePosition = mouse.pastMoves[#mouse.pastMoves].position
-        if ((mouse.position == self.position) or
-           ((mouse.position == lastPosition) and (lastMousePosition == self.position))) and
-           (mouse.delay == 0) then
-            return true
-        end
-    end
-    return false
+function Player:startFadeTimer()
+    self.fadeAnimator = GFX.animator.new(1500, 1, 0, PD.easingFunctions.outCubic)
 end
 
 function Player:update()
@@ -78,4 +63,22 @@ function Player:update()
         self:setDirectionImage(DIRECTIONS.RIGHT)
         self.direction = DIRECTIONS.RIGHT
     end
+
+    if self.isDead then
+        self.deathAnimation.paused = false
+        self:setImage(self.deathAnimation:image())
+        if not self.deathAnimation:isValid() then
+            ResetLevel()
+        end
+    end
+
+    if self.fadeAnimator then
+        local fadedImage = self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBurkes)
+        self:setImage(fadedImage)
+        if self.fadeAnimator:ended() then
+            LevelOver()
+            self:remove()
+        end
+    end
+
 end
