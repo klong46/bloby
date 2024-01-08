@@ -1,7 +1,7 @@
-name=Iced Heist
+name=Blob-Y
 author=Kyle Long
-description=Spicy icy heisty
-bundleID=com.kylelong.icedheist
+description=Blob-Y!
+bundleID=com.kylelong.bloby
 version=1.0
 buildNumber=100
 imagePath=SystemAssets

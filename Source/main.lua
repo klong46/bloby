@@ -8,14 +8,41 @@ import "escapeTile"
 import "stars"
 import "escapeText"
 import "movesText"
+import "startButton"
+import "levelSelectButton"
+import "title"
+import "menuManager"
 
-local levelManager = LevelManager()
-local moveForwardTimer = nil
-local moveBackTimer = nil
+local levelManager
+local menuManager = MenuManager()
+local onMenu = true
+local moveForwardTimer
+local moveBackTimer
 LevelFinished = false
--- ReadyToContinue = false
+ReadyToContinue = false
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
+
+function StartGame()
+    SLIB.removeAll()
+    levelManager = LevelManager()
+end
+
+function LevelSelect()
+    SLIB.removeAll()
+end
+
+function PD.leftButtonDown()
+    if onMenu then
+        menuManager:cursorLeft()
+    end
+end
+
+function PD.rightButtonDown()
+    if onMenu then
+        menuManager:cursorRight()
+    end
+end
 
 local function moveForward()
     if not levelManager.level.player.isDead then
@@ -30,45 +57,42 @@ local function moveBack()
 end
 
 local function removeForwardTimer()
-    if moveForwardTimer then
-        moveForwardTimer:remove()
-    end
+    moveForwardTimer:remove()
 end
 
 local function removeBackTimer()
-    if moveBackTimer then
-        moveBackTimer:remove()
-    end
+    moveBackTimer:remove()
 end
 
 function PD.AButtonDown()
-    if not LevelFinished then
+    if not LevelFinished and not onMenu then
         removeBackTimer()
         moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
         if PD.buttonIsPressed(playdate.kButtonLeft) then
             LevelOver()
         end
-    end
-    if ReadyToContinue then
-        ReadyToContinue = false
-        LevelFinished = false
-        levelManager:nextLevel()
+    elseif onMenu then
+        menuManager:cursorSelect()
     end
 end
 
 function PD.AButtonUp()
-    removeForwardTimer()
+    if not onMenu then
+        removeForwardTimer()
+    end
 end
 
 function PD.BButtonDown()
-    if not LevelFinished then
+    if not LevelFinished and not onMenu then
         removeForwardTimer()
         moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
     end
 end
 
 function PD.BButtonUp()
-    removeBackTimer()
+    if onMenu then
+        removeBackTimer()
+    end
 end
 
 function ResetLevel()

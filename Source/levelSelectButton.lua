@@ -13,3 +13,11 @@ function LevelSelectButton:init()
     self:add()
 end
 
+function LevelSelectButton:highlight()
+    self:setImage(image:scaledImage(1.5))
+end
+
+function LevelSelectButton:unhighlight()
+    self:setImage(image:scaledImage(1))
+end
+
