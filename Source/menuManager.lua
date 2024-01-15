@@ -28,7 +28,7 @@ function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
         StartGame()
     else
-        LevelSelect()
+        GoToLevelSelect()
     end
     self:remove()
 end

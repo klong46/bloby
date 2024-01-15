@@ -12,10 +12,12 @@ import "startButton"
 import "levelSelectButton"
 import "title"
 import "menuManager"
+import "levelSelect"
 
 local levelManager
 local menuManager = MenuManager()
 local onMenu = true
+local levelSelect
 local moveForwardTimer
 local moveBackTimer
 LevelFinished = false
@@ -28,19 +30,36 @@ function StartGame()
     levelManager = LevelManager()
 end
 
-function LevelSelect()
+function GoToLevelSelect()
     SLIB.removeAll()
+   levelSelect = LevelSelect()
 end
 
 function PD.leftButtonDown()
     if onMenu then
         menuManager:cursorLeft()
+    elseif levelSelect then
+        levelSelect:cursorLeft()
+    end
+end
+
+function PD.upButtonDown()
+    if levelSelect then
+        levelSelect:cursorUp()
+    end
+end
+
+function PD.downButtonDown()
+    if levelSelect then
+        levelSelect:cursorDown()
     end
 end
 
 function PD.rightButtonDown()
     if onMenu then
         menuManager:cursorRight()
+    elseif levelSelect then
+        levelSelect:cursorRight()
     end
 end
 
