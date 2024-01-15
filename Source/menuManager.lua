@@ -30,4 +30,5 @@ function MenuManager:cursorSelect()
     else
         LevelSelect()
     end
+    self:remove()
 end

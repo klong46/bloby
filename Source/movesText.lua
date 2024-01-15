@@ -1,6 +1,6 @@
 import "CoreLibs/sprites"
 import "constants"
-import "buttonIcon"
+import "continueButton"
 
 local bigFont = GFX.font.new("fonts/font-rains-3x")
 local smallFont = GFX.font.new("fonts/font-rains-2x")
@@ -18,7 +18,7 @@ function MovesText:init(moves)
 end
 
 local function showContinueButton()
-    ButtonIcon()
+    ContinueButton()
 end
 
 function MovesText:update()

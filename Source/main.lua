@@ -57,11 +57,15 @@ local function moveBack()
 end
 
 local function removeForwardTimer()
-    moveForwardTimer:remove()
+    if moveForwardTimer then
+        moveForwardTimer:remove()
+    end
 end
 
 local function removeBackTimer()
-    moveBackTimer:remove()
+    if moveBackTimer then
+        moveBackTimer:remove()
+    end
 end
 
 function PD.AButtonDown()
@@ -73,6 +77,11 @@ function PD.AButtonDown()
         end
     elseif onMenu then
         menuManager:cursorSelect()
+        onMenu = false
+    elseif ReadyToContinue and not onMenu then
+        ReadyToContinue = false
+        LevelFinished = false
+        levelManager:nextLevel()
     end
 end
 
