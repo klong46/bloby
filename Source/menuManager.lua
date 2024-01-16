@@ -3,8 +3,11 @@ import "constants"
 
 class('MenuManager').extends(SLIB)
 
-function MenuManager:init()
+local currentLevel = 1
+
+function MenuManager:init(startingLevel)
     MenuManager.super.init(self)
+    currentLevel = startingLevel
     self.startButton = StartButton()
     self.levelSelectButton = LevelSelectButton()
     self.title = Title()
@@ -26,7 +29,7 @@ end
 
 function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
-        StartGame()
+        StartGame(currentLevel)
     else
         GoToLevelSelect()
     end

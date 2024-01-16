@@ -61,6 +61,7 @@ function Level:init(file)
     self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
     self.mouseDelays = levelData.mouseDelays and levelData.mouseDelays or {}
     self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
+    self.starTargets = levelData.starTargets and levelData.starTargets or {}
     local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
     self.laserBases = {}
     self.guards = {}
@@ -213,10 +214,21 @@ function Level:checkPlayerDeath()
     end
 end
 
+function Level:getStars()
+    local turns = self.turn - 1
+    if turns > self.starTargets[1] then
+        return 1
+    elseif turns > self.starTargets[2] then
+        return 2
+    else
+        return 3
+    end
+end
+
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
         self.ladder:remove()
-        self.player:startFadeTimer()
+        self.player:finishLevel(self:getStars())
     end
 end
 

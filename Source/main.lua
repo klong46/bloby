@@ -14,8 +14,30 @@ import "title"
 import "menuManager"
 import "levelSelect"
 
+local gameData = {}
+local startingLevel = 1
+gameData = playdate.datastore.read()
+if gameData then
+    startingLevel = gameData.currentLevel
+end
+
+local function saveGameData()
+    gameData = {
+        currentLevel = levelManager.levelNum
+    }
+    playdate.datastore.write(gameData)
+end
+
+function playdate.gameWillTerminate()
+    saveGameData()
+end
+
+function playdate.gameWillSleep()
+    saveGameData()
+end
+
 local levelManager
-local menuManager = MenuManager()
+local menuManager = MenuManager(startingLevel)
 local onMenu = true
 local levelSelect
 local moveForwardTimer
@@ -25,14 +47,14 @@ ReadyToContinue = false
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 
-function StartGame()
+function StartGame(levelNum)
     SLIB.removeAll()
-    levelManager = LevelManager()
+    levelManager = LevelManager(levelNum)
 end
 
 function GoToLevelSelect()
     SLIB.removeAll()
-   levelSelect = LevelSelect()
+   levelSelect = LevelSelect(startingLevel)
 end
 
 function PD.leftButtonDown()
@@ -88,19 +110,23 @@ local function removeBackTimer()
 end
 
 function PD.AButtonDown()
-    if not LevelFinished and not onMenu then
-        removeBackTimer()
-        moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-        if PD.buttonIsPressed(playdate.kButtonLeft) then
-            LevelOver()
-        end
-    elseif onMenu then
+    if onMenu then
         menuManager:cursorSelect()
         onMenu = false
-    elseif ReadyToContinue and not onMenu then
-        ReadyToContinue = false
-        LevelFinished = false
-        levelManager:nextLevel()
+    else
+        if levelSelect then
+            levelSelect:select()
+        elseif not LevelFinished then
+            removeBackTimer()
+            moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+            if PD.buttonIsPressed(playdate.kButtonLeft) then
+                LevelOver()
+            end
+        elseif ReadyToContinue then
+            ReadyToContinue = false
+            LevelFinished = false
+            levelManager:nextLevel()
+        end
     end
 end
 
@@ -118,7 +144,7 @@ function PD.BButtonDown()
 end
 
 function PD.BButtonUp()
-    if onMenu then
+    if not onMenu then
         removeBackTimer()
     end
 end
@@ -127,13 +153,13 @@ function ResetLevel()
 	levelManager:resetLevel()
 end
 
-function LevelOver()
-    EscapeTile()
+function LevelOver(stars)
+    EscapeTile(stars)
     LevelFinished = true
 end
 
-function ShowFinishScreen()
-    Stars(3)
+function ShowFinishScreen(stars)
+    Stars(stars)
     EscapeText()
     MovesText(levelManager.level.turn-1 or 0)
 end

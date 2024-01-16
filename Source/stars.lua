@@ -4,8 +4,6 @@ import "staticObject"
 import "constants"
 import "star"
 
--- screen shake on star creation
-
 local ANIMATION_DURATION = 500
 local starNum = 1
 local limit = 0
