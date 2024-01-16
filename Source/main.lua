@@ -16,7 +16,8 @@ import "levelSelect"
 
 local gameData = {}
 local startingLevel = 1
-gameData = playdate.datastore.read()
+local levelManager
+gameData = PD.datastore.read()
 if gameData then
     startingLevel = gameData.currentLevel
 end
@@ -25,18 +26,17 @@ local function saveGameData()
     gameData = {
         currentLevel = levelManager.levelNum
     }
-    playdate.datastore.write(gameData)
+    PD.datastore.write(gameData)
 end
 
-function playdate.gameWillTerminate()
+function PD.gameWillTerminate()
     saveGameData()
 end
 
-function playdate.gameWillSleep()
+function PD.gameWillSleep()
     saveGameData()
 end
 
-local levelManager
 local menuManager = MenuManager(startingLevel)
 local onMenu = true
 local levelSelect
@@ -116,11 +116,14 @@ function PD.AButtonDown()
     else
         if levelSelect then
             levelSelect:select()
+            levelSelect = nil
         elseif not LevelFinished then
             removeBackTimer()
             moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-            if PD.buttonIsPressed(playdate.kButtonLeft) then
-                LevelOver()
+            if PD.buttonIsPressed(PD.kButtonLeft) then
+                ReadyToContinue = false
+                LevelFinished = false
+                levelManager:nextLevel()
             end
         elseif ReadyToContinue then
             ReadyToContinue = false

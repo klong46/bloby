@@ -86,4 +86,5 @@ end
 
 function LevelSelect:select()
     StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+    self:remove()
 end
