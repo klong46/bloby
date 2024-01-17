@@ -9,14 +9,14 @@ local function getLevelNum(x, y)
     return math.floor(((y-1)*NUM_COLS)+x)
 end
 
-local NUM_LEVELS = getLevelNum(NUM_COLS, NUM_ROWS)
 local currentLevel = 1
 
 class('LevelSelect').extends(SLIB)
 
-function LevelSelect:init(startingLevel)
+function LevelSelect:init(startingLevel, scores)
     LevelSelect.super.init(self)
     currentLevel = startingLevel
+    self.scores = scores
     self.cursorPos = PD.geometry.point.new(1,1)
     self.previousSelected = PD.geometry.point.new(1,1)
     self.tiles = {}
@@ -34,7 +34,7 @@ function LevelSelect:addLevelTiles()
             if levelNum > currentLevel then
                 locked = true
             end
-            table.insert(self.tiles, LevelSelectTile(x, y, levelNum, selected, locked))
+            table.insert(self.tiles, LevelSelectTile(x, y, levelNum, selected, locked, self.scores[levelNum]))
             selected = false
         end
     end
@@ -49,7 +49,7 @@ function LevelSelect:cursorLeft()
 end
 
 function LevelSelect:cursorRight()
-    if getLevelNum(self.cursorPos.x, self.cursorPos.y) < NUM_LEVELS and
+    if getLevelNum(self.cursorPos.x, self.cursorPos.y) < TOTAL_LEVELS and
        getLevelNum(self.cursorPos.x, self.cursorPos.y) < currentLevel then
         self:setPreviousSelected()
         self.cursorPos.x += 1
@@ -59,7 +59,7 @@ end
 
 function LevelSelect:cursorDown()
     if self.cursorPos.y < NUM_ROWS and
-       getLevelNum(self.cursorPos.x, self.cursorPos.y + 1) < currentLevel then
+       getLevelNum(self.cursorPos.x, self.cursorPos.y + 1) <= currentLevel then
         self:setPreviousSelected()
         self.cursorPos.y += 1
         self:updateSelectTiles()
