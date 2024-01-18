@@ -15,9 +15,7 @@ import "menuManager"
 import "levelSelect"
 
 -- bugs: 
--- player can't turn on second reverse
-
-
+-- stars override
 
 -- local function resetSaveData()
 --     local gameData = {
