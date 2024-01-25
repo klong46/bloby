@@ -15,15 +15,15 @@ import "menuManager"
 import "levelSelect"
 
 -- bugs: 
--- stars override
+-- animation playing after return to menu
 
--- local function resetSaveData()
---     local gameData = {
---         currentLevel = 1,
---         scores = {}
---     }
---     PD.datastore.write(gameData)
--- end
+local function resetSaveData()
+    local gameData = {
+        currentLevel = 1,
+        scores = {}
+    }
+    PD.datastore.write(gameData)
+end
 
 -- resetSaveData()
 
@@ -42,7 +42,7 @@ end
 local function saveGameData()
     gameData = {
         currentLevel = levelManager.levelNum,
-        scores = levelManager.scores
+        scores = starScores
     }
     PD.datastore.write(gameData)
 end
@@ -147,8 +147,8 @@ function PD.AButtonDown()
     if onMenu then
         menuManager:cursorSelect()
         onMenu = false
-        pdMenu:addMenuItem("Main Menu", returnToMenu)
-        pdMenu:addMenuItem("Restart Level", function ()
+        pdMenu:addMenuItem("main menu", returnToMenu)
+        pdMenu:addMenuItem("restart level", function ()
             levelManager:resetLevel()
         end)
     else
@@ -200,8 +200,17 @@ function ResetLevel()
 end
 
 function LevelOver(stars)
+    if #starScores >= levelManager.levelNum then
+        if starScores[levelManager.levelNum] < stars then
+            starScores[levelManager.levelNum] = stars
+        end
+    else
+        table.insert(starScores, stars)
+    end
     levelManager.levelNum += 1
-    table.insert(levelManager.scores, stars)
+    if levelManager.levelNum > startingLevel then
+        startingLevel = levelManager.levelNum
+    end
     EscapeTile(stars)
     LevelFinished = true
 end
