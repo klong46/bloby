@@ -156,9 +156,10 @@ function Level:updateGameObjects(step, isForward)
     Turn = self.turn
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
+    self:updateLasers()
     self:updateMouse(isForward)
     self:checkGuardInteractions(isForward)
-    self:updateLasers()
+    
 end
 
 function Level:checkGuardInteractions(isForward)
