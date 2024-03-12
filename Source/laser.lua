@@ -39,16 +39,20 @@ function Laser:setVisible(turn)
     if not self:isVisible(turn) then
         for i = 1, #self.segments, 1 do
             self.segments[i]:remove()
-            self.segments[i]:setAnimation(false)
         end
     else
         if self.length > #self.segments then
             self:createSegments(#self.segments+1, self.length)
         end
-        if self.length > 0 then
-            self.segments[self.length]:setAnimation(true)
+        for x = self.length+1, #self.segments, 1 do
+            self.segments[x]:remove()
         end
         for i = 1, self.length, 1 do
+            if i == self.length then
+                self.segments[i]:setAnimation(true)
+            else
+                self.segments[i]:setAnimation(false)
+            end
             self.segments[i]:add()
         end
     end
