@@ -30,6 +30,7 @@ end
 local gameData = {}
 local startingLevel = 1
 local levelManager
+local movesText
 local starScores = {}
 gameData = PD.datastore.read()
 if gameData then
@@ -77,6 +78,7 @@ initMenu()
 
 local function returnToMenu()
     SLIB.removeAll()
+    movesText.continueButtonTimer:remove()
     initMenu()
     pdMenu:removeAllMenuItems()
 end
@@ -218,7 +220,7 @@ end
 function ShowFinishScreen(stars)
     Stars(stars)
     EscapeText()
-    MovesText(levelManager.level.turn-1 or 0)
+    movesText = MovesText(levelManager.level.turn-1 or 0)
 end
 
 function PD.update()

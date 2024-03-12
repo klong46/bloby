@@ -14,6 +14,7 @@ function MovesText:init(moves)
     self:setZIndex(6)
     self.finished = false
     self.moveAnimator = GFX.animator.new(2500, 0, moves, playdate.easingFunctions.outCubic)
+    self.continueButtonTimer = nil
     self:add()
 end
 
@@ -26,7 +27,7 @@ function MovesText:update()
     if not self.finished then
         self:markDirty()
         if self.moveAnimator:ended() then
-            PD.timer.performAfterDelay(1500, showContinueButton)
+            self.continueButtonTimer = PD.timer.performAfterDelay(1500, showContinueButton)
             self.finished = true
         end
     end
