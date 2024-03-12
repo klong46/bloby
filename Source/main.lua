@@ -78,7 +78,9 @@ initMenu()
 
 local function returnToMenu()
     SLIB.removeAll()
-    movesText.continueButtonTimer:remove()
+    if movesText then
+        movesText.continueButtonTimer:remove()
+    end
     initMenu()
     pdMenu:removeAllMenuItems()
 end
@@ -133,13 +135,13 @@ local function moveBack()
     end
 end
 
-local function removeForwardTimer()
+function RemoveForwardTimer()
     if moveForwardTimer then
         moveForwardTimer:remove()
     end
 end
 
-local function removeBackTimer()
+function RemoveBackTimer()
     if moveBackTimer then
         moveBackTimer:remove()
     end
@@ -158,7 +160,7 @@ function PD.AButtonDown()
             levelSelect:select()
             levelSelect = nil
         elseif not LevelFinished then
-            removeBackTimer()
+            RemoveBackTimer()
             moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
             -- if PD.buttonIsPressed(PD.kButtonLeft) then
             --     ReadyToContinue = false
@@ -176,13 +178,13 @@ end
 
 function PD.AButtonUp()
     if not onMenu then
-        removeForwardTimer()
+        RemoveForwardTimer()
     end
 end
 
 function PD.BButtonDown()
     if not LevelFinished and not (onMenu or levelSelect) then
-        removeForwardTimer()
+        RemoveForwardTimer()
         moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
     elseif levelSelect then
         returnToMenu()
@@ -193,7 +195,7 @@ end
 
 function PD.BButtonUp()
     if not onMenu then
-        removeBackTimer()
+        RemoveBackTimer()
     end
 end
 
