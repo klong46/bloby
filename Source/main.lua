@@ -214,7 +214,6 @@ function LevelOver(stars)
         startingLevel = levelManager.levelNum
     end
     EscapeTile(stars)
-    LevelFinished = true
 end
 
 function ShowFinishScreen(stars)
