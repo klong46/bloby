@@ -156,10 +156,9 @@ function Level:updateGameObjects(step, isForward)
     Turn = self.turn
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
-    self:updateLasers()
     self:updateMouse(isForward)
     self:checkGuardInteractions(isForward)
-    
+    self:updateLasers()
 end
 
 function Level:checkGuardInteractions(isForward)
@@ -192,7 +191,9 @@ function Level:updateGuards(step, isForward)
     end
     -- determines what tiles to rewrite as empty or as a guard
     for x, position in ipairs(lastMoves) do
-        if not self:guardListIncludes(position) and self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
+        if not self:guardListIncludes(position) and
+        self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and
+        self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
             self.grid[GetTile(position.x, position.y)] = EMPTY_TILE
         end
     end
