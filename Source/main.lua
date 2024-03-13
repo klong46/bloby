@@ -88,6 +88,16 @@ end
 function StartGame(levelNum)
     SLIB.removeAll()
     levelManager = LevelManager(levelNum, starScores)
+    pdMenu:addMenuItem("main menu", returnToMenu)
+    pdMenu:addMenuItem("restart level", function ()
+        levelManager:resetLevel()
+    end)
+    pdMenu:addMenuItem("next level", function ()
+        ReadyToContinue = false
+        LevelFinished = false
+        levelManager.levelNum += 1
+        levelManager:nextLevel()
+    end)
 end
 
 function GoToLevelSelect()
@@ -151,10 +161,6 @@ function PD.AButtonDown()
     if onMenu then
         menuManager:cursorSelect()
         onMenu = false
-        pdMenu:addMenuItem("main menu", returnToMenu)
-        pdMenu:addMenuItem("restart level", function ()
-            levelManager:resetLevel()
-        end)
     else
         if levelSelect then
             levelSelect:select()
