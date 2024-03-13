@@ -13,7 +13,6 @@ local background = GFX.image.new('img/background_grid')
 class('Level').extends(SLIB)
 
 -- LEVEL: mirror image sides, control guard on other side
--- LEVEL: use holes in a wall to stop guards until you can finish
 
 local laserCadenceIndex
 local laserOffsetIndex
@@ -159,6 +158,10 @@ function Level:updateGameObjects(step, isForward)
     self:updateMouse(isForward)
     self:checkGuardInteractions(isForward)
     self:updateLasers()
+    for i, mouse in ipairs(self.mice) do
+        mouse.stalled = mouse:onLaser(self.laserBases, self.turn)
+    end
+
 end
 
 function Level:checkGuardInteractions(isForward)
