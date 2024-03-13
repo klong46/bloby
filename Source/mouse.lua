@@ -77,7 +77,6 @@ function Mouse:move(playerMove, isForward, bases, turn)
                     self.delay -= 1
                 end
             end
-            self.stalled = self:onLaser(bases, turn)
         end
     else
         self:moveBack()

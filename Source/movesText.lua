@@ -1,6 +1,6 @@
 import "CoreLibs/sprites"
 import "constants"
-import "buttonIcon"
+import "continueButton"
 
 local bigFont = GFX.font.new("fonts/font-rains-3x")
 local smallFont = GFX.font.new("fonts/font-rains-2x")
@@ -14,11 +14,12 @@ function MovesText:init(moves)
     self:setZIndex(6)
     self.finished = false
     self.moveAnimator = GFX.animator.new(2500, 0, moves, playdate.easingFunctions.outCubic)
+    self.continueButtonTimer = nil
     self:add()
 end
 
 local function showContinueButton()
-    ButtonIcon()
+    ContinueButton()
 end
 
 function MovesText:update()
@@ -26,7 +27,7 @@ function MovesText:update()
     if not self.finished then
         self:markDirty()
         if self.moveAnimator:ended() then
-            PD.timer.performAfterDelay(1500, showContinueButton)
+            self.continueButtonTimer = PD.timer.performAfterDelay(1500, showContinueButton)
             self.finished = true
         end
     end

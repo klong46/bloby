@@ -13,7 +13,6 @@ local background = GFX.image.new('img/background_grid')
 class('Level').extends(SLIB)
 
 -- LEVEL: mirror image sides, control guard on other side
--- LEVEL: use holes in a wall to stop guards until you can finish
 
 local laserCadenceIndex
 local laserOffsetIndex
@@ -61,6 +60,7 @@ function Level:init(file)
     self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
     self.mouseDelays = levelData.mouseDelays and levelData.mouseDelays or {}
     self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
+    self.starTargets = levelData.starTargets and levelData.starTargets or {}
     local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
     self.laserBases = {}
     self.guards = {}
@@ -158,6 +158,10 @@ function Level:updateGameObjects(step, isForward)
     self:updateMouse(isForward)
     self:checkGuardInteractions(isForward)
     self:updateLasers()
+    for i, mouse in ipairs(self.mice) do
+        mouse.stalled = mouse:onLaser(self.laserBases, self.turn)
+    end
+
 end
 
 function Level:checkGuardInteractions(isForward)
@@ -190,7 +194,9 @@ function Level:updateGuards(step, isForward)
     end
     -- determines what tiles to rewrite as empty or as a guard
     for x, position in ipairs(lastMoves) do
-        if not self:guardListIncludes(position) and self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
+        if not self:guardListIncludes(position) and
+        self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and
+        self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
             self.grid[GetTile(position.x, position.y)] = EMPTY_TILE
         end
     end
@@ -213,10 +219,21 @@ function Level:checkPlayerDeath()
     end
 end
 
+function Level:getStars()
+    local turns = self.turn - 1
+    if turns > self.starTargets[1] then
+        return 1
+    elseif turns > self.starTargets[2] then
+        return 2
+    else
+        return 3
+    end
+end
+
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
         self.ladder:remove()
-        self.player:startFadeTimer()
+        self.player:finishLevel(self:getStars())
     end
 end
 

@@ -10,7 +10,6 @@ function DynamicObject:init(initImage, position, direction, grid, imageList)
     self.isBlocked = false
     self.grid = grid
     self.pastMoves = {}
-    self.lastDirection = direction
     self.imageList = imageList
 
     self:setImage(initImage)
@@ -42,9 +41,12 @@ function DynamicObject:addPastMove()
     local living = self.alive
     local st = self.stalledTurns
     local isStalled = self.stalled
-    if dir ~= self.lastDirection then
+    local lastDirection = self.direction
+    if #self.pastMoves > 1 then
+        lastDirection = self.pastMoves[#self.pastMoves].direction
+    end
+    if self.direction ~= lastDirection then
         blocked = true
-        self.lastDirection = dir
     end
     table.insert(self.pastMoves, {
         position = pos,

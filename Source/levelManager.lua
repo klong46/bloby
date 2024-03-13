@@ -4,14 +4,13 @@ import "constants"
 
 class('LevelManager').extends(SLIB)
 
-function LevelManager:init()
-    self.levelNum = TEST_LEVEL
+function LevelManager:init(startingLevel)
+    self.levelNum = startingLevel
     self.level = Level("1-"..self.levelNum)
     self:add()
 end
 
 function LevelManager:nextLevel()
-    self.levelNum += 1
     self:resetLevel()
 end
 

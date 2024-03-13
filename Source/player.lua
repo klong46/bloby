@@ -4,8 +4,7 @@ import "dynamicObject"
 import "constants"
 
 local DEATH_ANIMATION_SPEED = 22
-
--- player can't turn using B button to move back
+local stars = 1
 
 local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_up'),
@@ -41,7 +40,11 @@ function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
-function Player:startFadeTimer()
+function Player:finishLevel(starsEarned)
+    LevelFinished = true
+    RemoveForwardTimer()
+    RemoveBackTimer()
+    stars = starsEarned
     self.fadeAnimator = GFX.animator.new(1500, 1, 0, PD.easingFunctions.outCubic)
 end
 
@@ -76,7 +79,7 @@ function Player:update()
         local fadedImage = self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBurkes)
         self:setImage(fadedImage)
         if self.fadeAnimator:ended() then
-            LevelOver()
+            LevelOver(stars)
             self:remove()
         end
     end

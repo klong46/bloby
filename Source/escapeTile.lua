@@ -5,10 +5,12 @@ class('EscapeTile').extends(SLIB)
 
 local image = GFX.image.new('img/escape_tile')
 local ANIMATOR_DURATION = 1000
+local stars
 
-function EscapeTile:init()
+function EscapeTile:init(starsEarned)
     EscapeTile.super.init(self)
     self.fadeAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 0.5, playdate.easingFunctions.outCubic)
+    stars = starsEarned
     self.animationFinished = false
     self:moveTo(200, 120)
     self:setZIndex(6)
@@ -20,7 +22,7 @@ function EscapeTile:update()
     if not self.animationFinished then
         self:setImage(image:fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBayer8x8))
         if self.fadeAnimator:ended() then
-            ShowFinishScreen()
+            ShowFinishScreen(stars)
             self.animationFinished = true
         end
     end
