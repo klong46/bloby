@@ -42,6 +42,7 @@ end
 
 function Player:finishLevel(starsEarned)
     LevelFinished = true
+    LevelOver(stars)
     RemoveForwardTimer()
     RemoveBackTimer()
     stars = starsEarned
@@ -79,7 +80,7 @@ function Player:update()
         local fadedImage = self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBurkes)
         self:setImage(fadedImage)
         if self.fadeAnimator:ended() then
-            LevelOver(stars)
+            EscapeTile(stars)
             self:remove()
         end
     end

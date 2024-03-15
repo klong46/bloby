@@ -168,12 +168,6 @@ function PD.AButtonDown()
         elseif not LevelFinished then
             RemoveBackTimer()
             moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-            -- if PD.buttonIsPressed(PD.kButtonLeft) then
-            --     ReadyToContinue = false
-            --     LevelFinished = false
-            --     levelManager.levelNum += 1
-            --     levelManager:nextLevel()
-            -- end
         elseif ReadyToContinue then
             ReadyToContinue = false
             LevelFinished = false
@@ -221,7 +215,6 @@ function LevelOver(stars)
     if levelManager.levelNum > startingLevel then
         startingLevel = levelManager.levelNum
     end
-    EscapeTile(stars)
 end
 
 function ShowFinishScreen(stars)
