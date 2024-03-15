@@ -3,7 +3,7 @@ import "constants"
 import "levelSelectTile"
 
 local NUM_COLS = 5
-local NUM_ROWS = math.floor(TOTAL_LEVELS/NUM_COLS)
+local NUM_ROWS = math.ceil(TOTAL_LEVELS/NUM_COLS)
 local ROWS_ON_SCREEN = 3
 
 
@@ -141,7 +141,6 @@ function LevelSelect:startAnimator()
         if self.scrollAnimator:ended() then
             self.scrollAnimator:reset()
         else
-            print('asdf')
             scrollQueued = true
         end
     end
