@@ -42,10 +42,10 @@ end
 
 function Player:finishLevel(starsEarned)
     LevelFinished = true
+    stars = starsEarned
     LevelOver(stars)
     RemoveForwardTimer()
     RemoveBackTimer()
-    stars = starsEarned
     self.fadeAnimator = GFX.animator.new(1500, 1, 0, PD.easingFunctions.outCubic)
 end
 
