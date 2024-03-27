@@ -89,7 +89,7 @@ function StartGame(levelNum)
     SLIB.removeAll()
     levelManager = LevelManager(levelNum, starScores)
     pdMenu:addMenuItem("menu", returnToMenu)
-    pdMenu:addMenuItem("restart", function ()
+    RestartMenuItem = pdMenu:addMenuItem("restart", function ()
         levelManager:resetLevel()
     end)
     pdMenu:addMenuItem("next level", function ()
@@ -177,6 +177,9 @@ function PD.AButtonDown()
             ReadyToContinue = false
             LevelFinished = false
             levelManager:nextLevel()
+            RestartMenuItem = pdMenu:addMenuItem("restart", function ()
+                levelManager:resetLevel()
+            end)
         end
     end
 end
@@ -209,6 +212,7 @@ function ResetLevel()
 end
 
 function LevelOver(stars)
+    pdMenu:removeMenuItem(RestartMenuItem)
     if #starScores >= levelManager.levelNum then
         if starScores[levelManager.levelNum] < stars then
             starScores[levelManager.levelNum] = stars
