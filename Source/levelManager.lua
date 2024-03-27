@@ -20,4 +20,5 @@ function LevelManager:resetLevel()
         self.levelNum = TEST_LEVEL
     end
     self.level = Level("1-"..self.levelNum)
+    LevelFinished = false
 end

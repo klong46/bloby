@@ -8,14 +8,14 @@ import "escapeTile"
 import "stars"
 import "escapeText"
 import "movesText"
-import "startButton"
-import "levelSelectButton"
-import "title"
+import "menuSelect"
 import "menuManager"
 import "levelSelect"
+import "menuBackground"
 
 -- bugs: 
--- animation playing after return to menu
+
+-- ideas:
 
 local function resetSaveData()
     local gameData = {
@@ -88,8 +88,8 @@ end
 function StartGame(levelNum)
     SLIB.removeAll()
     levelManager = LevelManager(levelNum, starScores)
-    pdMenu:addMenuItem("main menu", returnToMenu)
-    pdMenu:addMenuItem("restart level", function ()
+    pdMenu:addMenuItem("menu", returnToMenu)
+    pdMenu:addMenuItem("restart", function ()
         levelManager:resetLevel()
     end)
     pdMenu:addMenuItem("next level", function ()
@@ -100,35 +100,40 @@ function StartGame(levelNum)
     end)
 end
 
+
+-- DEVELOPMENT: goes straight to TEST_LEVEL
+-- StartGame(TEST_LEVEL)
+-- onMenu = false
+
 function GoToLevelSelect()
     SLIB.removeAll()
     levelSelect = LevelSelect(startingLevel, starScores)
 end
 
 function PD.leftButtonDown()
-    if onMenu then
-        menuManager:cursorLeft()
-    elseif levelSelect then
+    if levelSelect then
         levelSelect:cursorLeft()
     end
 end
 
 function PD.upButtonDown()
-    if levelSelect then
+    if onMenu then
+        menuManager:cursorUp()
+    elseif levelSelect then
         levelSelect:cursorUp()
     end
 end
 
 function PD.downButtonDown()
-    if levelSelect then
+    if onMenu then
+        menuManager:cursorDown()
+    elseif levelSelect then
         levelSelect:cursorDown()
     end
 end
 
 function PD.rightButtonDown()
-    if onMenu then
-        menuManager:cursorRight()
-    elseif levelSelect then
+    if levelSelect then
         levelSelect:cursorRight()
     end
 end

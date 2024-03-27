@@ -8,28 +8,37 @@ local currentLevel = 1
 function MenuManager:init(startingLevel)
     MenuManager.super.init(self)
     currentLevel = startingLevel
-    self.startButton = StartButton()
-    self.levelSelectButton = LevelSelectButton()
-    self.title = Title()
+    self.menuSelect = MenuSelect()
+    self.menuBackground = MenuBackground()
     self.selectedBox = 1
     self:add()
 end
 
-function MenuManager:cursorLeft()
-    self.selectedBox = 1
-    self.startButton:highlight()
-    self.levelSelectButton:unhighlight()
+function MenuManager:cursorUp()
+    if self.selectedBox == 1 then
+        self.selectedBox = 3
+    else
+        self.selectedBox -= 1
+    end
+    self.menuSelect:moveCursor(self.selectedBox)
+    self.menuBackground:moveCursor(self.selectedBox)
 end
 
-function MenuManager:cursorRight()
-    self.selectedBox = 2
-    self.levelSelectButton:highlight()
-    self.startButton:unhighlight()
+function MenuManager:cursorDown()
+    if self.selectedBox == 3 then
+        self.selectedBox = 1
+    else
+        self.selectedBox += 1
+    end
+    self.menuSelect:moveCursor(self.selectedBox)
+    self.menuBackground:moveCursor(self.selectedBox)
 end
 
 function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
         StartGame(currentLevel)
+    elseif self.selectedBox == 2 then
+        GoToLevelSelect()
     else
         GoToLevelSelect()
     end
