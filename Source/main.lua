@@ -212,7 +212,14 @@ function ResetLevel()
 end
 
 function LevelOver(stars)
-    pdMenu:removeMenuItem(RestartMenuItem)
+    pdMenu:removeAllMenuItems()
+    pdMenu:addMenuItem("menu", returnToMenu)
+    pdMenu:addMenuItem("next level", function ()
+        ReadyToContinue = false
+        LevelFinished = false
+        levelManager.levelNum += 1
+        levelManager:nextLevel()
+    end)
     if #starScores >= levelManager.levelNum then
         if starScores[levelManager.levelNum] < stars then
             starScores[levelManager.levelNum] = stars
