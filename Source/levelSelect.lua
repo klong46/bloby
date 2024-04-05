@@ -118,7 +118,11 @@ function LevelSelect:updateSelectTiles()
 end
 
 function LevelSelect:select()
-    StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+    if currentLevel == 1 then
+        Tutorial = ControlScreen()
+    else
+        StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+    end
     self:remove()
 end
 

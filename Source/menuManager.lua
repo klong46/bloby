@@ -36,7 +36,12 @@ end
 
 function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
-        StartGame(currentLevel)
+        if currentLevel == 1 then
+            Tutorial = ControlScreen()
+        else
+            StartGame(currentLevel)
+        end
+        
     elseif self.selectedBox == 2 then
         GoToLevelSelect()
     else

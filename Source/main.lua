@@ -12,10 +12,10 @@ import "menuSelect"
 import "menuManager"
 import "levelSelect"
 import "menuBackground"
+import "controlScreen"
 
--- bugs: 
-
--- ideas:
+-- final level: put boxes and blobxs in correct spot (box in corner forming and picture, blobxs 
+-- paralyzed by lasers to unlock finish)
 
 local function resetSaveData()
     local gameData = {
@@ -31,10 +31,16 @@ local gameData = {}
 local startingLevel = 1
 local levelManager
 local movesText
+local highestLevel = 1
 local starScores = {}
 gameData = PD.datastore.read()
 if gameData then
-    startingLevel = gameData.currentLevel
+    if gameData.currentLevel then
+        startingLevel = gameData.currentLevel
+    end
+    if gameData.highestUnlockedLevel then
+        highestLevel = gameData.highestUnlockedLevel
+    end
     if gameData.scores then
         starScores = gameData.scores
     end
@@ -43,6 +49,7 @@ end
 local function saveGameData()
     gameData = {
         currentLevel = levelManager.levelNum,
+        highestUnlockedLevel = highestLevel,
         scores = starScores
     }
     PD.datastore.write(gameData)
@@ -63,6 +70,8 @@ local moveForwardTimer
 local moveBackTimer
 LevelFinished = false
 ReadyToContinue = false
+OnControlScreen = false
+Tutorial = nil
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 local pdMenu = PD.getSystemMenu()
@@ -76,9 +85,9 @@ end
 
 initMenu()
 
-local function returnToMenu()
+function ReturnToMenu()
     SLIB.removeAll()
-    if movesText then
+    if movesText and movesText.continueButtonTimer then
         movesText.continueButtonTimer:remove()
     end
     initMenu()
@@ -88,7 +97,7 @@ end
 function StartGame(levelNum)
     SLIB.removeAll()
     levelManager = LevelManager(levelNum, starScores)
-    pdMenu:addMenuItem("menu", returnToMenu)
+    pdMenu:addMenuItem("menu", ReturnToMenu)
     RestartMenuItem = pdMenu:addMenuItem("restart", function ()
         levelManager:resetLevel()
     end)
@@ -107,7 +116,7 @@ end
 
 function GoToLevelSelect()
     SLIB.removeAll()
-    levelSelect = LevelSelect(startingLevel, starScores)
+    levelSelect = LevelSelect(highestLevel, starScores)
 end
 
 function PD.leftButtonDown()
@@ -167,19 +176,23 @@ function PD.AButtonDown()
         menuManager:cursorSelect()
         onMenu = false
     else
-        if levelSelect then
-            levelSelect:select()
-            levelSelect = nil
-        elseif not LevelFinished then
-            RemoveBackTimer()
-            moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-        elseif ReadyToContinue then
-            ReadyToContinue = false
-            LevelFinished = false
-            levelManager:nextLevel()
-            RestartMenuItem = pdMenu:addMenuItem("restart", function ()
-                levelManager:resetLevel()
-            end)
+        if OnControlScreen and Tutorial then
+            Tutorial:next()
+        else
+            if levelSelect then
+                levelSelect:select()
+                levelSelect = nil
+            elseif not LevelFinished then
+                RemoveBackTimer()
+                moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+            elseif ReadyToContinue then
+                ReadyToContinue = false
+                LevelFinished = false
+                levelManager:nextLevel()
+                RestartMenuItem = pdMenu:addMenuItem("restart", function ()
+                    levelManager:resetLevel()
+                end)
+            end
         end
     end
 end
@@ -191,12 +204,16 @@ function PD.AButtonUp()
 end
 
 function PD.BButtonDown()
-    if not LevelFinished and not (onMenu or levelSelect) then
+    if not LevelFinished and not (onMenu or levelSelect or OnControlScreen) then
         RemoveForwardTimer()
         moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
     elseif levelSelect then
-        returnToMenu()
+        ReturnToMenu()
+        levelSelect = nil
+    elseif OnControlScreen and Tutorial then
+        Tutorial:back()
     end
+
 end
 
 
@@ -213,7 +230,7 @@ end
 
 function LevelOver(stars)
     pdMenu:removeAllMenuItems()
-    pdMenu:addMenuItem("menu", returnToMenu)
+    pdMenu:addMenuItem("menu", ReturnToMenu)
     pdMenu:addMenuItem("next level", function ()
         ReadyToContinue = false
         LevelFinished = false
@@ -228,6 +245,9 @@ function LevelOver(stars)
         table.insert(starScores, stars)
     end
     levelManager.levelNum += 1
+    if levelManager.levelNum > highestLevel then
+        highestLevel = levelManager.levelNum
+    end
     if levelManager.levelNum > startingLevel then
         startingLevel = levelManager.levelNum
     end
