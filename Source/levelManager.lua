@@ -6,7 +6,7 @@ class('LevelManager').extends(SLIB)
 
 function LevelManager:init(startingLevel)
     self.levelNum = startingLevel
-    self.level = Level("1-"..self.levelNum)
+    self.level = Level(self.levelNum)
     self:add()
 end
 
@@ -19,6 +19,6 @@ function LevelManager:resetLevel()
     if self.levelNum > TOTAL_LEVELS then
         self.levelNum = TEST_LEVEL
     end
-    self.level = Level("1-"..self.levelNum)
+    self.level = Level(self.levelNum)
     LevelFinished = false
 end

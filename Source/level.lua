@@ -7,6 +7,7 @@ import "laserBase"
 import "laser"
 import "guard"
 import "mouse"
+import "dragon"
 
 local background = GFX.image.new('img/background_grid')
 
@@ -47,14 +48,15 @@ function Level:getMouseDelay()
     return delay
 end
 
-function Level:init(file)
+function Level:init(levelNum)
     Level.super.init(self)
     self.turn = 1
     Turn = self.turn
     laserCadenceIndex = 1
     laserOffsetIndex = 1
     mouseDelayIndex = 1
-    local levelData = PD.datastore.read("levels/"..file)
+    local levelData = PD.datastore.read("levels/1-"..levelNum)
+    self.levelNum = levelNum
     self.grid = levelData.grid
     self.laserCadences = levelData.laserCadences and levelData.laserCadences or {}
     self.laserOffsets = levelData.laserOffsets and levelData.laserOffsets or {}
@@ -65,6 +67,7 @@ function Level:init(file)
     self.laserBases = {}
     self.guards = {}
     self.mice = {}
+    self.dragon = nil
     self:drawTiles(playerDirection)
     self:setImage(background)
     self:setZIndex(4)
@@ -73,6 +76,9 @@ function Level:init(file)
 end
 
 function Level:drawTiles(playerDirection)
+    if self.levelNum == BONUS_LEVEL then
+        self.dragon = Dragon(self.grid)
+    end
     for x = 1, TILES_PER_ROW do
         for y = 1, TILES_PER_COLUMN do
             local tile = self.grid[GetTile(x, y)]
@@ -123,6 +129,7 @@ end
 
 function Level:moveForward()
     self:updateGuardDirections()
+    self:updateDragonDirection()
     self:checkForBlocks()
     if not self.player.isBlocked then
         self:updateGameObjects(FORWARD_STEP, true)
@@ -140,6 +147,13 @@ end
 function Level:updateGuardDirections()
     for i, guard in ipairs(self.guards) do
         guard.direction = self.player.direction
+    end
+end
+
+function Level:updateDragonDirection()
+    for i, scale in ipairs(self.dragon.scales) do
+        -- opposite of player direction
+        scale.direction = self.player.direction * -1
     end
 end
 
@@ -161,7 +175,13 @@ function Level:updateGameObjects(step, isForward)
     for i, mouse in ipairs(self.mice) do
         mouse.stalled = mouse:onLaser(self.laserBases, self.turn)
     end
+    if self.levelNum == BONUS_LEVEL then
+        self:updateDragon(step, isForward)
+    end
+end
 
+function Level:updateDragon(step, isForward)
+    self.dragon:move(step, isForward)
 end
 
 function Level:checkGuardInteractions(isForward)
@@ -189,7 +209,7 @@ end
 function Level:updateGuards(step, isForward)
     local lastMoves = {}
     for i, guard in ipairs(self.guards) do
-        guard:move(step, isForward, self.grid)
+        guard:move(step, isForward)
         table.insert(lastMoves, guard.lastPosition)
     end
     -- determines what tiles to rewrite as empty or as a guard
