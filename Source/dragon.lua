@@ -31,8 +31,10 @@ function Dragon:move(step, isForward, laserBases, turn)
         self.blocked = false
         for i, scale in ipairs(self.scales) do
             scale:addPastMove()
-            scale:setIsBlocked(GUARD_OBSTACLES)
-            if scale.isBlocked then self.blocked = true end
+            if scale.alive then
+                scale:setIsBlocked(GUARD_OBSTACLES)
+                if scale.isBlocked then self.blocked = true end
+            end
         end
 
         if not self.blocked then
@@ -42,12 +44,9 @@ function Dragon:move(step, isForward, laserBases, turn)
             end
         end
 
-        local deadScales = 0
-        for i=1, #self.scales do
-            if self.scales[i-deadScales]:onLaser(laserBases, turn) then
-                self.scales[i-deadScales]:remove()
-                table.remove(self.scales, i-deadScales)
-                deadScales += 1
+        for i, scale in ipairs(self.scales) do
+            if self.scales[i]:onLaser(laserBases, turn) then
+                self.scales[i].alive = false
             end
         end
     else
@@ -55,11 +54,5 @@ function Dragon:move(step, isForward, laserBases, turn)
             scale:moveBack()
             scale:setPosition()
         end
-        
     end
-    
-    -- if self.alive then
-    --     self.grid[GetTile(self.position.x, self.position.y)] = GUARD_TILE
-    -- end
 end
-
