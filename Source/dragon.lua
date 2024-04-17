@@ -39,8 +39,10 @@ function Dragon:move(step, isForward, laserBases, turn)
 
         if not self.blocked then
             for i, scale in ipairs(self.scales) do
-                scale:moveForward(step)
-                scale:setPosition()
+                if scale.alive then
+                    scale:moveForward(step)
+                    scale:setPosition()
+                end
             end
         end
 
