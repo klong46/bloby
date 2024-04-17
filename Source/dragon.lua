@@ -11,35 +11,51 @@ function Dragon:init(grid)
     self.grid = grid
     self.direction = DIRECTIONS.RIGHT
     self.scales = {}
+    self.blocked = false
     self:drawScales()
 end
 
 function Dragon:drawScales()
-    for y=0,DRAGON_WIDTH do
-        for x=0,DRAGON_WIDTH do
+    for x=0,DRAGON_WIDTH-1 do
+        for y=0,DRAGON_WIDTH-1 do
             table.insert(self.scales, DragonScale(PD.geometry.point.new(x+START_X, y+START_Y), self.direction, self.grid))
         end
     end
 end
 
-function Dragon:move(step, isForward)
-    -- self.lastPosition = PD.geometry.point.new(self.position.x, self.position.y)
+function Dragon:move(step, isForward, laserBases, turn)
+    for i, scale in ipairs(self.scales) do
+        scale.lastPosition = PD.geometry.point.new(scale.position.x, scale.position.y)
+    end
     if isForward then
-        -- self:addPastMove()
+        self.blocked = false
         for i, scale in ipairs(self.scales) do
+            scale:addPastMove()
             scale:setIsBlocked(GUARD_OBSTACLES)
-            if scale.isBlocked then return end
+            if scale.isBlocked then self.blocked = true end
         end
+
+        if not self.blocked then
+            for i, scale in ipairs(self.scales) do
+                scale:moveForward(step)
+                scale:setPosition()
+            end
+        end
+
+        local deadScales = 0
+        for i=1, #self.scales do
+            if self.scales[i-deadScales]:onLaser(laserBases, turn) then
+                self.scales[i-deadScales]:remove()
+                table.remove(self.scales, i-deadScales)
+                deadScales += 1
+            end
+        end
+    else
         for i, scale in ipairs(self.scales) do
-            scale:moveForward(step)
+            scale:moveBack()
             scale:setPosition()
         end
         
-    else
-        -- self:moveBack()
-        -- if self.alive then
-        --     self:setVisible(true)
-        -- end
     end
     
     -- if self.alive then

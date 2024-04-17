@@ -129,7 +129,9 @@ end
 
 function Level:moveForward()
     self:updateGuardDirections()
-    self:updateDragonDirection()
+    if self.levelNum == BONUS_LEVEL then
+        self:updateDragonDirection()
+    end
     self:checkForBlocks()
     if not self.player.isBlocked then
         self:updateGameObjects(FORWARD_STEP, true)
@@ -176,12 +178,12 @@ function Level:updateGameObjects(step, isForward)
         mouse.stalled = mouse:onLaser(self.laserBases, self.turn)
     end
     if self.levelNum == BONUS_LEVEL then
-        self:updateDragon(step, isForward)
+        self:updateDragon(step, isForward, self.laserBases, self.turn)
     end
 end
 
-function Level:updateDragon(step, isForward)
-    self.dragon:move(step, isForward)
+function Level:updateDragon(step, isForward, laserBases, turn)
+    self.dragon:move(step, isForward, laserBases, turn)
 end
 
 function Level:checkGuardInteractions(isForward)
