@@ -40,6 +40,15 @@ function Player:onLadder()
     return self.grid[GetTile(self.position.x, self.position.y)] == LADDER_TILE
 end
 
+function Player:onDragon(dragon)
+    for i, scale in ipairs(dragon.scales) do
+        if scale.position == self.position then
+            return true
+        end
+    end
+    return false
+end
+
 function Player:finishLevel(starsEarned)
     LevelFinished = true
     stars = starsEarned

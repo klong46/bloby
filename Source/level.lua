@@ -233,6 +233,11 @@ function Level:updateLasers()
 end
 
 function Level:checkPlayerDeath()
+    if self.levelNum == BONUS_LEVEL then
+        if self.player:onDragon(self.dragon) then
+            self.player.isDead = true
+        end
+    end
     if self.player:onLaser(self.laserBases, self.turn) then
         self.player.isDead = true
     elseif self.player:onMouse(self.mice, true) then
