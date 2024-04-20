@@ -122,10 +122,9 @@ function Level:update()
 end
 
 function Level:checkCrankTurns()
-	local ticks = PD.getCrankTicks(CRANK_SPEED)
-    if ticks > 0 then
+    if CrankTicks > 0 then
         self:moveForward()
-    elseif ticks < 0 then
+    elseif CrankTicks < 0 then
         self:moveBack()
     end
 end

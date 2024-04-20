@@ -13,9 +13,7 @@ import "menuManager"
 import "levelSelect"
 import "menuBackground"
 import "controlScreen"
-
--- final level: put boxes and blobxs in correct spot (box in corner forming and picture, blobxs 
--- paralyzed by lasers to unlock finish)
+import "gameWinScreen"
 
 local function resetSaveData()
     local gameData = {
@@ -35,6 +33,8 @@ local highestLevel = 1
 local starScores = {}
 local bonusLevelUnlocked = false
 local levelFinishedStars
+local gameWinScreen
+CrankTicks = 0
 gameData = PD.datastore.read()
 if gameData then
     if gameData.currentLevel then
@@ -142,6 +142,9 @@ function PD.leftButtonDown()
     if levelSelect then
         levelSelect:cursorLeft()
     end
+    if gameWinScreen then
+        gameWinScreen:left()
+    end
 end
 
 function PD.upButtonDown()
@@ -149,6 +152,9 @@ function PD.upButtonDown()
         menuManager:cursorUp()
     elseif levelSelect then
         levelSelect:cursorUp()
+    end
+    if gameWinScreen then
+        gameWinScreen:up()
     end
 end
 
@@ -158,11 +164,17 @@ function PD.downButtonDown()
     elseif levelSelect then
         levelSelect:cursorDown()
     end
+    if gameWinScreen then
+        gameWinScreen:down()
+    end
 end
 
 function PD.rightButtonDown()
     if levelSelect then
         levelSelect:cursorRight()
+    end
+    if gameWinScreen then
+        gameWinScreen:right()
     end
 end
 
@@ -207,10 +219,15 @@ function PD.AButtonDown()
             elseif ReadyToContinue then
                 ReadyToContinue = false
                 LevelFinished = false
-                levelManager:nextLevel()
-                RestartMenuItem = pdMenu:addMenuItem("restart", function ()
-                    levelManager:resetLevel()
-                end)
+                if levelManager.levelNum > BONUS_LEVEL then
+                    SLIB:removeAll()
+                    gameWinScreen = GameWinScreen()
+                else
+                    levelManager:nextLevel()
+                    RestartMenuItem = pdMenu:addMenuItem("restart", function ()
+                        levelManager:resetLevel()
+                    end)
+                end
             end
         end
     end
@@ -311,4 +328,5 @@ end
 function PD.update()
 	PD.timer.updateTimers()
 	SLIB.update()
+	CrankTicks = PD.getCrankTicks(CRANK_SPEED)
 end
