@@ -103,6 +103,9 @@ function Level:drawTiles(playerDirection)
                     self.grid[GetTile(x, y)] = EMPTY_TILE
                 elseif tile == LADDER_TILE then
                     self.ladder = Ladder(position)
+                    if self.levelNum == BONUS_LEVEL then
+                        self.ladder:hide()
+                    end
                 end
             end
         end
@@ -179,6 +182,23 @@ function Level:updateGameObjects(step, isForward)
     end
     if self.levelNum == BONUS_LEVEL then
         self:updateDragon(step, isForward, self.laserBases, self.turn)
+        self:checkDragonDestroyed(isForward)
+    end
+end
+
+function Level:checkDragonDestroyed(isForward)
+    local deadScales = 0
+    for i, scale in ipairs(self.dragon.scales) do
+        if not scale.alive then
+            deadScales += 1
+        end
+    end
+    if deadScales == #self.dragon.scales then
+        if not self.ladder:isVisible() then
+            self.ladder:show()
+        end
+    elseif not isForward then
+        self.ladder:setVisible(false)
     end
 end
 
