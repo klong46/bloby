@@ -33,6 +33,8 @@ local levelManager
 local movesText
 local highestLevel = 1
 local starScores = {}
+local bonusLevelUnlocked = false
+local levelFinishedStars
 gameData = PD.datastore.read()
 if gameData then
     if gameData.currentLevel then
@@ -44,13 +46,17 @@ if gameData then
     if gameData.scores then
         starScores = gameData.scores
     end
+    if gameData.bonusLevelUnlocked then
+        bonusLevelUnlocked = gameData.bonusLevelUnlocked
+    end
 end
 
 local function saveGameData()
     gameData = {
         currentLevel = levelManager.levelNum,
         highestUnlockedLevel = highestLevel,
-        scores = starScores
+        scores = starScores,
+        bonusLevelUnlocked = bonusLevelUnlocked
     }
     PD.datastore.write(gameData)
 end
@@ -90,6 +96,14 @@ function ReturnToMenu()
     if movesText and movesText.continueButtonTimer then
         movesText.continueButtonTimer:remove()
     end
+    if levelFinishedStars then
+        if levelFinishedStars.starAppearTimer then
+            levelFinishedStars.starAppearTimer:remove()
+        end
+        if levelFinishedStars.starTimer then
+            levelFinishedStars.starTimer:remove()
+        end
+    end
     initMenu()
     pdMenu:removeAllMenuItems()
 end
@@ -97,6 +111,7 @@ end
 function StartGame(levelNum)
     SLIB.removeAll()
     levelManager = LevelManager(levelNum, starScores)
+    pdMenu:removeAllMenuItems()
     pdMenu:addMenuItem("menu", ReturnToMenu)
     RestartMenuItem = pdMenu:addMenuItem("restart", function ()
         levelManager:resetLevel()
@@ -117,6 +132,10 @@ end
 function GoToLevelSelect()
     SLIB.removeAll()
     levelSelect = LevelSelect(highestLevel, starScores)
+    for i = 1, levelManager.levelNum-1, 1 do
+        levelSelect:cursorRight()
+    end
+    pdMenu:addMenuItem("menu", ReturnToMenu)
 end
 
 function PD.leftButtonDown()
@@ -228,7 +247,37 @@ function ResetLevel()
 	levelManager:resetLevel()
 end
 
+local function allStarsEarned()
+    if #starScores ~= (TOTAL_LEVELS - 1) then return false end
+    for i, score in ipairs(starScores) do
+        if score ~= 3 then
+            return false
+        end
+    end
+    return true
+end
+
+local function levelSelectCursorDown(scrollTimer)
+    levelSelect:cursorRight()
+    if levelSelect.cursorPos.y == 7 and levelSelect.cursorPos.x == 1 then
+        scrollTimer:remove()
+        ReadyToContinue = false
+        LevelFinished = false
+    end
+end
+
 function LevelOver(stars)
+    if allStarsEarned() and not bonusLevelUnlocked then
+        bonusLevelUnlocked = true
+        GoToLevelSelect()
+        local scrollTimer
+        scrollTimer = PD.timer.keyRepeatTimerWithDelay(
+            30,
+            30,
+            function ()
+                levelSelectCursorDown(scrollTimer)
+            end)
+    end
     pdMenu:removeAllMenuItems()
     pdMenu:addMenuItem("menu", ReturnToMenu)
     pdMenu:addMenuItem("next level", function ()
@@ -254,7 +303,7 @@ function LevelOver(stars)
 end
 
 function ShowFinishScreen(stars)
-    Stars(stars)
+    levelFinishedStars = Stars(stars)
     EscapeText()
     movesText = MovesText(levelManager.level.turn-1 or 0)
 end

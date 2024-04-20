@@ -12,6 +12,7 @@ function Ladder:init(position)
     Ladder.super.init(self, image, position)
     self.animation = GFX.animation.loop.new(ANIMATION_SPEED, animationTable, true)
     self.fadeAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 1)
+    self.fadeAnimator.paused = true
 end
 
 function Ladder:update()

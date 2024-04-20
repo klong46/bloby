@@ -35,9 +35,8 @@ function LevelSelectTile:init(x, y, levelNum, selected, locked, score)
     self:moveTo(x*WIDTH-40, y*WIDTH-40)
     if levelNum > TOTAL_LEVELS then
         self:setImage(TILE_IMAGES[6])
-    else
-        self.numberLabel = LevelSelectNumber(x, y, levelNum, selected)
     end
+    self.numberLabel = LevelSelectNumber(x, y, levelNum, selected)
     self:add()
 end
 

@@ -182,23 +182,26 @@ function Level:updateGameObjects(step, isForward)
     end
     if self.levelNum == BONUS_LEVEL then
         self:updateDragon(step, isForward, self.laserBases, self.turn)
-        self:checkDragonDestroyed(isForward)
+        if self:dragonIsDead() then
+            self:showLadder()
+        elseif not isForward then
+            self.ladder:setVisible(false)
+        end
     end
 end
 
-function Level:checkDragonDestroyed(isForward)
-    local deadScales = 0
+function Level:dragonIsDead()
     for i, scale in ipairs(self.dragon.scales) do
-        if not scale.alive then
-            deadScales += 1
+        if scale.alive then
+            return false
         end
     end
-    if deadScales == #self.dragon.scales then
-        if not self.ladder:isVisible() then
-            self.ladder:show()
-        end
-    elseif not isForward then
-        self.ladder:setVisible(false)
+    return true
+end
+
+function Level:showLadder()
+    if not self.ladder:isVisible() then
+        self.ladder:show()
     end
 end
 

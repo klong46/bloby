@@ -3,7 +3,7 @@ import "constants"
 import "levelSelectTile"
 
 local NUM_COLS = 5
-local NUM_ROWS = math.floor(TOTAL_LEVELS/NUM_COLS)
+local NUM_ROWS = 7
 local ROWS_ON_SCREEN = 3
 
 
@@ -13,14 +13,15 @@ end
 
 local currentLevel = 1
 local scrollDown = true
-local offset = 0
 local scrollQueued = false
 
 class('LevelSelect').extends(SLIB)
 
 function LevelSelect:init(startingLevel, scores)
     LevelSelect.super.init(self)
-    currentLevel = startingLevel
+    if startingLevel then
+        currentLevel = startingLevel
+    end
     self.scores = scores
     self.cursorPos = PD.geometry.point.new(1,1)
     self.previousSelected = PD.geometry.point.new(1,1)
@@ -28,6 +29,7 @@ function LevelSelect:init(startingLevel, scores)
     self.scrollAnimator = nil
     self:addLevelTiles()
     self.tiles[getLevelNum(self.cursorPos.x, self.cursorPos.y)]:select()
+    self.offset = 0
     self:add()
 end
 
@@ -96,13 +98,13 @@ function LevelSelect:cursorUp()
 end
 
 function LevelSelect:checkScrollDown()
-    if offset < NUM_ROWS-ROWS_ON_SCREEN then
+    if self.offset < NUM_ROWS-ROWS_ON_SCREEN then
         self:scrollDown()
     end
 end
 
 function LevelSelect:checkScrollUp()
-    if offset > 0 then
+    if self.offset > 0 then
         self:scrollUp()
     end
 end
@@ -128,13 +130,13 @@ end
 
 function LevelSelect:scrollDown()
     scrollDown = true
-    offset += 1
+    self.offset += 1
     self:startAnimator()
 end
 
 function LevelSelect:scrollUp()
     scrollDown = false
-    offset -= 1
+    self.offset -= 1
     self:startAnimator()
 end
 
@@ -162,9 +164,9 @@ function LevelSelect:update()
                 local number = self.tiles[getLevelNum(x,y)].numberLabel
                 local yPos
                 if scrollDown then
-                    yPos = ((y-offset+1)*80-55) - self.scrollAnimator:currentValue()
+                    yPos = ((y-self.offset+1)*80-55) - self.scrollAnimator:currentValue()
                 else
-                    yPos = ((y-offset-1)*80-55) + self.scrollAnimator:currentValue()
+                    yPos = ((y-self.offset-1)*80-55) + self.scrollAnimator:currentValue()
                 end
                 number:moveTo(number.x, yPos)
                 local tile = self.tiles[getLevelNum(x,y)]

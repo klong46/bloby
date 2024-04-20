@@ -45,7 +45,7 @@ function MenuManager:cursorSelect()
     elseif self.selectedBox == 2 then
         GoToLevelSelect()
     else
-        GoToLevelSelect()
+        GoToLevelSelect() -- gonna add credits here
     end
     self:remove()
 end
