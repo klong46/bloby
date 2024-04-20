@@ -39,7 +39,6 @@ end
 function GameWinScreen:moveEyelids()
     self.topEyelid:moveTo(self.topEyelid.x, self.topEyelid.y + (CrankTicks * 2))
     self.bottomEyelid:moveTo(self.bottomEyelid.x, self.bottomEyelid.y - (CrankTicks * 2))
-    print(self.topEyelid.y)
 end
 
 function GameWinScreen:update()

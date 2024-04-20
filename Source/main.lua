@@ -219,7 +219,7 @@ function PD.AButtonDown()
             elseif ReadyToContinue then
                 ReadyToContinue = false
                 LevelFinished = false
-                if levelManager.levelNum > BONUS_LEVEL then
+                if levelManager.levelNum == BONUS_LEVEL then
                     SLIB:removeAll()
                     gameWinScreen = GameWinScreen()
                 else
@@ -310,7 +310,9 @@ function LevelOver(stars)
     else
         table.insert(starScores, stars)
     end
-    levelManager.levelNum += 1
+    if levelManager.levelNum ~= BONUS_LEVEL then
+        levelManager.levelNum += 1
+    end
     if levelManager.levelNum > highestLevel then
         highestLevel = levelManager.levelNum
     end
