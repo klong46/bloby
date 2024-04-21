@@ -12,6 +12,7 @@ local GW_IMAGES <const> = {
 local blackScreen = GFX.image.new('img/game_win/black_screen')
 
 local EYES_CLOSED_Y_POS = 42
+local FADE_DURATION = 10000
 
 function GameWinScreen:init()
     GameWinScreen.super.init(self)
@@ -19,7 +20,7 @@ function GameWinScreen:init()
     self:setImage(GW_IMAGES[4])
     self.topEyelid = Eyelid(200, -14)
     self.bottomEyelid = Eyelid(200, 200)
-    self.fadeAnimator = GFX.animator.new(6000, 1, 0, PD.easingFunctions.inQuad)
+    self.fadeAnimator = GFX.animator.new(FADE_DURATION, 1, 0, PD.easingFunctions.inQuad)
     self.fadeAnimator.paused = true
     self.closed = false
     self:add()
