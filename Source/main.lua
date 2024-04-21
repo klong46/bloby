@@ -217,10 +217,11 @@ function PD.AButtonDown()
                     SLIB:removeAll()
                     gameWinScreen = GameWinScreen()
                 else
-                    levelManager:nextLevel()
-                    RestartMenuItem = pdMenu:addMenuItem("restart", function ()
-                        levelManager:resetLevel()
-                    end)
+                    if levelManager.levelNum ~= BONUS_LEVEL then
+                        levelManager.levelNum += 1
+                    end
+                    startingLevel = levelManager.levelNum
+                    levelManager:resetLevel()
                 end
             end
         end

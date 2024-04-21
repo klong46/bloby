@@ -171,6 +171,7 @@ function LevelSelect:update()
                 number:moveTo(number.x, yPos)
                 local tile = self.tiles[getLevelNum(x,y)]
                 tile:moveTo(tile.x, yPos+15)
+                tile.background:moveTo(tile.x, yPos+15)
             end
         end
     end
