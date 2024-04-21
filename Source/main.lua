@@ -116,12 +116,6 @@ function StartGame(levelNum)
     RestartMenuItem = pdMenu:addMenuItem("restart", function ()
         levelManager:resetLevel()
     end)
-    pdMenu:addMenuItem("next level", function ()
-        ReadyToContinue = false
-        LevelFinished = false
-        levelManager.levelNum += 1
-        levelManager:nextLevel()
-    end)
 end
 
 
@@ -132,7 +126,7 @@ end
 function GoToLevelSelect()
     SLIB.removeAll()
     levelSelect = LevelSelect(highestLevel, starScores)
-    for i = 1, levelManager.levelNum-1, 1 do
+    for i = 1, startingLevel-1, 1 do
         levelSelect:cursorRight()
     end
     pdMenu:addMenuItem("menu", ReturnToMenu)
@@ -297,11 +291,11 @@ function LevelOver(stars)
     end
     pdMenu:removeAllMenuItems()
     pdMenu:addMenuItem("menu", ReturnToMenu)
-    pdMenu:addMenuItem("next level", function ()
-        ReadyToContinue = false
-        LevelFinished = false
-        levelManager.levelNum += 1
-        levelManager:nextLevel()
+    RestartMenuItem = pdMenu:addMenuItem("restart", function ()
+        levelManager:resetLevel()
+        for i, timer in ipairs(PD.timer.allTimers()) do
+            timer:remove()
+        end
     end)
     if #starScores >= levelManager.levelNum then
         if starScores[levelManager.levelNum] < stars then
@@ -310,14 +304,8 @@ function LevelOver(stars)
     else
         table.insert(starScores, stars)
     end
-    if levelManager.levelNum ~= BONUS_LEVEL then
-        levelManager.levelNum += 1
-    end
-    if levelManager.levelNum > highestLevel then
-        highestLevel = levelManager.levelNum
-    end
-    if levelManager.levelNum > startingLevel then
-        startingLevel = levelManager.levelNum
+    if levelManager.levelNum ~= BONUS_LEVEL and levelManager.levelNum+1 > highestLevel then
+        highestLevel = levelManager.levelNum+1
     end
 end
 
