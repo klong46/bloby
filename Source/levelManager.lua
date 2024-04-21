@@ -10,10 +10,6 @@ function LevelManager:init(startingLevel)
     self:add()
 end
 
-function LevelManager:nextLevel()
-    self:resetLevel()
-end
-
 function LevelManager:resetLevel()
     SLIB.removeAll()
     if self.levelNum > TOTAL_LEVELS then
