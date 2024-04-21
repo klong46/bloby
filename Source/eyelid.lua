@@ -6,6 +6,6 @@ function Eyelid:init(x, y)
     Eyelid.super.init(self)
     self:moveTo(x, y)
     self:setImage(eyelidImage)
-    self:setZIndex(100)
+    self:setZIndex(1)
     self:add()
 end

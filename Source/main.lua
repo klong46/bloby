@@ -142,7 +142,7 @@ function PD.leftButtonDown()
     if levelSelect then
         levelSelect:cursorLeft()
     end
-    if gameWinScreen then
+    if gameWinScreen and not gameWinScreen.closed then
         gameWinScreen:left()
     end
 end
@@ -153,7 +153,7 @@ function PD.upButtonDown()
     elseif levelSelect then
         levelSelect:cursorUp()
     end
-    if gameWinScreen then
+    if gameWinScreen and not gameWinScreen.closed then
         gameWinScreen:up()
     end
 end
@@ -164,7 +164,7 @@ function PD.downButtonDown()
     elseif levelSelect then
         levelSelect:cursorDown()
     end
-    if gameWinScreen then
+    if gameWinScreen and not gameWinScreen.closed then
         gameWinScreen:down()
     end
 end
@@ -173,7 +173,7 @@ function PD.rightButtonDown()
     if levelSelect then
         levelSelect:cursorRight()
     end
-    if gameWinScreen then
+    if gameWinScreen and not gameWinScreen.closed then
         gameWinScreen:right()
     end
 end

@@ -9,14 +9,19 @@ local GW_IMAGES <const> = {
     GFX.image.new('img/game_win/gw_right')
 }
 
+local blackScreen = GFX.image.new('img/game_win/black_screen')
+
 local EYES_CLOSED_Y_POS = 42
 
 function GameWinScreen:init()
     GameWinScreen.super.init(self)
     self:moveTo(200,120)
     self:setImage(GW_IMAGES[4])
-    self.topEyelid = Eyelid(200, -15)
+    self.topEyelid = Eyelid(200, -14)
     self.bottomEyelid = Eyelid(200, 200)
+    self.fadeAnimator = GFX.animator.new(6000, 1, 0, PD.easingFunctions.inQuad)
+    self.fadeAnimator.paused = true
+    self.closed = false
     self:add()
 end
 
@@ -50,7 +55,18 @@ function GameWinScreen:update()
     elseif CrankTicks > 0 then
         self:moveEyelids()
     end
-    if self.topEyelid.y >= EYES_CLOSED_Y_POS then
-        ReturnToMenu()
+    if self.topEyelid.y >= EYES_CLOSED_Y_POS and not self.closed then
+        self:setImage(blackScreen)
+        self:setZIndex(2)
+        self.topEyelid:remove()
+        self.bottomEyelid:remove()
+        self.closed = true
+        self.fadeAnimator:reset()
+    end
+    if self.closed then
+        self:setImage(self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBayer8x8))
+        if self.fadeAnimator:ended() then
+            ReturnToMenu()
+        end
     end
 end
