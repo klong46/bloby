@@ -13,5 +13,6 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 "playerDirection": 1,
 "mouseDelays":[7,5],
-"starTargets":[101,97]
+"starTargets":[101,97],
+"movesPosition":[17,3]
 }

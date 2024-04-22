@@ -15,5 +15,6 @@
 "playerDirection": 1,
 "laserCadences":[2,3],
 "laserOffsets": [1,3],
-"starTargets":[50,42]
+"starTargets":[50,42],
+"movesPosition":[13,7]
 }

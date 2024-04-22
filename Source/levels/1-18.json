@@ -15,5 +15,6 @@
 "laserCadences":[],
 "laserOffsets": [],
 "mouseDelays":[],
-"starTargets":[148,120]
+"starTargets":[148,120],
+"movesPosition":[12,7]
 }
