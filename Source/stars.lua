@@ -16,7 +16,6 @@ function Stars:init(num)
     starNum = 1
     limit = num
     self.starAppearTimer = PD.timer.performAfterDelay(ANIMATION_DURATION, self.startAnimation)
-    self.starTimer = nil
 end
 
 local function drawStar()
@@ -31,5 +30,5 @@ local function drawStar()
 end
 
 function Stars:startAnimation()
-    self.starTimer = PD.timer.keyRepeatTimerWithDelay(ANIMATION_DURATION, ANIMATION_DURATION, drawStar)
+    starTimer = PD.timer.keyRepeatTimerWithDelay(ANIMATION_DURATION, ANIMATION_DURATION, drawStar)
 end

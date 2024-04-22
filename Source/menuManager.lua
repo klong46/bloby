@@ -4,9 +4,11 @@ import "constants"
 class('MenuManager').extends(SLIB)
 
 local currentLevel = 1
+local numScores = 0
 
-function MenuManager:init(startingLevel)
+function MenuManager:init(startingLevel, scores)
     MenuManager.super.init(self)
+    numScores = scores
     currentLevel = startingLevel
     self.menuSelect = MenuSelect()
     self.menuBackground = MenuBackground()
@@ -36,7 +38,7 @@ end
 
 function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
-        if currentLevel == 1 then
+        if currentLevel == 1 and numScores == 0 then
             Tutorial = ControlScreen()
         else
             StartGame(currentLevel)
