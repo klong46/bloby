@@ -14,6 +14,7 @@ function EscapeText:init()
 end
 
 function EscapeText:draw()
+    GFX.setImageDrawMode(GFX.kDrawModeCopy)
     GFX.setFont(bigFont, "bold")
     GFX.drawText("*Escape!*", 0, 0)
 end

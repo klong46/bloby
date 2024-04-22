@@ -34,6 +34,7 @@ function MovesText:update()
 end
 
 function MovesText:draw()
+    GFX.setImageDrawMode(GFX.kDrawModeCopy)
     GFX.setFont(smallFont, "bold")
     GFX.drawText("*moves: *", 0, 5)
     GFX.setFont(bigFont, "bold")

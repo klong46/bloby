@@ -8,6 +8,7 @@ import "laser"
 import "guard"
 import "mouse"
 import "dragon"
+import "movesTile"
 
 local background = GFX.image.new('img/background_grid')
 
@@ -63,6 +64,7 @@ function Level:init(levelNum)
     self.mouseDelays = levelData.mouseDelays and levelData.mouseDelays or {}
     self.guardDirections = levelData.guardDirections and levelData.guardDirections or {}
     self.starTargets = levelData.starTargets and levelData.starTargets or {}
+    self.movesPosition = levelData.movesPosition and levelData.movesPosition or {}
     local playerDirection = levelData.playerDirection and levelData.playerDirection or DEFAULT_PLAYER_DIRECTION
     self.laserBases = {}
     self.guards = {}
@@ -79,6 +81,7 @@ function Level:drawTiles(playerDirection)
     if self.levelNum == BONUS_LEVEL then
         self.dragon = Dragon(self.grid)
     end
+    MovesTile(PD.geometry.point.new(self.movesPosition[1], self.movesPosition[2]))
     for x = 1, TILES_PER_ROW do
         for y = 1, TILES_PER_COLUMN do
             local tile = self.grid[GetTile(x, y)]

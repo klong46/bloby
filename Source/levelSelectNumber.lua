@@ -26,6 +26,7 @@ function LevelSelectNumber:init(x, y, levelNum, selected)
 end
 
 function LevelSelectNumber:draw()
+    GFX.setImageDrawMode(GFX.kDrawModeCopy)
     local label = math.floor( self.levelNum )
     GFX.setFont(smallFont, "bold")
     if self.selected then
