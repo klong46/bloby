@@ -154,6 +154,12 @@ end
 
 function LevelSelect:update()
     LevelSelect.super.update(self)
+    if CrankTicks > 0 then
+        self:cursorDown()
+    elseif CrankTicks < 0 then
+        self:cursorUp()
+    end
+
     if scrollQueued then
         self.scrollAnimator:reset()
         scrollQueued = false

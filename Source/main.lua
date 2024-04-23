@@ -316,5 +316,9 @@ end
 function PD.update()
     PD.timer.updateTimers()
     SLIB.update()
-    CrankTicks = PD.getCrankTicks(CRANK_SPEED)
+    if levelSelect then
+        CrankTicks = PD.getCrankTicks(LEVEL_SELECT_CRANK_SPEED)
+    else
+        CrankTicks = PD.getCrankTicks(MOVE_CRANK_SPEED)
+    end
 end
