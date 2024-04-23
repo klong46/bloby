@@ -18,7 +18,10 @@ import "gameWinScreen"
 local function resetSaveData()
     local gameData = {
         currentLevel = 1,
-        scores = {}
+        scores = {},
+        startingLevel = 1,
+        highestUnlockedLevel = 1,
+        bonusLevelUnlocked = false
     }
     PD.datastore.write(gameData)
 end
@@ -233,7 +236,6 @@ function PD.AButtonDown()
                     bonusLevelUnlocked = true
                     highestLevel = BONUS_LEVEL
                     GoToLevelSelect()
-                    -- local scrollTimer
                     PD.timer.keyRepeatTimerWithDelay(30,30, levelSelectCursorDown)
                 else
                     if levelManager.levelNum == BONUS_LEVEL then

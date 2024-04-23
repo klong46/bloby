@@ -120,7 +120,7 @@ function LevelSelect:updateSelectTiles()
 end
 
 function LevelSelect:select()
-    if currentLevel == 1 and #scores == 0 then
+    if currentLevel == 1 and #self.scores == 0 then
         Tutorial = ControlScreen()
     else
         StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
