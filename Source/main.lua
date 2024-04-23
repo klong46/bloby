@@ -21,7 +21,7 @@ local function resetSaveData()
         scores = {},
         startingLevel = 1,
         highestUnlockedLevel = 1,
-        bonusLevelUnlocked = false
+        bonusLevelAnimationPlayed = false
     }
     PD.datastore.write(gameData)
 end
@@ -33,7 +33,7 @@ local startingLevel = 1
 local levelManager
 local highestLevel = 1
 local starScores = {}
-local bonusLevelUnlocked = false
+local bonusLevelAnimationPlayed = false
 local gameWinScreen
 CrankTicks = 0
 gameData = PD.datastore.read()
@@ -47,8 +47,8 @@ if gameData then
     if gameData.scores then
         starScores = gameData.scores
     end
-    if gameData.bonusLevelUnlocked then
-        bonusLevelUnlocked = gameData.bonusLevelUnlocked
+    if gameData.bonusLevelAnimationPlayed then
+        bonusLevelAnimationPlayed = gameData.bonusLevelAnimationPlayed
     end
 end
 
@@ -57,7 +57,7 @@ local function saveGameData()
         currentLevel = startingLevel,
         highestUnlockedLevel = highestLevel,
         scores = starScores,
-        bonusLevelUnlocked = bonusLevelUnlocked
+        bonusLevelAnimationPlayed = bonusLevelAnimationPlayed
     }
     PD.datastore.write(gameData)
 end
@@ -232,11 +232,10 @@ function PD.AButtonDown()
             elseif ReadyToContinue then
                 ReadyToContinue = false
                 LevelFinished = false
-                if (not bonusLevelUnlocked) and allStarsEarned() then
-                    bonusLevelUnlocked = true
-                    highestLevel = BONUS_LEVEL
+                if not bonusLevelAnimationPlayed and allStarsEarned() then
+                    bonusLevelAnimationPlayed = true
                     GoToLevelSelect()
-                    PD.timer.keyRepeatTimerWithDelay(30,30, levelSelectCursorDown)
+                    PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
                 else
                     if levelManager.levelNum == BONUS_LEVEL then
                         SLIB:removeAll()
@@ -304,6 +303,9 @@ function LevelOver(stars)
         if levelManager.levelNum + 1 > highestLevel then
             highestLevel = levelManager.levelNum + 1
         end
+    end
+    if allStarsEarned() then
+        highestLevel = BONUS_LEVEL
     end
 end
 
