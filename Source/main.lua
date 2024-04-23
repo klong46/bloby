@@ -298,7 +298,7 @@ function LevelOver(stars)
     else
         table.insert(starScores, stars)
     end
-    if levelManager.levelNum ~= BONUS_LEVEL then
+    if levelManager.levelNum ~= (TOTAL_LEVELS-1) then
         startingLevel = levelManager.levelNum + 1
         if levelManager.levelNum + 1 > highestLevel then
             highestLevel = levelManager.levelNum + 1
