@@ -3,8 +3,8 @@ import "dragonScale"
 class('Dragon').extends(SLIB)
 
 local DRAGON_WIDTH = 5
-local START_X = 5
-local START_Y = 5
+local START_X = 7
+local START_Y = 2
 
 function Dragon:init(grid)
     Dragon.super.init(self)

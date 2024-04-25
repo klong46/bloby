@@ -42,7 +42,7 @@ end
 
 function Player:onDragon(dragon)
     for i, scale in ipairs(dragon.scales) do
-        if scale.position == self.position then
+        if scale.position == self.position and scale.alive then
             return true
         end
     end
