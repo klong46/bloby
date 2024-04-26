@@ -14,6 +14,7 @@ import "levelSelect"
 import "menuBackground"
 import "controlScreen"
 import "gameWinScreen"
+import "creditsText"
 
 local function resetSaveData()
     local gameData = {
@@ -35,6 +36,7 @@ local highestLevel = 1
 local starScores = {}
 local bonusLevelAnimationPlayed = false
 local gameWinScreen
+local credits
 CrankTicks = 0
 gameData = PD.datastore.read()
 if gameData then
@@ -127,6 +129,12 @@ function GoToLevelSelect()
     for i = 1, startingLevel - 1, 1 do
         levelSelect:cursorRight()
     end
+    pdMenu:addMenuItem("menu", ReturnToMenu)
+end
+
+function GoToCredits()
+    SLIB.removeAll()
+    credits = CreditsText()
     pdMenu:addMenuItem("menu", ReturnToMenu)
 end
 
@@ -261,12 +269,13 @@ function PD.AButtonUp()
 end
 
 function PD.BButtonDown()
-    if not LevelFinished and not (onMenu or levelSelect or OnControlScreen) then
+    if not LevelFinished and not (onMenu or levelSelect or OnControlScreen or credits) then
         RemoveForwardTimer()
         moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
-    elseif levelSelect then
+    elseif levelSelect or credits then
         ReturnToMenu()
         levelSelect = nil
+        credits = nil
     elseif OnControlScreen and Tutorial then
         Tutorial:back()
     end
@@ -298,7 +307,7 @@ function LevelOver(stars)
     else
         table.insert(starScores, stars)
     end
-    if levelManager.levelNum ~= (TOTAL_LEVELS-1) then
+    if levelManager.levelNum < TOTAL_LEVELS then
         startingLevel = levelManager.levelNum + 1
         if levelManager.levelNum + 1 > highestLevel then
             highestLevel = levelManager.levelNum + 1
