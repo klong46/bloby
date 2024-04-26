@@ -155,9 +155,9 @@ end
 function LevelSelect:update()
     LevelSelect.super.update(self)
     if CrankTicks > 0 then
-        self:cursorDown()
+        self:cursorRight()
     elseif CrankTicks < 0 then
-        self:cursorUp()
+        self:cursorLeft()
     end
 
     if scrollQueued then
