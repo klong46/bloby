@@ -64,7 +64,7 @@ function LevelSelect:cursorLeft()
 end
 
 function LevelSelect:cursorRight()
-    if getLevelNum(self.cursorPos.x, self.cursorPos.y) < TOTAL_LEVELS and
+    if getLevelNum(self.cursorPos.x, self.cursorPos.y) < BONUS_LEVEL and
        getLevelNum(self.cursorPos.x, self.cursorPos.y) < currentLevel then
         self:setPreviousSelected()
         if self.cursorPos.x % NUM_COLS == 0 then

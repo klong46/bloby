@@ -121,7 +121,7 @@ end
 -- for i = 1, 30, 1 do
 --     table.insert(starScores, 3)
 -- end
--- starScores[30] = 1
+-- starScores[1] = 1
 
 function GoToLevelSelect()
     SLIB.removeAll()
@@ -203,7 +203,7 @@ function RemoveBackTimer()
 end
 
 local function allStarsEarned()
-    if #starScores ~= (TOTAL_LEVELS - 1) then return false end
+    if #starScores ~= TOTAL_LEVELS then return false end
     for i, score in ipairs(starScores) do
         if score ~= 3 then
             return false
@@ -249,7 +249,7 @@ function PD.AButtonDown()
                         SLIB:removeAll()
                         gameWinScreen = GameWinScreen()
                     else
-                        if levelManager.levelNum == (TOTAL_LEVELS - 1) then
+                        if levelManager.levelNum == TOTAL_LEVELS then
                             ReturnToMenu()
                         else
                             levelManager.levelNum += 1

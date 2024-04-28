@@ -12,8 +12,8 @@ end
 
 function LevelManager:resetLevel()
     SLIB.removeAll()
-    if self.levelNum > TOTAL_LEVELS then
-        self.levelNum = TEST_LEVEL
+    if self.levelNum > BONUS_LEVEL then
+        self.levelNum = 1
     end
     self.level = Level(self.levelNum)
     LevelFinished = false
