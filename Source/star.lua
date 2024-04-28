@@ -15,8 +15,8 @@ function Star:init(order)
     self:setImage(image)
     self:setZIndex(6)
     self:add()
-    self.rotationAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 360, playdate.easingFunctions.outCubic)
-    self.scaleAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 1, playdate.easingFunctions.outCubic)
+    self.rotationAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 360, playdate.easingFunctions.outExpo)
+    self.scaleAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 1, playdate.easingFunctions.outExpo)
 end
 
 function Star:getPosition(order)
