@@ -28,14 +28,13 @@ function LevelSelectTile:init(x, y, levelNum, selected, locked, score)
             self.image = TILE_IMAGES[5]
         end
         if not selected then
-            self:setImage(self.image:fadedImage(0.5, GFX.image.kDitherTypeBayer8x8))
+            self:setImage(self.image)
         end
     else
         self:setImage(TILE_IMAGES[4])
-
     end
     self:moveTo(x*WIDTH-40, y*WIDTH-40)
-    if levelNum > TOTAL_LEVELS then
+    if levelNum > BONUS_LEVEL then
         self:setImage(TILE_IMAGES[6])
     end
     self.numberLabel = LevelSelectNumber(x, y, levelNum, selected)
@@ -43,7 +42,6 @@ function LevelSelectTile:init(x, y, levelNum, selected, locked, score)
 end
 
 function LevelSelectTile:unselect()
-    self:setImage(self.image:fadedImage(0.5, GFX.image.kDitherTypeBayer8x8))
     self.background:setVisible(true)
     self.numberLabel:unselect()
 end

@@ -10,7 +10,7 @@ class('BlankTile').extends(SLIB)
 
 function BlankTile:init(x, y)
     BlankTile.super.init(self)
-    self:setImage(blankTile:fadedImage(0.2, GFX.image.kDitherTypeDiagonalLine))
+    self:setImage(blankTile:fadedImage(0.5, GFX.image.kDitherTypeScreen))
     self:moveTo(x*WIDTH-40, y*WIDTH-40)
     self:add()
 end
