@@ -8,19 +8,21 @@ import "escapeTile"
 import "stars"
 import "escapeText"
 import "movesText"
-import "startButton"
-import "levelSelectButton"
-import "title"
+import "menuSelect"
 import "menuManager"
 import "levelSelect"
-
--- bugs: 
--- animation playing after return to menu
+import "menuBackground"
+import "controlScreen"
+import "gameWinScreen"
+import "creditsText"
 
 local function resetSaveData()
     local gameData = {
         currentLevel = 1,
-        scores = {}
+        scores = {},
+        startingLevel = 1,
+        highestUnlockedLevel = 1,
+        bonusLevelAnimationPlayed = false
     }
     PD.datastore.write(gameData)
 end
@@ -30,20 +32,34 @@ end
 local gameData = {}
 local startingLevel = 1
 local levelManager
-local movesText
+local highestLevel = 1
 local starScores = {}
+local bonusLevelAnimationPlayed = false
+local gameWinScreen
+local credits
+CrankTicks = 0
 gameData = PD.datastore.read()
 if gameData then
-    startingLevel = gameData.currentLevel
+    if gameData.currentLevel then
+        startingLevel = gameData.currentLevel
+    end
+    if gameData.highestUnlockedLevel then
+        highestLevel = gameData.highestUnlockedLevel
+    end
     if gameData.scores then
         starScores = gameData.scores
+    end
+    if gameData.bonusLevelAnimationPlayed then
+        bonusLevelAnimationPlayed = gameData.bonusLevelAnimationPlayed
     end
 end
 
 local function saveGameData()
     gameData = {
-        currentLevel = levelManager.levelNum,
-        scores = starScores
+        currentLevel = startingLevel,
+        highestUnlockedLevel = highestLevel,
+        scores = starScores,
+        bonusLevelAnimationPlayed = bonusLevelAnimationPlayed
     }
     PD.datastore.write(gameData)
 end
@@ -63,6 +79,8 @@ local moveForwardTimer
 local moveBackTimer
 LevelFinished = false
 ReadyToContinue = false
+OnControlScreen = false
+Tutorial = nil
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 local pdMenu = PD.getSystemMenu()
@@ -70,16 +88,16 @@ local pdMenu = PD.getSystemMenu()
 local function initMenu()
     LevelFinished = false
     ReadyToContinue = false
-    menuManager = MenuManager(startingLevel)
+    menuManager = MenuManager(startingLevel, #starScores)
     onMenu = true
 end
 
 initMenu()
 
-local function returnToMenu()
+function ReturnToMenu()
     SLIB.removeAll()
-    if movesText then
-        movesText.continueButtonTimer:remove()
+    for i, timer in ipairs(PD.timer.allTimers()) do
+        timer:remove()
     end
     initMenu()
     pdMenu:removeAllMenuItems()
@@ -87,51 +105,88 @@ end
 
 function StartGame(levelNum)
     SLIB.removeAll()
+    startingLevel = levelNum
     levelManager = LevelManager(levelNum, starScores)
+    pdMenu:removeAllMenuItems()
+    pdMenu:addMenuItem("menu", ReturnToMenu)
+    RestartMenuItem = pdMenu:addMenuItem("restart", function()
+        levelManager:resetLevel()
+    end)
 end
+
+-- DEVELOPMENT: goes straight to TEST_LEVEL
+-- StartGame(TEST_LEVEL)
+-- onMenu = false
+-- starScores = {}
+-- for i = 1, 30, 1 do
+--     table.insert(starScores, 3)
+-- end
+-- starScores[1] = 1
 
 function GoToLevelSelect()
     SLIB.removeAll()
-    levelSelect = LevelSelect(startingLevel, starScores)
+    levelSelect = LevelSelect(highestLevel, starScores)
+    for i = 1, startingLevel - 1, 1 do
+        levelSelect:cursorRight()
+    end
+    pdMenu:addMenuItem("menu", ReturnToMenu)
+end
+
+function GoToCredits()
+    SLIB.removeAll()
+    credits = CreditsText()
+    pdMenu:addMenuItem("menu", ReturnToMenu)
 end
 
 function PD.leftButtonDown()
-    if onMenu then
-        menuManager:cursorLeft()
-    elseif levelSelect then
+    if levelSelect then
         levelSelect:cursorLeft()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:left()
     end
 end
 
 function PD.upButtonDown()
-    if levelSelect then
+    if onMenu then
+        menuManager:cursorUp()
+    elseif levelSelect then
         levelSelect:cursorUp()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:up()
     end
 end
 
 function PD.downButtonDown()
-    if levelSelect then
+    if onMenu then
+        menuManager:cursorDown()
+    elseif levelSelect then
         levelSelect:cursorDown()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:down()
     end
 end
 
 function PD.rightButtonDown()
-    if onMenu then
-        menuManager:cursorRight()
-    elseif levelSelect then
+    if levelSelect then
         levelSelect:cursorRight()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:right()
     end
 end
 
 local function moveForward()
     if not levelManager.level.player.isDead then
-	    levelManager.level:moveForward()
+        levelManager.level:moveForward()
     end
 end
 
 local function moveBack()
     if not levelManager.level.player.isDead then
-	    levelManager.level:moveBack()
+        levelManager.level:moveBack()
     end
 end
 
@@ -147,31 +202,62 @@ function RemoveBackTimer()
     end
 end
 
+local function allStarsEarned()
+    if #starScores ~= TOTAL_LEVELS then return false end
+    for i, score in ipairs(starScores) do
+        if score ~= 3 then
+            return false
+        end
+    end
+    return true
+end
+
+local function levelSelectCursorDown(scrollTimer)
+    levelSelect:cursorRight()
+    if levelSelect.cursorPos.y == 7 and levelSelect.cursorPos.x == 1 then
+        if scrollTimer then
+            scrollTimer:remove()
+        end
+        ReadyToContinue = false
+        LevelFinished = false
+    end
+end
+
 function PD.AButtonDown()
     if onMenu then
         menuManager:cursorSelect()
         onMenu = false
-        pdMenu:addMenuItem("main menu", returnToMenu)
-        pdMenu:addMenuItem("restart level", function ()
-            levelManager:resetLevel()
-        end)
     else
-        if levelSelect then
-            levelSelect:select()
-            levelSelect = nil
-        elseif not LevelFinished then
-            RemoveBackTimer()
-            moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-            -- if PD.buttonIsPressed(PD.kButtonLeft) then
-            --     ReadyToContinue = false
-            --     LevelFinished = false
-            --     levelManager.levelNum += 1
-            --     levelManager:nextLevel()
-            -- end
-        elseif ReadyToContinue then
-            ReadyToContinue = false
-            LevelFinished = false
-            levelManager:nextLevel()
+        if OnControlScreen and Tutorial then
+            Tutorial:next()
+        else
+            if levelSelect then
+                levelSelect:select()
+                levelSelect = nil
+            elseif not LevelFinished then
+                RemoveBackTimer()
+                moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+            elseif ReadyToContinue then
+                ReadyToContinue = false
+                LevelFinished = false
+                if not bonusLevelAnimationPlayed and allStarsEarned() then
+                    bonusLevelAnimationPlayed = true
+                    GoToLevelSelect()
+                    PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
+                else
+                    if levelManager.levelNum == BONUS_LEVEL then
+                        SLIB:removeAll()
+                        gameWinScreen = GameWinScreen()
+                    else
+                        if levelManager.levelNum == TOTAL_LEVELS then
+                            ReturnToMenu()
+                        else
+                            levelManager.levelNum += 1
+                            levelManager:resetLevel()
+                        end
+                    end
+                end
+            end
         end
     end
 end
@@ -183,15 +269,17 @@ function PD.AButtonUp()
 end
 
 function PD.BButtonDown()
-    if not LevelFinished and not (onMenu or levelSelect) then
+    if not LevelFinished and not (onMenu or levelSelect or OnControlScreen or credits) then
         RemoveForwardTimer()
         moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
-    elseif levelSelect then
-        returnToMenu()
+    elseif levelSelect or credits then
+        ReturnToMenu()
+        levelSelect = nil
+        credits = nil
+    elseif OnControlScreen and Tutorial then
+        Tutorial:back()
     end
 end
-
-
 
 function PD.BButtonUp()
     if not onMenu then
@@ -200,10 +288,18 @@ function PD.BButtonUp()
 end
 
 function ResetLevel()
-	levelManager:resetLevel()
+    levelManager:resetLevel()
 end
 
 function LevelOver(stars)
+    pdMenu:removeAllMenuItems()
+    pdMenu:addMenuItem("menu", ReturnToMenu)
+    RestartMenuItem = pdMenu:addMenuItem("restart", function()
+        levelManager:resetLevel()
+        for i, timer in ipairs(PD.timer.allTimers()) do
+            timer:remove()
+        end
+    end)
     if #starScores >= levelManager.levelNum then
         if starScores[levelManager.levelNum] < stars then
             starScores[levelManager.levelNum] = stars
@@ -211,20 +307,29 @@ function LevelOver(stars)
     else
         table.insert(starScores, stars)
     end
-    levelManager.levelNum += 1
-    if levelManager.levelNum > startingLevel then
-        startingLevel = levelManager.levelNum
+    if levelManager.levelNum < TOTAL_LEVELS then
+        startingLevel = levelManager.levelNum + 1
+        if levelManager.levelNum + 1 > highestLevel then
+            highestLevel = levelManager.levelNum + 1
+        end
     end
-    EscapeTile(stars)
+    if allStarsEarned() then
+        highestLevel = BONUS_LEVEL
+    end
 end
 
 function ShowFinishScreen(stars)
     Stars(stars)
     EscapeText()
-    movesText = MovesText(levelManager.level.turn-1 or 0)
+    MovesText(Turn - 1 or 0)
 end
 
 function PD.update()
-	PD.timer.updateTimers()
-	SLIB.update()
+    PD.timer.updateTimers()
+    SLIB.update()
+    if levelSelect then
+        CrankTicks = PD.getCrankTicks(LEVEL_SELECT_CRANK_SPEED)
+    else
+        CrankTicks = PD.getCrankTicks(MOVE_CRANK_SPEED)
+    end
 end

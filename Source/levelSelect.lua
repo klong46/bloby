@@ -3,7 +3,7 @@ import "constants"
 import "levelSelectTile"
 
 local NUM_COLS = 5
-local NUM_ROWS = math.floor(TOTAL_LEVELS/NUM_COLS)
+local NUM_ROWS = 7
 local ROWS_ON_SCREEN = 3
 
 
@@ -13,14 +13,15 @@ end
 
 local currentLevel = 1
 local scrollDown = true
-local offset = 0
 local scrollQueued = false
 
 class('LevelSelect').extends(SLIB)
 
 function LevelSelect:init(startingLevel, scores)
     LevelSelect.super.init(self)
-    currentLevel = startingLevel
+    if startingLevel then
+        currentLevel = startingLevel
+    end
     self.scores = scores
     self.cursorPos = PD.geometry.point.new(1,1)
     self.previousSelected = PD.geometry.point.new(1,1)
@@ -28,6 +29,7 @@ function LevelSelect:init(startingLevel, scores)
     self.scrollAnimator = nil
     self:addLevelTiles()
     self.tiles[getLevelNum(self.cursorPos.x, self.cursorPos.y)]:select()
+    self.offset = 0
     self:add()
 end
 
@@ -62,7 +64,7 @@ function LevelSelect:cursorLeft()
 end
 
 function LevelSelect:cursorRight()
-    if getLevelNum(self.cursorPos.x, self.cursorPos.y) < TOTAL_LEVELS and
+    if getLevelNum(self.cursorPos.x, self.cursorPos.y) < BONUS_LEVEL and
        getLevelNum(self.cursorPos.x, self.cursorPos.y) < currentLevel then
         self:setPreviousSelected()
         if self.cursorPos.x % NUM_COLS == 0 then
@@ -96,13 +98,13 @@ function LevelSelect:cursorUp()
 end
 
 function LevelSelect:checkScrollDown()
-    if offset < NUM_ROWS-ROWS_ON_SCREEN then
+    if self.offset < NUM_ROWS-ROWS_ON_SCREEN then
         self:scrollDown()
     end
 end
 
 function LevelSelect:checkScrollUp()
-    if offset > 0 then
+    if self.offset > 0 then
         self:scrollUp()
     end
 end
@@ -118,19 +120,23 @@ function LevelSelect:updateSelectTiles()
 end
 
 function LevelSelect:select()
-    StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+    if currentLevel == 1 and #self.scores == 0 then
+        Tutorial = ControlScreen()
+    else
+        StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+    end
     self:remove()
 end
 
 function LevelSelect:scrollDown()
     scrollDown = true
-    offset += 1
+    self.offset += 1
     self:startAnimator()
 end
 
 function LevelSelect:scrollUp()
     scrollDown = false
-    offset -= 1
+    self.offset -= 1
     self:startAnimator()
 end
 
@@ -141,7 +147,6 @@ function LevelSelect:startAnimator()
         if self.scrollAnimator:ended() then
             self.scrollAnimator:reset()
         else
-            print('asdf')
             scrollQueued = true
         end
     end
@@ -149,6 +154,12 @@ end
 
 function LevelSelect:update()
     LevelSelect.super.update(self)
+    if CrankTicks > 0 then
+        self:cursorRight()
+    elseif CrankTicks < 0 then
+        self:cursorLeft()
+    end
+
     if scrollQueued then
         self.scrollAnimator:reset()
         scrollQueued = false
@@ -159,13 +170,14 @@ function LevelSelect:update()
                 local number = self.tiles[getLevelNum(x,y)].numberLabel
                 local yPos
                 if scrollDown then
-                    yPos = ((y-offset+1)*80-55) - self.scrollAnimator:currentValue()
+                    yPos = ((y-self.offset+1)*80-55) - self.scrollAnimator:currentValue()
                 else
-                    yPos = ((y-offset-1)*80-55) + self.scrollAnimator:currentValue()
+                    yPos = ((y-self.offset-1)*80-55) + self.scrollAnimator:currentValue()
                 end
                 number:moveTo(number.x, yPos)
                 local tile = self.tiles[getLevelNum(x,y)]
                 tile:moveTo(tile.x, yPos+15)
+                tile.background:moveTo(tile.x, yPos+15)
             end
         end
     end

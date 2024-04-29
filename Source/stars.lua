@@ -11,6 +11,13 @@ local starTimer = nil
 
 class('Stars').extends(SLIB)
 
+function Stars:init(num)
+    Stars.super.init(self)
+    starNum = 1
+    limit = num
+    self.starAppearTimer = PD.timer.performAfterDelay(ANIMATION_DURATION, self.startAnimation)
+end
+
 local function drawStar()
     if starNum <= limit then
         Star(starNum)
@@ -22,13 +29,6 @@ local function drawStar()
     end
 end
 
-local function startAnimation()
+function Stars:startAnimation()
     starTimer = PD.timer.keyRepeatTimerWithDelay(ANIMATION_DURATION, ANIMATION_DURATION, drawStar)
-end
-
-function Stars:init(num)
-    Stars.super.init(self)
-    starNum = 1
-    limit = num
-    PD.timer.performAfterDelay(ANIMATION_DURATION, startAnimation)
 end

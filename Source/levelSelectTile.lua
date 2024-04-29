@@ -1,6 +1,7 @@
 import "CoreLibs/sprites"
 import "constants"
 import "levelSelectNumber"
+import "blankTile"
 
 local TILE_IMAGES <const> = {
     GFX.image.new('img/level_tile/one_star'),
@@ -17,6 +18,7 @@ class('LevelSelectTile').extends(SLIB)
 
 function LevelSelectTile:init(x, y, levelNum, selected, locked, score)
     LevelSelectTile.super.init(self)
+    self.background = BlankTile(x, y)
     self:setSize(200, 22)
     if not locked then
         if score then
@@ -26,27 +28,26 @@ function LevelSelectTile:init(x, y, levelNum, selected, locked, score)
             self.image = TILE_IMAGES[5]
         end
         if not selected then
-            self:setImage(self.image:fadedImage(0.5, GFX.image.kDitherTypeBayer8x8))
+            self:setImage(self.image)
         end
     else
         self:setImage(TILE_IMAGES[4])
-
     end
     self:moveTo(x*WIDTH-40, y*WIDTH-40)
-    if levelNum > TOTAL_LEVELS then
+    if levelNum > BONUS_LEVEL then
         self:setImage(TILE_IMAGES[6])
-    else
-        self.numberLabel = LevelSelectNumber(x, y, levelNum, selected)
     end
+    self.numberLabel = LevelSelectNumber(x, y, levelNum, selected)
     self:add()
 end
 
 function LevelSelectTile:unselect()
-    self:setImage(self.image:fadedImage(0.5, GFX.image.kDitherTypeBayer8x8))
+    self.background:setVisible(true)
     self.numberLabel:unselect()
 end
 
 function LevelSelectTile:select()
     self:setImage(self.image)
+    self.background:setVisible(false)
     self.numberLabel:select()
 end
