@@ -1,9 +1,8 @@
-import "CoreLibs/sprites"
 import "constants"
 
-local bigFont = GFX.font.new("fonts/font-rains-3x")
-
 class('CreditsText').extends(SLIB)
+
+local bigFont = GFX.font.new("fonts/font-rains-3x")
 
 function CreditsText:init()
     CreditsText.super.init(self)

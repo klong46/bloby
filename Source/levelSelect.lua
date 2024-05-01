@@ -1,11 +1,11 @@
-import "CoreLibs/sprites"
 import "constants"
 import "levelSelectTile"
+
+class('LevelSelect').extends(SLIB)
 
 local NUM_COLS = 5
 local NUM_ROWS = 7
 local ROWS_ON_SCREEN = 3
-
 
 local function getLevelNum(x, y)
     return math.floor(((y-1)*NUM_COLS)+x)
@@ -14,8 +14,6 @@ end
 local currentLevel = 1
 local scrollDown = true
 local scrollQueued = false
-
-class('LevelSelect').extends(SLIB)
 
 function LevelSelect:init(startingLevel, scores)
     LevelSelect.super.init(self)

@@ -1,3 +1,4 @@
+import "constants"
 import "eyelid"
 
 class('GameWinScreen').extends(SLIB)
@@ -10,16 +11,18 @@ local GW_IMAGES <const> = {
 }
 
 local blackScreen = GFX.image.new('img/game_win/black_screen')
-
 local EYES_CLOSED_Y_POS = 42
 local FADE_DURATION = 10000
+local POSITION = {X = 200, Y = 120}
+local TOP_EYELID_POSITION = {X = 200, Y = -14}
+local BOTTOM_EYELID_POSITION = {X = 200, Y = 200}
 
 function GameWinScreen:init()
     GameWinScreen.super.init(self)
-    self:moveTo(200,120)
+    self:moveTo(POSITION.X, POSITION.Y)
     self:setImage(GW_IMAGES[4])
-    self.topEyelid = Eyelid(200, -14)
-    self.bottomEyelid = Eyelid(200, 200)
+    self.topEyelid = Eyelid(TOP_EYELID_POSITION.X, TOP_EYELID_POSITION.Y)
+    self.bottomEyelid = Eyelid(BOTTOM_EYELID_POSITION.X, BOTTOM_EYELID_POSITION.Y)
     self.fadeAnimator = GFX.animator.new(FADE_DURATION, 1, 0, PD.easingFunctions.inQuad)
     self.fadeAnimator.paused = true
     self.closed = false

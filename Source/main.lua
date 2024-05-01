@@ -1,6 +1,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "CoreLibs/animation"
 import "level"
 import "levelManager"
 import "constants"
@@ -327,7 +328,7 @@ end
 function PD.update()
     PD.timer.updateTimers()
     SLIB.update()
-    if levelSelect then
+    if levelSelect or onMenu then
         CrankTicks = PD.getCrankTicks(LEVEL_SELECT_CRANK_SPEED)
     else
         CrankTicks = PD.getCrankTicks(MOVE_CRANK_SPEED)

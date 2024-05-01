@@ -1,4 +1,3 @@
-import "CoreLibs/sprites"
 import "constants"
 
 class('LaserSegment').extends(SLIB)
@@ -6,9 +5,11 @@ class('LaserSegment').extends(SLIB)
 local laserAnimationTable = 'img/laser/laser_animation'
 local laserHitAnimationTable = 'img/laser/laser_hit_animation'
 local ANIMATION_SPEED = 40
+local LASER_OFFSETS = {{9, 11},{10, 10},{10, 10},{10, 11}}
 local laserHitAnimation = GFX.animation.loop.new(ANIMATION_SPEED, GFX.imagetable.new(laserHitAnimationTable), true)
 local laserAnimation = GFX.animation.loop.new(ANIMATION_SPEED, GFX.imagetable.new(laserAnimationTable), true)
 local offset = {}
+
 
 function LaserSegment:init(direction, position, isEnd)
     LaserSegment.super.init(self)
@@ -22,8 +23,7 @@ function LaserSegment:init(direction, position, isEnd)
 end
 
 function LaserSegment:setOffsets()
-    local offsets = {{9, 11},{10, 10},{10, 10},{10, 11}}
-    offset = GetByDirection(offsets, self.direction)
+    offset = GetByDirection(LASER_OFFSETS, self.direction)
 end
 
 function LaserSegment:setAnimation(isEnd)

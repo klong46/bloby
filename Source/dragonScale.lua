@@ -1,3 +1,5 @@
+import "constants"
+
 class('DragonScale').extends(DynamicObject)
 
 local SCALE_IMAGE = GFX.image.new('img/dragon/scale')

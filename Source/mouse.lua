@@ -1,5 +1,6 @@
-import "CoreLibs/sprites"
 import "constants"
+
+class('Mouse').extends(DynamicObject)
 
 local inactiveImage = GFX.image.new('img/mouse/mouse_inactive')
 local stallAnimationTable = GFX.imagetable.new('img/mouse/mouse_stalling_animation')
@@ -13,8 +14,6 @@ local MOUSE_IMAGES <const> = {
     GFX.image.new('img/mouse/mouse_left'),
     GFX.image.new('img/mouse/mouse_right')
 }
-
-class('Mouse').extends(DynamicObject)
 
 function Mouse:init(position, delay, grid)
     Mouse.super.init(self, inactiveImage, position, DEFAULT_MOUSE_DIRECTION, grid, MOUSE_IMAGES)

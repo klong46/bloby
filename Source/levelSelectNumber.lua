@@ -1,12 +1,12 @@
-import "CoreLibs/sprites"
 import "constants"
+
+class('LevelSelectNumber').extends(SLIB)
 
 local bigFont = GFX.font.new("fonts/font-rains-3x")
 local smallFont = GFX.font.new("fonts/font-rains-2x")
 local WIDTH = 80
 local DOUBLE_DIGITS = 10
-
-class('LevelSelectNumber').extends(SLIB)
+local SIZE = {WIDTH = 220, HEIGHT = 20}
 
 function LevelSelectNumber:init(x, y, levelNum, selected)
     LevelSelectNumber.super.init(self)
@@ -20,7 +20,7 @@ function LevelSelectNumber:init(x, y, levelNum, selected)
         self.xOffset += 2
     end
     self.selected = selected
-    self:setSize(220, 20)
+    self:setSize(SIZE.WIDTH, SIZE.HEIGHT)
     self:moveTo(x*WIDTH-self.xOffset, y*WIDTH-self.yOffset)
     self:add()
 end

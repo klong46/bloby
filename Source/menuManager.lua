@@ -43,11 +43,19 @@ function MenuManager:cursorSelect()
         else
             StartGame(currentLevel)
         end
-        
     elseif self.selectedBox == 2 then
         GoToLevelSelect()
     else
         GoToCredits()
     end
     self:remove()
+end
+
+function MenuManager:update()
+    MenuManager.super.update(self)
+    if CrankTicks > 0 then
+        self:cursorDown()
+    elseif CrankTicks < 0 then
+        self:cursorUp()
+    end
 end

@@ -1,4 +1,3 @@
-import "CoreLibs/sprites"
 import "level"
 import "constants"
 

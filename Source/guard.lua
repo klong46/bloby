@@ -1,11 +1,11 @@
-import "CoreLibs/sprites"
 import "dynamicObject"
+import "constants"
+
+class('Guard').extends(DynamicObject)
 
 local animationTable = GFX.imagetable.new('img/guard_animation')
 local ANIMATION_SPEED = 10
 local ANIMATION_DELAY = 75
-
-class('Guard').extends(DynamicObject)
 
 function Guard:init(position, grid)
     Guard.super.init(self, nil, position, DEFAULT_GUARD_DIRECTION, grid, {})

@@ -1,16 +1,17 @@
-import "CoreLibs/sprites"
 import "constants"
 import "continueButton"
 
+class('MovesText').extends(SLIB)
+
 local bigFont = GFX.font.new("fonts/font-rains-3x")
 local smallFont = GFX.font.new("fonts/font-rains-2x")
-
-class('MovesText').extends(SLIB)
+local SIZE = {WIDTH = 200, HEIGHT = 22}
+local POSITION = {X = 228, Y = 195}
 
 function MovesText:init(moves)
     MovesText.super.init(self)
-    self:setSize(200, 22)
-    self:moveTo(228, 195)
+    self:setSize(SIZE.WIDTH, SIZE.HEIGHT)
+    self:moveTo(POSITION.X, POSITION.Y)
     self:setZIndex(6)
     self.finished = false
     self.moveAnimator = GFX.animator.new(2500, 0, moves, playdate.easingFunctions.outCubic)

@@ -10,12 +10,9 @@ import "mouse"
 import "dragon"
 import "movesTile"
 
-local background = GFX.image.new('img/background_grid')
-
 class('Level').extends(SLIB)
 
--- LEVEL: mirror image sides, control guard on other side
-
+local background = GFX.image.new('img/background_grid')
 local laserCadenceIndex
 local laserOffsetIndex
 local mouseDelayIndex
@@ -78,6 +75,7 @@ function Level:init(levelNum)
 end
 
 function Level:drawTiles(playerDirection)
+    -- create dragon if bonus level
     if self.levelNum == BONUS_LEVEL then
         self.dragon = Dragon(self.grid)
     end
@@ -116,6 +114,7 @@ function Level:drawTiles(playerDirection)
 end
 
 function Level:update()
+    -- If the level is finished, freeze all sprite updates
     if not LevelFinished then
         Level.super.update(self)
         if not self.player.isDead then
@@ -124,6 +123,7 @@ function Level:update()
     end
 end
 
+-- Updates the level based on the crank turns
 function Level:checkCrankTurns()
     if CrankTicks > 0 then
         self:moveForward()
@@ -137,11 +137,13 @@ function Level:moveForward()
     if self.levelNum == BONUS_LEVEL then
         self:updateDragonDirection()
     end
-    self:checkForBlocks()
+    self.player:setIsBlocked(PLAYER_OBSTACLES)
+    self:checkForGuardBlocks()
     if not self.player.isBlocked then
         self:updateGameObjects(FORWARD_STEP, true)
         self:checkPlayerInteractions()
-        self.player:setIsBlocked(PLAYER_OBSTACLES) -- check if move is valid after turn ends
+        -- check if move is valid after turn ends
+        self.player:setIsBlocked(PLAYER_OBSTACLES)
     end
 end
 
@@ -151,33 +153,14 @@ function Level:moveBack()
     end
 end
 
-function Level:updateGuardDirections()
-    for i, guard in ipairs(self.guards) do
-        guard.direction = self.player.direction
-    end
-end
-
-function Level:updateDragonDirection()
-    for i, scale in ipairs(self.dragon.scales) do
-        -- opposite of player direction
-        scale.direction = self.player.direction * -1
-    end
-end
-
-function Level:checkForBlocks()
-    self.player:setIsBlocked(PLAYER_OBSTACLES)
-    for i, guard in ipairs(self.guards) do
-        guard:setIsBlocked(GUARD_OBSTACLES)
-    end
-end
-
+-- Updates the game objects based on the step and direction
 function Level:updateGameObjects(step, isForward)
     self.turn += step
     Turn = self.turn
     self:updateGuards(step, isForward)
     self.player:move(step, isForward)
     self:updateMouse(isForward)
-    self:checkGuardInteractions(isForward)
+    self:checkGuardDeath(isForward)
     self:updateLasers()
     for i, mouse in ipairs(self.mice) do
         mouse.stalled = mouse:onLaser(self.laserBases, self.turn)
@@ -192,69 +175,17 @@ function Level:updateGameObjects(step, isForward)
     end
 end
 
-function Level:dragonIsDead()
-    for i, scale in ipairs(self.dragon.scales) do
-        if scale.alive then
-            return false
-        end
-    end
-    return true
-end
-
+-- Only used on the bonus level to show the ladder when the dragon is dead.
 function Level:showLadder()
     if not self.ladder:isVisible() then
         self.ladder:show()
     end
 end
 
-function Level:updateDragon(step, isForward, laserBases, turn)
-    self.dragon:move(step, isForward, laserBases, turn)
-end
-
-function Level:checkGuardInteractions(isForward)
-    for i, guard in ipairs(self.guards) do
-        if guard.alive and guard:onMouse(self.mice, isForward) then
-            guard:destroy()
-        end
-    end
-end
-
+-- PLAYER FUNCTIONS:
 function Level:checkPlayerInteractions()
     self:checkPlayerDeath()
     self:checkPlayerWin()
-end
-
-function Level:guardListIncludes(value)
-    for i, guard in ipairs(self.guards) do
-        if guard.position == value then
-            return true
-        end
-    end
-    return false
-end
-
-function Level:updateGuards(step, isForward)
-    local lastMoves = {}
-    for i, guard in ipairs(self.guards) do
-        guard:move(step, isForward)
-        table.insert(lastMoves, guard.lastPosition)
-    end
-    -- determines what tiles to rewrite as empty or as a guard
-    for x, position in ipairs(lastMoves) do
-        if not self:guardListIncludes(position) and
-        self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and
-        self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
-            self.grid[GetTile(position.x, position.y)] = EMPTY_TILE
-        end
-    end
-end
-
-function Level:updateLasers()
-    for i, laserBase in ipairs(self.laserBases) do
-        local laser = laserBase.laser
-        laser.length = laser:setLength(self.grid)
-        laser:setVisible(self.turn)
-    end
 end
 
 function Level:checkPlayerDeath()
@@ -271,17 +202,6 @@ function Level:checkPlayerDeath()
     end
 end
 
-function Level:getStars()
-    local turns = self.turn - 1
-    if turns > self.starTargets[1] then
-        return 1
-    elseif turns > self.starTargets[2] then
-        return 2
-    else
-        return 3
-    end
-end
-
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
         self.ladder:remove()
@@ -289,6 +209,66 @@ function Level:checkPlayerWin()
     end
 end
 
+-- GUARD FUNCTIONS:
+function Level:updateGuards(step, isForward)
+    local lastMoves = {}
+    for i, guard in ipairs(self.guards) do
+        guard:move(step, isForward)
+        table.insert(lastMoves, guard.lastPosition)
+    end
+    -- Determines what tiles to rewrite as empty or as a guard.
+    for x, position in ipairs(lastMoves) do
+        if not self:guardListIncludes(position) and
+        self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and
+        self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
+            self.grid[GetTile(position.x, position.y)] = EMPTY_TILE
+        end
+    end
+end
+
+function Level:checkGuardDeath(isForward)
+    for i, guard in ipairs(self.guards) do
+        if guard.alive and guard:onMouse(self.mice, isForward) then
+            guard:destroy()
+        end
+    end
+end
+
+function Level:updateGuardDirections()
+    for i, guard in ipairs(self.guards) do
+        guard.direction = self.player.direction
+    end
+end
+
+-- Checks if the guard list includes a certain position.
+function Level:guardListIncludes(value)
+    for i, guard in ipairs(self.guards) do
+        if guard.position == value then
+            return true
+        end
+    end
+    return false
+end
+
+function Level:checkForGuardBlocks()
+    for i, guard in ipairs(self.guards) do
+        guard:setIsBlocked(GUARD_OBSTACLES)
+    end
+end
+
+
+-- LASER FUNCTIONS:
+function Level:updateLasers()
+    for i, laserBase in ipairs(self.laserBases) do
+        local laser = laserBase.laser
+        laser.length = laser:setLength(self.grid)
+        laser:setVisible(self.turn)
+    end
+end
+
+
+-- MOUSE FUNCTIONS:
+-- Updates the mouse movement
 function Level:updateMouse(isForward)
     for i, mouse in ipairs(self.mice) do
         local delay = self.mouseDelays[i]-1 + mouse.stalledTurns
@@ -301,5 +281,41 @@ function Level:updateMouse(isForward)
     end
 end
 
+-- STAR FUNCTIONS:
+-- Constants for star ratings
+local STAR_RATING_ONE = 1
+local STAR_RATING_TWO = 2
+local STAR_RATING_THREE = 3
 
+-- Returns the number of stars earned based on the number of turns taken
+function Level:getStars()
+    local turns = self.turn - 1
+    if turns > self.starTargets[1] then
+        return STAR_RATING_ONE
+    elseif turns > self.starTargets[2] then
+        return STAR_RATING_TWO
+    else
+        return STAR_RATING_THREE
+    end
+end
 
+-- DRAGON FUNCTIONS:
+function Level:updateDragon(step, isForward, laserBases, turn)
+    self.dragon:move(step, isForward, laserBases, turn)
+end
+
+function Level:dragonIsDead()
+    for i, scale in ipairs(self.dragon.scales) do
+        if scale.alive then
+            return false
+        end
+    end
+    return true
+end
+
+function Level:updateDragonDirection()
+    for i, scale in ipairs(self.dragon.scales) do
+        -- opposite of player direction
+        scale.direction = self.player.direction * -1
+    end
+end

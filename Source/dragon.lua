@@ -1,4 +1,5 @@
 import "dragonScale"
+import "constants"
 
 class('Dragon').extends(SLIB)
 
@@ -32,7 +33,7 @@ function Dragon:move(step, isForward, laserBases, turn)
         for i, scale in ipairs(self.scales) do
             scale:addPastMove()
             if scale.alive then
-                scale:setIsBlocked(GUARD_OBSTACLES)
+                scale:setIsBlocked(DRAGON_OBSTACLES)
                 if scale.isBlocked then self.blocked = true end
             end
         end

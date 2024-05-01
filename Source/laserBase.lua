@@ -1,4 +1,3 @@
-import "CoreLibs/sprites"
 import "constants"
 
 class('LaserBase').extends(StaticObject)
@@ -10,7 +9,7 @@ function LaserBase:init(position, grid, direction, cadence, offset)
     LaserBase.super.init(self, image, position)
     self.animation = GFX.animation.loop.new(ANIMATION_SPEED, animationTable, true)
     self.direction = direction
-    self:moveTo((position.x * TILE_SIZE) - 10, (position.y * TILE_SIZE) - 10)
+    self:setPosition(position)
     self.laser = Laser(position, grid, direction, cadence, offset)
     self.animation.frame = math.random(1, animationTable:getLength())
     self:setAnimation()
