@@ -281,37 +281,29 @@ function PD.AButtonDown()
     if onMenu then
         menuManager:cursorSelect()
         onMenu = false
-    else
-        if OnControlScreen and Tutorial then
-            Tutorial:next()
+    elseif OnControlScreen and Tutorial then
+        Tutorial:next()
+    elseif levelSelect then
+        levelSelect:select()
+        levelSelect = nil
+    elseif not LevelFinished then
+        RemoveBackTimer()
+        moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+    elseif ReadyToContinue then
+        ReadyToContinue = false
+        LevelFinished = false
+        if not bonusLevelAnimationPlayed and allStarsEarned() then
+            bonusLevelAnimationPlayed = true
+            GoToLevelSelect()
+            PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
+        elseif levelManager.levelNum == BONUS_LEVEL then
+            SLIB:removeAll()
+            gameWinScreen = GameWinScreen()
+        elseif levelManager.levelNum == TOTAL_LEVELS then
+            ReturnToMenu()
         else
-            if levelSelect then
-                levelSelect:select()
-                levelSelect = nil
-            elseif not LevelFinished then
-                RemoveBackTimer()
-                moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-            elseif ReadyToContinue then
-                ReadyToContinue = false
-                LevelFinished = false
-                if not bonusLevelAnimationPlayed and allStarsEarned() then
-                    bonusLevelAnimationPlayed = true
-                    GoToLevelSelect()
-                    PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
-                else
-                    if levelManager.levelNum == BONUS_LEVEL then
-                        SLIB:removeAll()
-                        gameWinScreen = GameWinScreen()
-                    else
-                        if levelManager.levelNum == TOTAL_LEVELS then
-                            ReturnToMenu()
-                        else
-                            levelManager.levelNum += 1
-                            levelManager:resetLevel()
-                        end
-                    end
-                end
-            end
+            levelManager.levelNum += 1
+            levelManager:resetLevel()
         end
     end
 end
