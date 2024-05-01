@@ -10,7 +10,6 @@ local laserHitAnimation = GFX.animation.loop.new(ANIMATION_SPEED, GFX.imagetable
 local laserAnimation = GFX.animation.loop.new(ANIMATION_SPEED, GFX.imagetable.new(laserAnimationTable), true)
 local offset = {}
 
-
 function LaserSegment:init(direction, position, isEnd)
     LaserSegment.super.init(self)
     self.direction = direction

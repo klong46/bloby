@@ -2,8 +2,6 @@ PD = playdate
 GFX = PD.graphics
 SLIB = GFX.sprite
 
-Turn = 0
-
 DIRECTIONS = {UP = -1, DOWN = 1, LEFT = -2, RIGHT = 2}
 MOVE_CRANK_SPEED = 6
 LEVEL_SELECT_CRANK_SPEED = 4

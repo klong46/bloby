@@ -27,9 +27,9 @@ local function resetSaveData()
     }
     PD.datastore.write(gameData)
 end
-
 -- resetSaveData()
 
+-- INSTANCE VARS
 local gameData = {}
 local startingLevel = 1
 local levelManager
@@ -38,7 +38,22 @@ local starScores = {}
 local bonusLevelAnimationPlayed = false
 local gameWinScreen
 local credits
+local menuManager
+local onMenu = true
+local levelSelect
+local moveForwardTimer
+local moveBackTimer
+LevelFinished = false
+ReadyToContinue = false
+OnControlScreen = false
+Tutorial = nil
+local INIT_MOVE_DELAY = 200
+local MOVE_DELAY = 50
+local pdMenu = PD.getSystemMenu()
 CrankTicks = 0
+Turn = 0
+
+-- LOAD SAVE DATA
 gameData = PD.datastore.read()
 if gameData then
     if gameData.currentLevel then
@@ -73,19 +88,7 @@ function PD.gameWillSleep()
     saveGameData()
 end
 
-local menuManager
-local onMenu = true
-local levelSelect
-local moveForwardTimer
-local moveBackTimer
-LevelFinished = false
-ReadyToContinue = false
-OnControlScreen = false
-Tutorial = nil
-local INIT_MOVE_DELAY = 200
-local MOVE_DELAY = 50
-local pdMenu = PD.getSystemMenu()
-
+-- MENU FUNCTIONS:
 local function initMenu()
     LevelFinished = false
     ReadyToContinue = false
@@ -139,46 +142,7 @@ function GoToCredits()
     pdMenu:addMenuItem("menu", ReturnToMenu)
 end
 
-function PD.leftButtonDown()
-    if levelSelect then
-        levelSelect:cursorLeft()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:left()
-    end
-end
-
-function PD.upButtonDown()
-    if onMenu then
-        menuManager:cursorUp()
-    elseif levelSelect then
-        levelSelect:cursorUp()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:up()
-    end
-end
-
-function PD.downButtonDown()
-    if onMenu then
-        menuManager:cursorDown()
-    elseif levelSelect then
-        levelSelect:cursorDown()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:down()
-    end
-end
-
-function PD.rightButtonDown()
-    if levelSelect then
-        levelSelect:cursorRight()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:right()
-    end
-end
-
+-- UPDATE FUNCTIONS:
 local function moveForward()
     if not levelManager.level.player.isDead then
         levelManager.level:moveForward()
@@ -221,6 +185,95 @@ local function levelSelectCursorDown(scrollTimer)
         end
         ReadyToContinue = false
         LevelFinished = false
+    end
+end
+
+
+function ResetLevel()
+    levelManager:resetLevel()
+end
+
+function LevelOver(stars)
+    pdMenu:removeAllMenuItems()
+    pdMenu:addMenuItem("menu", ReturnToMenu)
+    RestartMenuItem = pdMenu:addMenuItem("restart", function()
+        levelManager:resetLevel()
+        for i, timer in ipairs(PD.timer.allTimers()) do
+            timer:remove()
+        end
+    end)
+    if #starScores >= levelManager.levelNum then
+        if starScores[levelManager.levelNum] < stars then
+            starScores[levelManager.levelNum] = stars
+        end
+    else
+        table.insert(starScores, stars)
+    end
+    if levelManager.levelNum < TOTAL_LEVELS then
+        startingLevel = levelManager.levelNum + 1
+        if levelManager.levelNum + 1 > highestLevel then
+            highestLevel = levelManager.levelNum + 1
+        end
+    end
+    if allStarsEarned() then
+        highestLevel = BONUS_LEVEL
+    end
+end
+
+function ShowFinishScreen(stars)
+    Stars(stars)
+    EscapeText()
+    MovesText(Turn - 1 or 0)
+end
+
+function PD.update()
+    PD.timer.updateTimers()
+    SLIB.update()
+    if levelSelect or onMenu then
+        CrankTicks = PD.getCrankTicks(LEVEL_SELECT_CRANK_SPEED)
+    else
+        CrankTicks = PD.getCrankTicks(MOVE_CRANK_SPEED)
+    end
+end
+
+-- BUTTON INPUT:
+function PD.leftButtonDown()
+    if levelSelect then
+        levelSelect:cursorLeft()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:left()
+    end
+end
+
+function PD.upButtonDown()
+    if onMenu then
+        menuManager:cursorUp()
+    elseif levelSelect then
+        levelSelect:cursorUp()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:up()
+    end
+end
+
+function PD.downButtonDown()
+    if onMenu then
+        menuManager:cursorDown()
+    elseif levelSelect then
+        levelSelect:cursorDown()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:down()
+    end
+end
+
+function PD.rightButtonDown()
+    if levelSelect then
+        levelSelect:cursorRight()
+    end
+    if gameWinScreen and not gameWinScreen.closed then
+        gameWinScreen:right()
     end
 end
 
@@ -285,52 +338,5 @@ end
 function PD.BButtonUp()
     if not onMenu then
         RemoveBackTimer()
-    end
-end
-
-function ResetLevel()
-    levelManager:resetLevel()
-end
-
-function LevelOver(stars)
-    pdMenu:removeAllMenuItems()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
-    RestartMenuItem = pdMenu:addMenuItem("restart", function()
-        levelManager:resetLevel()
-        for i, timer in ipairs(PD.timer.allTimers()) do
-            timer:remove()
-        end
-    end)
-    if #starScores >= levelManager.levelNum then
-        if starScores[levelManager.levelNum] < stars then
-            starScores[levelManager.levelNum] = stars
-        end
-    else
-        table.insert(starScores, stars)
-    end
-    if levelManager.levelNum < TOTAL_LEVELS then
-        startingLevel = levelManager.levelNum + 1
-        if levelManager.levelNum + 1 > highestLevel then
-            highestLevel = levelManager.levelNum + 1
-        end
-    end
-    if allStarsEarned() then
-        highestLevel = BONUS_LEVEL
-    end
-end
-
-function ShowFinishScreen(stars)
-    Stars(stars)
-    EscapeText()
-    MovesText(Turn - 1 or 0)
-end
-
-function PD.update()
-    PD.timer.updateTimers()
-    SLIB.update()
-    if levelSelect or onMenu then
-        CrankTicks = PD.getCrankTicks(LEVEL_SELECT_CRANK_SPEED)
-    else
-        CrankTicks = PD.getCrankTicks(MOVE_CRANK_SPEED)
     end
 end
