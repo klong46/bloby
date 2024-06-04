@@ -3,6 +3,10 @@ import "constants"
 
 class('Wall').extends(StaticObject)
 
+local WALL_FREQ = 20
+
+local blank_wall = GFX.image.new('img/walls/wall_0')
+
 local images = {
     GFX.image.new('img/walls/wall_1'),
     GFX.image.new('img/walls/wall_2'),
@@ -22,8 +26,11 @@ function Wall:init(position)
 end
 
 function Wall:getImage(position)
-    local seed = math.randomseed(position.x, position.y)
-    local imgNum = math.random(8)
-    return images[imgNum]
+    math.randomseed(position.x, position.y)
+    local imgNum = math.random(#images + WALL_FREQ)
+    if imgNum <= #images then
+        return images[imgNum]
+    end
+    return blank_wall
 
 end

@@ -8,6 +8,7 @@ import "guard"
 import "mouse"
 import "dragon"
 import "movesTile"
+import "floor"
 
 class('Level').extends(SLIB)
 
@@ -85,6 +86,8 @@ function Level:drawTiles(playerDirection)
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
                 Wall(position)
+            elseif tile == EMPTY_TILE then
+                Floor(position)
             elseif tile == GUARD_TILE then
                 table.insert(self.guards, Guard(position, self.grid))
             elseif tile == MOUSE_TILE then
