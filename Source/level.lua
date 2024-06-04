@@ -1,5 +1,4 @@
 import "CoreLibs/sprites"
-import "CoreLibs/crank"
 import "player"
 import "ladder"
 import "wall"

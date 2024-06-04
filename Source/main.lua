@@ -2,6 +2,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/animation"
+import "CoreLibs/crank"
 import "level"
 import "levelManager"
 import "constants"
@@ -33,7 +34,7 @@ end
 local gameData = {}
 local startingLevel = 1
 local levelManager
-local highestLevel = 1
+local highestLevel = 30
 local starScores = {}
 local bonusLevelAnimationPlayed = false
 local gameWinScreen
@@ -60,7 +61,7 @@ if gameData then
         startingLevel = gameData.currentLevel
     end
     if gameData.highestUnlockedLevel then
-        highestLevel = gameData.highestUnlockedLevel
+        -- highestLevel = gameData.highestUnlockedLevel
     end
     if gameData.scores then
         starScores = gameData.scores
