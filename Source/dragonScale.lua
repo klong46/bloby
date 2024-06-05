@@ -11,6 +11,7 @@ function DragonScale:init(position, direction, grid)
     self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
     self.deathAnimation.paused = true
     self.alive = true
+    self:setZIndex(2)
     self:add()
 end
 
