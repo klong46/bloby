@@ -74,6 +74,22 @@ function Level:init(levelNum)
     self:add()
 end
 
+-- gross but determines if wall is surrounded and should have a pattern
+function Level:wallIsSurrounded(x, y)
+    if (x == 1 or self.grid[GetTile(x-1, y)] == nil or self.grid[GetTile(x-1, y)] == WALL_TILE) and
+       (x == TILES_PER_ROW or self.grid[GetTile(x+1, y)] == nil or self.grid[GetTile(x+1, y)] == WALL_TILE) and
+       (self.grid[GetTile(x, y-1)] == nil or self.grid[GetTile(x, y-1)] == WALL_TILE) and
+       (self.grid[GetTile(x, y+1)] == nil or self.grid[GetTile(x, y+1)] == WALL_TILE) and
+
+       (x == 1 or self.grid[GetTile(x-1, y-1)] == nil or self.grid[GetTile(x-1, y-1)] == WALL_TILE) and
+       (x == TILES_PER_ROW or self.grid[GetTile(x+1, y+1)] == nil or self.grid[GetTile(x+1, y+1)] == WALL_TILE) and
+       (x == TILES_PER_ROW or self.grid[GetTile(x+1, y-1)] == nil or self.grid[GetTile(x+1, y-1)] == WALL_TILE) and
+       (x == 1 or self.grid[GetTile(x-1, y+1)] == nil or self.grid[GetTile(x-1, y+1)] == WALL_TILE) then
+        return true
+    end
+    return false
+end
+
 function Level:drawTiles(playerDirection)
     -- create dragon if bonus level
     if self.levelNum == BONUS_LEVEL then
@@ -85,7 +101,7 @@ function Level:drawTiles(playerDirection)
             local tile = self.grid[GetTile(x, y)]
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
-                Wall(position)
+                Wall(position, self:wallIsSurrounded(x, y))
             elseif tile == EMPTY_TILE then
                 Floor(position)
             elseif tile == GUARD_TILE then
