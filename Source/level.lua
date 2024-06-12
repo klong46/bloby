@@ -13,6 +13,9 @@ import "floor"
 class('Level').extends(SLIB)
 
 local background = GFX.image.new('img/background_grid')
+local deathSound = playdate.sound.sampleplayer.new('snd/death_sound')
+local winSound = playdate.sound.sampleplayer.new('snd/win_sound')
+
 local laserCadenceIndex
 local laserOffsetIndex
 local mouseDelayIndex
@@ -71,6 +74,7 @@ function Level:init(levelNum)
     self:setImage(background)
     self:setZIndex(4)
     self:moveTo(200,120)
+    StartThemeMusic()
     self:add()
 end
 
@@ -206,22 +210,30 @@ function Level:checkPlayerInteractions()
     self:checkPlayerWin()
 end
 
+function Level:playerDies()
+    ThemeMusic:stop()
+    self.player.isDead = true
+    deathSound:play()
+end
+
 function Level:checkPlayerDeath()
     if self.levelNum == BONUS_LEVEL then
         if self.player:onDragon(self.dragon) then
-            self.player.isDead = true
+            self:playerDies()
         end
     end
     if self.player:onLaser(self.laserBases, self.turn) then
-        self.player.isDead = true
+        self:playerDies()
     elseif self.player:onMouse(self.mice, true) then
-        self.player.isDead = true
+        self:playerDies()
         self.player:remove()
     end
 end
 
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
+        ThemeMusic:setVolume(0.2)
+        winSound:play()
         self.ladder:remove()
         self.player:finishLevel(self:getStars())
     end

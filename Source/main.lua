@@ -18,6 +18,9 @@ import "controlScreen"
 import "gameWinScreen"
 import "creditsText"
 
+local menuMusic = PD.sound.fileplayer.new('snd/opening')
+ThemeMusic = PD.sound.fileplayer.new('snd/blob-y_theme')
+
 local function resetSaveData()
     local gameData = {
         currentLevel = 1,
@@ -61,7 +64,7 @@ if gameData then
         startingLevel = gameData.currentLevel
     end
     if gameData.highestUnlockedLevel then
-        -- highestLevel = gameData.highestUnlockedLevel
+        highestLevel = gameData.highestUnlockedLevel
     end
     if gameData.scores then
         starScores = gameData.scores
@@ -89,8 +92,17 @@ function PD.gameWillSleep()
     saveGameData()
 end
 
+
+-- MUSIC FUNCTIONS
+function StartThemeMusic()
+    ThemeMusic:setVolume(1)
+    ThemeMusic:play()
+end
+
 -- MENU FUNCTIONS:
 local function initMenu()
+    ThemeMusic:stop()
+    menuMusic:play()
     LevelFinished = false
     ReadyToContinue = false
     menuManager = MenuManager(startingLevel, #starScores)
@@ -117,6 +129,8 @@ function StartGame(levelNum)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
     end)
+    menuMusic:stop()
+    ThemeMusic:play()
 end
 
 -- DEVELOPMENT: goes straight to TEST_LEVEL
