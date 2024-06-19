@@ -14,6 +14,10 @@ end
 local currentLevel = 1
 local scrollDown = true
 local scrollQueued = false
+local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
+local selectSound = playdate.sound.sampleplayer.new('snd/cursor_select')
+
+
 
 function LevelSelect:init(startingLevel, scores)
     LevelSelect.super.init(self)
@@ -113,11 +117,13 @@ function LevelSelect:setPreviousSelected()
 end
 
 function LevelSelect:updateSelectTiles()
+    blipSound:play()
     self.tiles[getLevelNum(self.previousSelected.x, self.previousSelected.y)]:unselect()
     self.tiles[getLevelNum(self.cursorPos.x, self.cursorPos.y)]:select()
 end
 
 function LevelSelect:select()
+    selectSound:play()
     if currentLevel == 1 and #self.scores == 0 then
         Tutorial = ControlScreen()
     else

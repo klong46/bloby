@@ -19,7 +19,8 @@ import "gameWinScreen"
 import "creditsText"
 
 local menuMusic = PD.sound.fileplayer.new('snd/opening')
-ThemeMusic = PD.sound.fileplayer.new('snd/blob-y_theme')
+ThemeMusic = PD.sound.fileplayer.new('snd/bytf')
+BossMusic = PD.sound.fileplayer.new('snd/bytf-fast')
 
 local function resetSaveData()
     local gameData = {
@@ -94,14 +95,22 @@ end
 
 
 -- MUSIC FUNCTIONS
-function StartThemeMusic()
-    ThemeMusic:setVolume(1)
-    ThemeMusic:play()
+function StartThemeMusic(levelNum)
+    menuMusic:stop()
+    if levelNum == BONUS_LEVEL then
+        BossMusic:setVolume(1)
+        BossMusic:play(0)
+    else
+        ThemeMusic:setVolume(1)
+        ThemeMusic:play(0)
+    end
+    
 end
 
 -- MENU FUNCTIONS:
 local function initMenu()
     ThemeMusic:stop()
+    BossMusic:stop()
     menuMusic:play()
     LevelFinished = false
     ReadyToContinue = false
@@ -129,8 +138,6 @@ function StartGame(levelNum)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
     end)
-    menuMusic:stop()
-    ThemeMusic:play()
 end
 
 -- DEVELOPMENT: goes straight to TEST_LEVEL

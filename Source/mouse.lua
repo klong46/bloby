@@ -8,6 +8,9 @@ local eatAnimationTable = GFX.imagetable.new('img/mouse/mouse_eat_animation')
 local STALL_ANIMATION_SPEED = 30
 local EAT_ANIMATION_SPEED = 30
 
+local awakeSound = playdate.sound.sampleplayer.new('snd/mouse_awake')
+
+
 local MOUSE_IMAGES <const> = {
     GFX.image.new('img/mouse/mouse_up'),
     GFX.image.new('img/mouse/mouse_down'),
@@ -26,6 +29,7 @@ function Mouse:init(position, delay, grid)
     self.stalled = false
     self.stalledTurns = 0
     self.gameOver = false
+    self.awoken = false
     self:setZIndex(2)
 end
 
@@ -47,6 +51,7 @@ function Mouse:moveBack()
     end
     if self:isInactive() then
         self:setImage(inactiveImage)
+        self.awoken = false
     end
 end
 
@@ -56,6 +61,10 @@ function Mouse:isInactive()
 end
 
 function Mouse:moveForward(playerMove)
+    if not self.awoken then
+        awakeSound:play()
+        self.awoken = true
+    end
     self.position = playerMove.position
     self:setDirectionImage(playerMove.direction)
     self.direction = playerMove.direction

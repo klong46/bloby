@@ -6,6 +6,9 @@ class('MenuManager').extends(SLIB)
 local currentLevel = 1
 local numScores = 0
 
+local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
+
+
 function MenuManager:init(startingLevel, scores)
     MenuManager.super.init(self)
     numScores = scores
@@ -17,6 +20,7 @@ function MenuManager:init(startingLevel, scores)
 end
 
 function MenuManager:cursorUp()
+    blipSound:play()
     if self.selectedBox == 1 then
         self.selectedBox = 3
     else
@@ -27,6 +31,7 @@ function MenuManager:cursorUp()
 end
 
 function MenuManager:cursorDown()
+    blipSound:play()
     if self.selectedBox == 3 then
         self.selectedBox = 1
     else

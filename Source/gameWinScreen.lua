@@ -26,6 +26,7 @@ function GameWinScreen:init()
     self.fadeAnimator = GFX.animator.new(FADE_DURATION, 1, 0, PD.easingFunctions.inQuad)
     self.fadeAnimator.paused = true
     self.closed = false
+    BossMusic:stop()
     self:add()
 end
 

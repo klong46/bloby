@@ -74,7 +74,7 @@ function Level:init(levelNum)
     self:setImage(background)
     self:setZIndex(4)
     self:moveTo(200,120)
-    StartThemeMusic()
+    StartThemeMusic(levelNum)
     self:add()
 end
 
@@ -232,7 +232,11 @@ end
 
 function Level:checkPlayerWin()
     if self.player:onLadder(self.grid) then
-        ThemeMusic:setVolume(0.2)
+        if self.levelNum == BONUS_LEVEL then
+            BossMusic:setVolume(0.2)
+        else
+            ThemeMusic:setVolume(0.2)
+        end
         winSound:play()
         self.ladder:remove()
         self.player:finishLevel(self:getStars())
