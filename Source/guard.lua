@@ -6,6 +6,7 @@ class('Guard').extends(DynamicObject)
 local animationTable = GFX.imagetable.new('img/guard_animation')
 local ANIMATION_SPEED = 10
 local ANIMATION_DELAY = 75
+local explosionSound = playdate.sound.sampleplayer.new('snd/explosion')
 
 function Guard:init(position, grid)
     Guard.super.init(self, nil, position, DEFAULT_GUARD_DIRECTION, grid, {})
@@ -46,6 +47,7 @@ function Guard:move(step, isForward)
 end
 
 function Guard:destroy()
+    explosionSound:play()
     self.grid[GetTile(self.position.x, self.position.y)] = EMPTY_TILE
     self.alive = false
     self:setVisible(false)

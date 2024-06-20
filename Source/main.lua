@@ -21,6 +21,7 @@ import "creditsText"
 local menuMusic = PD.sound.fileplayer.new('snd/opening')
 ThemeMusic = PD.sound.fileplayer.new('snd/bytf')
 BossMusic = PD.sound.fileplayer.new('snd/bytf-fast')
+local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
 
 local function resetSaveData()
     local gameData = {
@@ -301,17 +302,21 @@ end
 
 function PD.AButtonDown()
     if onMenu then
+        blipSound:play()
         menuManager:cursorSelect()
         onMenu = false
     elseif OnControlScreen and Tutorial then
+        blipSound:play()
         Tutorial:next()
     elseif levelSelect then
+        blipSound:play()
         levelSelect:select()
         levelSelect = nil
-    elseif not LevelFinished then
+    elseif not LevelFinished and not credits then
         RemoveBackTimer()
         moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
     elseif ReadyToContinue then
+        blipSound:play()
         ReadyToContinue = false
         LevelFinished = false
         if not bonusLevelAnimationPlayed and allStarsEarned() then
@@ -341,10 +346,12 @@ function PD.BButtonDown()
         RemoveForwardTimer()
         moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
     elseif levelSelect or credits then
+        blipSound:play()
         ReturnToMenu()
         levelSelect = nil
         credits = nil
     elseif OnControlScreen and Tutorial then
+        blipSound:play()
         Tutorial:back()
     end
 end
