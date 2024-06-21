@@ -168,6 +168,7 @@ function GoToLevelSelect()
     for i = 1, startingLevel - 1, 1 do
         levelSelect:cursorRight()
     end
+    pdMenu:removeAllMenuItems()
     pdMenu:addMenuItem("menu", function() Transition("menu") end)
     if playBonusLevelAnimation then
         PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
