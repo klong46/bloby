@@ -122,7 +122,7 @@ end
 
 function LevelSelect:select()
     if currentLevel == 1 and #self.scores == 0 then
-        Tutorial = ControlScreen()
+        Transition("tutorial")
     else
         Transition("start_game", getLevelNum(self.cursorPos.x, self.cursorPos.y))
     end

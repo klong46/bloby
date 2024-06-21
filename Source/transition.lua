@@ -13,6 +13,7 @@ function Transition:init(destination, levelNum)
     self:setZIndex(10)
     self:moveTo(200, 120)
     InTransition = true
+    self.halfway = false
     self:add()
 end
 
@@ -26,7 +27,7 @@ end
 function Transition:update()
     Transition.super.update(self)
     self:setImage(self.transitionAnimation:image())
-    if self.transitionAnimation.frame == 10 then
+    if self.transitionAnimation.frame > 9 and not self.halfway then
         self:clearScreen()
         if self.destination == "level_select" then
             GoToLevelSelect()
@@ -36,7 +37,10 @@ function Transition:update()
             GoToCredits()
         elseif self.destination == "menu" then
             ReturnToMenu()
+        elseif self.destination == "tutorial" then
+            StartTutorial()
         end
+        self.halfway = true
     end
     if not self.transitionAnimation:isValid() then
         self:remove()

@@ -45,7 +45,7 @@ end
 function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
         if currentLevel == 1 and numScores == 0 then
-            Tutorial = ControlScreen()
+            Transition("tutorial")
         else
             Transition("start_game", currentLevel)
         end

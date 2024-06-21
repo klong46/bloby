@@ -10,10 +10,9 @@ function ControlScreen:init()
     ControlScreen.super.init(self)
     OnControlScreen = true
     self.screen = 1
-    SLIB.removeAll()
     self:setImage(SCREEN_1)
     self:moveTo(POSITION.X, POSITION.Y)
-    ContinueButton()
+    self.continueButton = ContinueButton()
     self:add()
 end
 
@@ -24,13 +23,14 @@ function ControlScreen:next()
     elseif self.screen == 2 then
         OnControlScreen = false
         -- Start on first level
-        StartGame(1)
+        Transition("start_game", 1)
     end
 end
 
 function ControlScreen:back()
     if self.screen == 1 then
         OnControlScreen = false
+        self.continueButton:remove()
         ReturnToMenu()
     elseif self.screen == 2 then
         self:setImage(SCREEN_1)

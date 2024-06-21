@@ -93,7 +93,7 @@ function PD.gameWillTerminate()
     saveGameData()
 end
 
-function PD.gameWillSleep()
+function PD.deviceWillSleep()
     saveGameData()
 end
 
@@ -156,12 +156,12 @@ function GoToLevelSelect()
     for i = 1, startingLevel - 1, 1 do
         levelSelect:cursorRight()
     end
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
 end
 
 function GoToCredits()
     credits = CreditsText()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
 end
 
 -- UPDATE FUNCTIONS:
@@ -215,9 +215,13 @@ function ResetLevel()
     levelManager:resetLevel()
 end
 
+function StartTutorial()
+    Tutorial = ControlScreen()
+end
+
 function LevelOver(stars)
     pdMenu:removeAllMenuItems()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
         for i, timer in ipairs(PD.timer.allTimers()) do
