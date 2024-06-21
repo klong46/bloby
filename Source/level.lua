@@ -110,8 +110,10 @@ function Level:drawTiles(playerDirection)
                 Floor(position)
             elseif tile == GUARD_TILE then
                 table.insert(self.guards, Guard(position, self.grid))
+                Floor(position)
             elseif tile == MOUSE_TILE then
                 table.insert(self.mice, Mouse(position, self:getMouseDelay(), self.grid))
+                Floor(position)
             else
                 if tile == RIGHT_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.RIGHT, self:getLaserCadence(), self:getLaserOffset()))

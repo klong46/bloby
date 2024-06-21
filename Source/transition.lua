@@ -27,7 +27,7 @@ end
 function Transition:update()
     Transition.super.update(self)
     self:setImage(self.transitionAnimation:image())
-    if self.transitionAnimation.frame > 9 and not self.halfway then
+    if self.transitionAnimation.frame > 10 and not self.halfway then
         self:clearScreen()
         if self.destination == "level_select" then
             GoToLevelSelect()

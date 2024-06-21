@@ -15,7 +15,7 @@ function Guard:init(position, grid)
     self.alive = true
     self.lastPosition = position
     self:setImage(self.animation:image())
-    self:setZIndex(2)
+    self:setZIndex(5)
 end
 
 function Guard:moveBack()

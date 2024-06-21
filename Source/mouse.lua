@@ -108,7 +108,7 @@ function Mouse:update()
                 ResetLevel()
             end
         end
-    elseif self.stalled then
+    elseif self.stalled and self.awoken then
         self:setImage(self.stallAnimation:image())
     else
         if self:isInactive() then

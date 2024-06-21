@@ -41,9 +41,10 @@ end
 local gameData = {}
 local startingLevel = 1
 local levelManager
-local highestLevel = 30
+local highestLevel = 1
 local starScores = {}
 local bonusLevelAnimationPlayed = false
+local playBonusLevelAnimation = false
 local gameWinScreen
 local credits
 local menuManager
@@ -149,7 +150,18 @@ end
 -- for i = 1, 30, 1 do
 --     table.insert(starScores, 3)
 -- end
--- starScores[1] = 1
+-- starScores[7] = 1
+
+local function levelSelectCursorDown(scrollTimer)
+    levelSelect:cursorRight()
+    if levelSelect.cursorPos.y == 7 and levelSelect.cursorPos.x == 1 then
+        if scrollTimer then
+            scrollTimer:remove()
+        end
+        ReadyToContinue = false
+        LevelFinished = false
+    end
+end
 
 function GoToLevelSelect()
     levelSelect = LevelSelect(highestLevel, starScores)
@@ -157,6 +169,10 @@ function GoToLevelSelect()
         levelSelect:cursorRight()
     end
     pdMenu:addMenuItem("menu", function() Transition("menu") end)
+    if playBonusLevelAnimation then
+        PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
+        playBonusLevelAnimation = false
+    end
 end
 
 function GoToCredits()
@@ -198,18 +214,6 @@ local function allStarsEarned()
     end
     return true
 end
-
-local function levelSelectCursorDown(scrollTimer)
-    levelSelect:cursorRight()
-    if levelSelect.cursorPos.y == 7 and levelSelect.cursorPos.x == 1 then
-        if scrollTimer then
-            scrollTimer:remove()
-        end
-        ReadyToContinue = false
-        LevelFinished = false
-    end
-end
-
 
 function ResetLevel()
     levelManager:resetLevel()
@@ -333,8 +337,8 @@ function PD.AButtonDown()
             LevelFinished = false
             if not bonusLevelAnimationPlayed and allStarsEarned() then
                 bonusLevelAnimationPlayed = true
-                GoToLevelSelect()
-                PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
+                playBonusLevelAnimation = true
+                Transition("level_select")
             elseif levelManager.levelNum == BONUS_LEVEL then
                 SLIB:removeAll()
                 gameWinScreen = GameWinScreen()
