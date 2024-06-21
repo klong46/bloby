@@ -1,5 +1,6 @@
 import "CoreLibs/sprites"
 import "constants"
+import "transition"
 
 class('MenuManager').extends(SLIB)
 
@@ -46,12 +47,12 @@ function MenuManager:cursorSelect()
         if currentLevel == 1 and numScores == 0 then
             Tutorial = ControlScreen()
         else
-            StartGame(currentLevel)
+            Transition("start_game", currentLevel)
         end
     elseif self.selectedBox == 2 then
-        GoToLevelSelect()
+        Transition("level_select")
     else
-        GoToCredits()
+        Transition("credits")
     end
     self:remove()
 end

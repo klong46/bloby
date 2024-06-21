@@ -17,8 +17,10 @@ import "menuBackground"
 import "controlScreen"
 import "gameWinScreen"
 import "creditsText"
+import "transition"
 
 local menuMusic = PD.sound.fileplayer.new('snd/opening')
+menuMusic:setVolume(0.7)
 ThemeMusic = PD.sound.fileplayer.new('snd/bytf')
 BossMusic = PD.sound.fileplayer.new('snd/bytf-fast')
 local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
@@ -53,6 +55,7 @@ LevelFinished = false
 ReadyToContinue = false
 OnControlScreen = false
 Tutorial = nil
+InTransition = false
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 local pdMenu = PD.getSystemMenu()
@@ -122,7 +125,6 @@ end
 initMenu()
 
 function ReturnToMenu()
-    SLIB.removeAll()
     for i, timer in ipairs(PD.timer.allTimers()) do
         timer:remove()
     end
@@ -131,11 +133,10 @@ function ReturnToMenu()
 end
 
 function StartGame(levelNum)
-    SLIB.removeAll()
     startingLevel = levelNum
     levelManager = LevelManager(levelNum, starScores)
     pdMenu:removeAllMenuItems()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
     end)
@@ -151,7 +152,6 @@ end
 -- starScores[1] = 1
 
 function GoToLevelSelect()
-    SLIB.removeAll()
     levelSelect = LevelSelect(highestLevel, starScores)
     for i = 1, startingLevel - 1, 1 do
         levelSelect:cursorRight()
@@ -160,7 +160,6 @@ function GoToLevelSelect()
 end
 
 function GoToCredits()
-    SLIB.removeAll()
     credits = CreditsText()
     pdMenu:addMenuItem("menu", ReturnToMenu)
 end
@@ -261,103 +260,119 @@ end
 
 -- BUTTON INPUT:
 function PD.leftButtonDown()
-    if levelSelect then
-        levelSelect:cursorLeft()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:left()
+    if not InTransition then
+        if levelSelect then
+            levelSelect:cursorLeft()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:left()
+        end
     end
 end
 
 function PD.upButtonDown()
-    if onMenu then
-        menuManager:cursorUp()
-    elseif levelSelect then
-        levelSelect:cursorUp()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:up()
+    if not InTransition then
+        if onMenu then
+            menuManager:cursorUp()
+        elseif levelSelect then
+            levelSelect:cursorUp()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:up()
+        end
     end
 end
 
 function PD.downButtonDown()
-    if onMenu then
-        menuManager:cursorDown()
-    elseif levelSelect then
-        levelSelect:cursorDown()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:down()
+    if not InTransition then
+        if onMenu then
+            menuManager:cursorDown()
+        elseif levelSelect then
+            levelSelect:cursorDown()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:down()
+        end
     end
 end
 
 function PD.rightButtonDown()
-    if levelSelect then
-        levelSelect:cursorRight()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:right()
+    if not InTransition then
+        if levelSelect then
+            levelSelect:cursorRight()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:right()
+        end
     end
 end
 
 function PD.AButtonDown()
-    if onMenu then
-        blipSound:play()
-        menuManager:cursorSelect()
-        onMenu = false
-    elseif OnControlScreen and Tutorial then
-        blipSound:play()
-        Tutorial:next()
-    elseif levelSelect then
-        blipSound:play()
-        levelSelect:select()
-        levelSelect = nil
-    elseif not LevelFinished and not credits then
-        RemoveBackTimer()
-        moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-    elseif ReadyToContinue then
-        blipSound:play()
-        ReadyToContinue = false
-        LevelFinished = false
-        if not bonusLevelAnimationPlayed and allStarsEarned() then
-            bonusLevelAnimationPlayed = true
-            GoToLevelSelect()
-            PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
-        elseif levelManager.levelNum == BONUS_LEVEL then
-            SLIB:removeAll()
-            gameWinScreen = GameWinScreen()
-        elseif levelManager.levelNum == TOTAL_LEVELS then
-            ReturnToMenu()
-        else
-            levelManager.levelNum += 1
-            levelManager:resetLevel()
+    if not InTransition then
+        if onMenu then
+            blipSound:play()
+            menuManager:cursorSelect()
+            onMenu = false
+        elseif OnControlScreen and Tutorial then
+            blipSound:play()
+            Tutorial:next()
+        elseif levelSelect then
+            blipSound:play()
+            levelSelect:select()
+            levelSelect = nil
+        elseif not LevelFinished and not credits then
+            RemoveBackTimer()
+            moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+        elseif ReadyToContinue then
+            blipSound:play()
+            ReadyToContinue = false
+            LevelFinished = false
+            if not bonusLevelAnimationPlayed and allStarsEarned() then
+                bonusLevelAnimationPlayed = true
+                GoToLevelSelect()
+                PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
+            elseif levelManager.levelNum == BONUS_LEVEL then
+                SLIB:removeAll()
+                gameWinScreen = GameWinScreen()
+            elseif levelManager.levelNum == TOTAL_LEVELS then
+                ReturnToMenu()
+            else
+                levelManager.levelNum += 1
+                levelManager:resetLevel()
+            end
         end
     end
 end
 
 function PD.AButtonUp()
-    if not onMenu then
-        RemoveForwardTimer()
+    if not InTransition then
+        if not onMenu then
+            RemoveForwardTimer()
+        end
     end
 end
 
 function PD.BButtonDown()
-    if not LevelFinished and not (onMenu or levelSelect or OnControlScreen or credits) then
-        RemoveForwardTimer()
-        moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
-    elseif levelSelect or credits then
-        blipSound:play()
-        ReturnToMenu()
-        levelSelect = nil
-        credits = nil
-    elseif OnControlScreen and Tutorial then
-        blipSound:play()
-        Tutorial:back()
+    if not InTransition then
+        if not LevelFinished and not (onMenu or levelSelect or OnControlScreen or credits) then
+            RemoveForwardTimer()
+            moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
+        elseif levelSelect or credits then
+            blipSound:play()
+            Transition("menu")
+            levelSelect = nil
+            credits = nil
+        elseif OnControlScreen and Tutorial then
+            blipSound:play()
+            Tutorial:back()
+        end
     end
 end
 
 function PD.BButtonUp()
-    if not onMenu then
-        RemoveBackTimer()
+    if not InTransition then
+        if not onMenu then
+            RemoveBackTimer()
+        end
     end
 end

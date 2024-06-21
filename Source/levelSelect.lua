@@ -124,7 +124,7 @@ function LevelSelect:select()
     if currentLevel == 1 and #self.scores == 0 then
         Tutorial = ControlScreen()
     else
-        StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+        Transition("start_game", getLevelNum(self.cursorPos.x, self.cursorPos.y))
     end
     self:remove()
 end
@@ -171,7 +171,7 @@ function LevelSelect:update()
                 local number = self.tiles[getLevelNum(x,y)].numberLabel
                 local yPos
                 local scrollValue = self.scrollAnimator:currentValue()
-                if TILE_WIDTH - scrollValue <= 3 then
+                if TILE_WIDTH - scrollValue <= 2 then
                     scrollValue = 80
                 end
                 if scrollDown then
