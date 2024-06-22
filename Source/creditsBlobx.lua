@@ -17,17 +17,21 @@ end
 function CreditsBlobx:update()
     CreditsBlobx.super.update(self)
     local crankChange = PD.getCrankChange() * -1
-    if crankChange > 0 then
+    local yChange
+    if crankChange ~= 0 then
+        yChange = crankChange
+    else
+        yChange = CreditsScroll * -1
+    end
+    if yChange > 0 then
         self:setImage(downImg)
-    elseif crankChange < 0 then
+    elseif yChange < 0 then
         self:setImage(upImg)
     end
-    local yChange = crankChange
-
-    if (self.y + crankChange) > 210 and crankChange > 0 then
+    if (self.y + yChange) > 210 and yChange > 0 then
         yChange = 210 - self.y
     end
-    if (self.y + crankChange) < 30 and crankChange < 0 then
+    if (self.y + yChange) < 30 and yChange < 0 then
         yChange = 30 - self.y
     end
     self:moveTo(self.x, self.y + yChange)

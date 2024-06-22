@@ -19,12 +19,17 @@ end
 function CreditsText:update()
     CreditsText.super.update(self)
     local crankChange = PD.getCrankChange() * SCROLL_CONVERSION
-    local yChange = crankChange
-    if (self.y + crankChange) > 270 and crankChange > 0 then
-        yChange = 270 - self.y
+    local yChange
+    if crankChange ~= 0 then
+        yChange = crankChange
+    else
+        yChange = CreditsScroll * SCROLL_CONVERSION
     end
-    if (self.y + crankChange) < -30 and crankChange < 0 then
-        yChange = -30 - self.y
-    end
-    self:moveTo(self.x, self.y + yChange)
+        if (self.y + yChange) > 270 and yChange > 0 then
+            yChange = 270 - self.y
+        end
+        if (self.y + yChange) < -30 and yChange < 0 then
+            yChange = -30 - self.y
+        end
+        self:moveTo(self.x, self.y + yChange)
 end

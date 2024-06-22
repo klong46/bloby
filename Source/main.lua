@@ -52,11 +52,13 @@ local onMenu = true
 local levelSelect
 local moveForwardTimer
 local moveBackTimer
+local creditsScrollTimer = nil
 LevelFinished = false
 ReadyToContinue = false
 OnControlScreen = false
 Tutorial = nil
 InTransition = false
+CreditsScroll = 0
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
 local pdMenu = PD.getSystemMenu()
@@ -70,7 +72,7 @@ if gameData then
         startingLevel = gameData.currentLevel
     end
     if gameData.highestUnlockedLevel then
-        highestLevel = 30
+        highestLevel = gameData.highestUnlockedLevel
     end
     if gameData.scores then
         starScores = gameData.scores
@@ -196,7 +198,7 @@ end
 
 function RemoveForwardTimer()
     if moveForwardTimer then
-        moveForwardTimer:remove()
+        
     end
 end
 
@@ -289,6 +291,9 @@ function PD.upButtonDown()
         if gameWinScreen and not gameWinScreen.closed then
             gameWinScreen:up()
         end
+        if credits then
+            CreditsScroll = -5
+        end
     end
 end
 
@@ -302,6 +307,21 @@ function PD.downButtonDown()
         if gameWinScreen and not gameWinScreen.closed then
             gameWinScreen:down()
         end
+        if credits then
+            CreditsScroll = 5
+        end
+    end
+end
+
+function PD.downButtonUp()
+    if not InTransition then
+        CreditsScroll = 0
+    end
+end
+
+function PD.upButtonUp()
+    if not InTransition then
+        CreditsScroll = 0
     end
 end
 
