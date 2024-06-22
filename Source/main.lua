@@ -198,7 +198,7 @@ end
 
 function RemoveForwardTimer()
     if moveForwardTimer then
-        
+        moveForwardTimer:remove()
     end
 end
 
@@ -314,13 +314,13 @@ function PD.downButtonDown()
 end
 
 function PD.downButtonUp()
-    if not InTransition then
+    if not InTransition and credits then
         CreditsScroll = 0
     end
 end
 
 function PD.upButtonUp()
-    if not InTransition then
+    if not InTransition and credits then
         CreditsScroll = 0
     end
 end
