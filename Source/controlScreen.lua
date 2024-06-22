@@ -31,7 +31,7 @@ function ControlScreen:back()
     if self.screen == 1 then
         OnControlScreen = false
         self.continueButton:remove()
-        ReturnToMenu()
+        Transition("menu")
     elseif self.screen == 2 then
         self:setImage(SCREEN_1)
         self.screen = 1

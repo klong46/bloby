@@ -70,7 +70,7 @@ if gameData then
         startingLevel = gameData.currentLevel
     end
     if gameData.highestUnlockedLevel then
-        highestLevel = gameData.highestUnlockedLevel
+        highestLevel = 30
     end
     if gameData.scores then
         starScores = gameData.scores
@@ -344,7 +344,7 @@ function PD.AButtonDown()
                 SLIB:removeAll()
                 gameWinScreen = GameWinScreen()
             elseif levelManager.levelNum == TOTAL_LEVELS then
-                ReturnToMenu()
+                Transition("menu")
             else
                 levelManager.levelNum += 1
                 levelManager:resetLevel()

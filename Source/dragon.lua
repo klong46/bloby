@@ -41,8 +41,8 @@ function Dragon:move(step, isForward, laserBases, turn)
         self.blocked = false
         for i, scale in ipairs(self.scales) do
             scale:addPastMove()
-            if scale.isEye then scale:setImage(scale:getEyeImage()) end
             if scale.alive and not self.blocked then
+                if scale.isEye then scale:setImage(scale:getEyeImage()) end
                 scale:setIsBlocked(DRAGON_OBSTACLES)
                 if scale.isBlocked then self.blocked = true end
             end

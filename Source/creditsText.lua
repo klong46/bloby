@@ -1,19 +1,30 @@
 import "constants"
+import "creditsBloby"
+import "creditsBlobx"
 
 class('CreditsText').extends(SLIB)
 
-local bigFont = GFX.font.new("fonts/font-rains-3x")
+local SCROLL_CONVERSION = -1.6
+local image = GFX.image.new('img/credits/credits')
 
 function CreditsText:init()
     CreditsText.super.init(self)
-    self:setSize(250, 100)
-    self:moveTo(225, 85)
-    self:setZIndex(6)
+    self:setImage(image)
+    self:moveTo(205, 270)
+    CreditsBloby()
+    CreditsBlobx()
     self:add()
 end
 
-function CreditsText:draw()
-    GFX.setImageDrawMode(GFX.kDrawModeCopy)
-    GFX.setFont(bigFont, "bold")
-    GFX.drawText("*Kyle Long*", 0, 0)
+function CreditsText:update()
+    CreditsText.super.update(self)
+    local crankChange = PD.getCrankChange() * SCROLL_CONVERSION
+    local yChange = crankChange
+    if (self.y + crankChange) > 270 and crankChange > 0 then
+        yChange = 270 - self.y
+    end
+    if (self.y + crankChange) < -30 and crankChange < 0 then
+        yChange = -30 - self.y
+    end
+    self:moveTo(self.x, self.y + yChange)
 end

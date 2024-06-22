@@ -11,6 +11,7 @@ local GW_IMAGES <const> = {
 }
 
 local blackScreen = GFX.image.new('img/game_win/black_screen')
+local menuMusic = PD.sound.fileplayer.new('snd/opening')
 local EYES_CLOSED_Y_POS = 42
 local FADE_DURATION = 10000
 local POSITION = {X = 200, Y = 120}
@@ -27,6 +28,7 @@ function GameWinScreen:init()
     self.fadeAnimator.paused = true
     self.closed = false
     BossMusic:stop()
+    menuMusic:play(0)
     self:add()
 end
 
@@ -71,7 +73,9 @@ function GameWinScreen:update()
     if self.closed then
         self:setImage(self:getImage():fadedImage(self.fadeAnimator:currentValue(), GFX.image.kDitherTypeBayer8x8))
         if self.fadeAnimator:ended() then
+            SLIB:removeAll()
             ReturnToMenu()
+            menuMusic:stop()
         end
     end
 end
