@@ -10,7 +10,7 @@ local image = GFX.image.new('img/credits/credits')
 function CreditsText:init()
     CreditsText.super.init(self)
     self:setImage(image)
-    self:moveTo(205, 270)
+    self:moveTo(205, 263)
     CreditsBloby()
     CreditsBlobx()
     self:add()
@@ -25,8 +25,8 @@ function CreditsText:update()
     else
         yChange = CreditsScroll * SCROLL_CONVERSION
     end
-        if (self.y + yChange) > 270 and yChange > 0 then
-            yChange = 270 - self.y
+        if (self.y + yChange) > 263 and yChange > 0 then
+            yChange = 263 - self.y
         end
         if (self.y + yChange) < -30 and yChange < 0 then
             yChange = -30 - self.y
