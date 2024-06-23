@@ -63,7 +63,7 @@ end
 
 function DragonScale:update()
     DragonScale.super.update(self)
-    if not self.alive then
+    if not self.alive and self:isVisible() then
         self.deathAnimation.paused = false
         self:setImage(self.deathAnimation:image())
         if not self.deathAnimation:isValid() then
