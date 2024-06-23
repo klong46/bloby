@@ -1,7 +1,7 @@
 name=Blob-Y
 author=Kyle Long
-description=Blob-Y!
+description=Escape!
 bundleID=com.kylelong.bloby
 version=1.0
-buildNumber=100
+buildNumber=1
 imagePath=SystemAssets
