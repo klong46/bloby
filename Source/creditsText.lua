@@ -18,7 +18,7 @@ end
 
 function CreditsText:update()
     CreditsText.super.update(self)
-    local crankChange = PD.getCrankChange() * SCROLL_CONVERSION
+    local crankChange = (PD.getCrankChange()/2) * SCROLL_CONVERSION
     local yChange
     if crankChange ~= 0 then
         yChange = crankChange

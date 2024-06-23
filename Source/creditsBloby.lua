@@ -15,7 +15,7 @@ end
 
 function CreditsBloby:update()
     CreditsBloby.super.update(self)
-    local crankChange = PD.getCrankChange()
+    local crankChange = (PD.getCrankChange()/2)
     local yChange
     if crankChange ~= 0 then
         yChange = crankChange

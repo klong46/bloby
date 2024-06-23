@@ -16,7 +16,7 @@ end
 
 function CreditsBlobx:update()
     CreditsBlobx.super.update(self)
-    local crankChange = PD.getCrankChange() * -1
+    local crankChange = (PD.getCrankChange()/2) * -1
     local yChange
     if crankChange ~= 0 then
         yChange = crankChange

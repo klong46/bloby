@@ -256,7 +256,7 @@ function Level:updateGuards(step, isForward)
     for x, position in ipairs(lastMoves) do
         if not self:guardListIncludes(position) and
         self.grid[GetTile(position.x, position.y)] ~= LADDER_TILE and
-        self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE  then
+        self.grid[GetTile(position.x, position.y)] ~= MOUSE_TILE then
             self.grid[GetTile(position.x, position.y)] = EMPTY_TILE
         end
     end
@@ -279,7 +279,7 @@ end
 -- Checks if the guard list includes a certain position.
 function Level:guardListIncludes(value)
     for i, guard in ipairs(self.guards) do
-        if guard.position == value then
+        if guard.alive and guard.position == value then
             return true
         end
     end
