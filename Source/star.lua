@@ -1,4 +1,3 @@
-import "CoreLibs/sprites"
 import "staticObject"
 import "constants"
 
@@ -8,12 +7,16 @@ local ANIMATOR_DURATION = 1000
 class('Star').extends(SLIB)
 
 local image = GFX.image.new('img/star')
+local starSound = playdate.sound.sampleplayer.new('snd/star_hit')
+
 
 function Star:init(order)
     Star.super.init(self)
     self:moveTo(self:getPosition(order))
     self:setImage(image)
     self:setZIndex(6)
+    starSound:play()
+
     self:add()
     self.rotationAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 360, playdate.easingFunctions.outExpo)
     self.scaleAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 1, playdate.easingFunctions.outExpo)

@@ -1,3 +1,5 @@
+import "constants"
+
 class('Eyelid').extends(SLIB)
 
 local eyelidImage = GFX.image.new('img/game_win/eyelid')

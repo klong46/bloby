@@ -1,11 +1,12 @@
-import "CoreLibs/sprites"
 import "constants"
 import "levelSelectTile"
+
+class('LevelSelect').extends(SLIB)
 
 local NUM_COLS = 5
 local NUM_ROWS = 7
 local ROWS_ON_SCREEN = 3
-
+local TILE_WIDTH = 80
 
 local function getLevelNum(x, y)
     return math.floor(((y-1)*NUM_COLS)+x)
@@ -15,7 +16,7 @@ local currentLevel = 1
 local scrollDown = true
 local scrollQueued = false
 
-class('LevelSelect').extends(SLIB)
+
 
 function LevelSelect:init(startingLevel, scores)
     LevelSelect.super.init(self)
@@ -121,9 +122,9 @@ end
 
 function LevelSelect:select()
     if currentLevel == 1 and #self.scores == 0 then
-        Tutorial = ControlScreen()
+        Transition("tutorial")
     else
-        StartGame(getLevelNum(self.cursorPos.x, self.cursorPos.y))
+        Transition("start_game", getLevelNum(self.cursorPos.x, self.cursorPos.y))
     end
     self:remove()
 end
@@ -142,7 +143,7 @@ end
 
 function LevelSelect:startAnimator()
     if not self.scrollAnimator then
-        self.scrollAnimator = GFX.animator.new(500, 0, 80, playdate.easingFunctions.outCubic)
+        self.scrollAnimator = GFX.animator.new(500, 0, TILE_WIDTH, playdate.easingFunctions.outCubic)
     else
         if self.scrollAnimator:ended() then
             self.scrollAnimator:reset()
@@ -169,10 +170,14 @@ function LevelSelect:update()
             for x = 1, NUM_COLS, 1 do
                 local number = self.tiles[getLevelNum(x,y)].numberLabel
                 local yPos
+                local scrollValue = self.scrollAnimator:currentValue()
+                if TILE_WIDTH - scrollValue <= 2 then
+                    scrollValue = 80
+                end
                 if scrollDown then
-                    yPos = ((y-self.offset+1)*80-55) - self.scrollAnimator:currentValue()
+                    yPos = ((y-self.offset+1)*TILE_WIDTH-55) - scrollValue
                 else
-                    yPos = ((y-self.offset-1)*80-55) + self.scrollAnimator:currentValue()
+                    yPos = ((y-self.offset-1)*TILE_WIDTH-55) + scrollValue
                 end
                 number:moveTo(number.x, yPos)
                 local tile = self.tiles[getLevelNum(x,y)]

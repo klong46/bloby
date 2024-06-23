@@ -1,6 +1,8 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "CoreLibs/animation"
+import "CoreLibs/crank"
 import "level"
 import "levelManager"
 import "constants"
@@ -15,6 +17,13 @@ import "menuBackground"
 import "controlScreen"
 import "gameWinScreen"
 import "creditsText"
+import "transition"
+
+local menuMusic = PD.sound.fileplayer.new('snd/opening')
+menuMusic:setVolume(0.7)
+ThemeMusic = PD.sound.fileplayer.new('snd/bytf')
+BossMusic = PD.sound.fileplayer.new('snd/bytf-fast')
+local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
 
 local function resetSaveData()
     local gameData = {
@@ -26,18 +35,37 @@ local function resetSaveData()
     }
     PD.datastore.write(gameData)
 end
-
 -- resetSaveData()
 
+-- INSTANCE VARS
 local gameData = {}
 local startingLevel = 1
 local levelManager
 local highestLevel = 1
 local starScores = {}
 local bonusLevelAnimationPlayed = false
+local playBonusLevelAnimation = false
 local gameWinScreen
 local credits
+local menuManager
+local onMenu = true
+local levelSelect
+local moveForwardTimer
+local moveBackTimer
+local creditsScrollTimer = nil
+LevelFinished = false
+ReadyToContinue = false
+OnControlScreen = false
+Tutorial = nil
+InTransition = false
+CreditsScroll = 0
+local INIT_MOVE_DELAY = 200
+local MOVE_DELAY = 50
+local pdMenu = PD.getSystemMenu()
 CrankTicks = 0
+Turn = 0
+
+-- LOAD SAVE DATA
 gameData = PD.datastore.read()
 if gameData then
     if gameData.currentLevel then
@@ -68,24 +96,29 @@ function PD.gameWillTerminate()
     saveGameData()
 end
 
-function PD.gameWillSleep()
+function PD.deviceWillSleep()
     saveGameData()
 end
 
-local menuManager
-local onMenu = true
-local levelSelect
-local moveForwardTimer
-local moveBackTimer
-LevelFinished = false
-ReadyToContinue = false
-OnControlScreen = false
-Tutorial = nil
-local INIT_MOVE_DELAY = 200
-local MOVE_DELAY = 50
-local pdMenu = PD.getSystemMenu()
 
+-- MUSIC FUNCTIONS
+function StartThemeMusic(levelNum)
+    menuMusic:stop()
+    if levelNum == BONUS_LEVEL then
+        BossMusic:setVolume(1)
+        BossMusic:play(0)
+    else
+        ThemeMusic:setVolume(1)
+        ThemeMusic:play(0)
+    end
+    
+end
+
+-- MENU FUNCTIONS:
 local function initMenu()
+    ThemeMusic:stop()
+    BossMusic:stop()
+    menuMusic:play()
     LevelFinished = false
     ReadyToContinue = false
     menuManager = MenuManager(startingLevel, #starScores)
@@ -95,7 +128,6 @@ end
 initMenu()
 
 function ReturnToMenu()
-    SLIB.removeAll()
     for i, timer in ipairs(PD.timer.allTimers()) do
         timer:remove()
     end
@@ -104,11 +136,10 @@ function ReturnToMenu()
 end
 
 function StartGame(levelNum)
-    SLIB.removeAll()
     startingLevel = levelNum
     levelManager = LevelManager(levelNum, starScores)
     pdMenu:removeAllMenuItems()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
     end)
@@ -121,63 +152,38 @@ end
 -- for i = 1, 30, 1 do
 --     table.insert(starScores, 3)
 -- end
--- starScores[1] = 1
+-- starScores[7] = 1
+
+local function levelSelectCursorDown(scrollTimer)
+    levelSelect:cursorRight()
+    if levelSelect.cursorPos.y == 7 and levelSelect.cursorPos.x == 1 then
+        if scrollTimer then
+            scrollTimer:remove()
+        end
+        ReadyToContinue = false
+        LevelFinished = false
+    end
+end
 
 function GoToLevelSelect()
-    SLIB.removeAll()
     levelSelect = LevelSelect(highestLevel, starScores)
     for i = 1, startingLevel - 1, 1 do
         levelSelect:cursorRight()
     end
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:removeAllMenuItems()
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
+    if playBonusLevelAnimation then
+        PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
+        playBonusLevelAnimation = false
+    end
 end
 
 function GoToCredits()
-    SLIB.removeAll()
     credits = CreditsText()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
 end
 
-function PD.leftButtonDown()
-    if levelSelect then
-        levelSelect:cursorLeft()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:left()
-    end
-end
-
-function PD.upButtonDown()
-    if onMenu then
-        menuManager:cursorUp()
-    elseif levelSelect then
-        levelSelect:cursorUp()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:up()
-    end
-end
-
-function PD.downButtonDown()
-    if onMenu then
-        menuManager:cursorDown()
-    elseif levelSelect then
-        levelSelect:cursorDown()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:down()
-    end
-end
-
-function PD.rightButtonDown()
-    if levelSelect then
-        levelSelect:cursorRight()
-    end
-    if gameWinScreen and not gameWinScreen.closed then
-        gameWinScreen:right()
-    end
-end
-
+-- UPDATE FUNCTIONS:
 local function moveForward()
     if not levelManager.level.player.isDead then
         levelManager.level:moveForward()
@@ -212,88 +218,17 @@ local function allStarsEarned()
     return true
 end
 
-local function levelSelectCursorDown(scrollTimer)
-    levelSelect:cursorRight()
-    if levelSelect.cursorPos.y == 7 and levelSelect.cursorPos.x == 1 then
-        if scrollTimer then
-            scrollTimer:remove()
-        end
-        ReadyToContinue = false
-        LevelFinished = false
-    end
-end
-
-function PD.AButtonDown()
-    if onMenu then
-        menuManager:cursorSelect()
-        onMenu = false
-    else
-        if OnControlScreen and Tutorial then
-            Tutorial:next()
-        else
-            if levelSelect then
-                levelSelect:select()
-                levelSelect = nil
-            elseif not LevelFinished then
-                RemoveBackTimer()
-                moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
-            elseif ReadyToContinue then
-                ReadyToContinue = false
-                LevelFinished = false
-                if not bonusLevelAnimationPlayed and allStarsEarned() then
-                    bonusLevelAnimationPlayed = true
-                    GoToLevelSelect()
-                    PD.timer.keyRepeatTimerWithDelay(20,20, levelSelectCursorDown)
-                else
-                    if levelManager.levelNum == BONUS_LEVEL then
-                        SLIB:removeAll()
-                        gameWinScreen = GameWinScreen()
-                    else
-                        if levelManager.levelNum == TOTAL_LEVELS then
-                            ReturnToMenu()
-                        else
-                            levelManager.levelNum += 1
-                            levelManager:resetLevel()
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
-function PD.AButtonUp()
-    if not onMenu then
-        RemoveForwardTimer()
-    end
-end
-
-function PD.BButtonDown()
-    if not LevelFinished and not (onMenu or levelSelect or OnControlScreen or credits) then
-        RemoveForwardTimer()
-        moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
-    elseif levelSelect or credits then
-        ReturnToMenu()
-        levelSelect = nil
-        credits = nil
-    elseif OnControlScreen and Tutorial then
-        Tutorial:back()
-    end
-end
-
-function PD.BButtonUp()
-    if not onMenu then
-        RemoveBackTimer()
-    end
-end
-
 function ResetLevel()
     levelManager:resetLevel()
 end
 
+function StartTutorial()
+    Tutorial = ControlScreen()
+end
+
 function LevelOver(stars)
     pdMenu:removeAllMenuItems()
-    pdMenu:addMenuItem("menu", ReturnToMenu)
+    pdMenu:addMenuItem("menu", function() Transition("menu") end)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
         for i, timer in ipairs(PD.timer.allTimers()) do
@@ -327,9 +262,146 @@ end
 function PD.update()
     PD.timer.updateTimers()
     SLIB.update()
-    if levelSelect then
+    if levelSelect or onMenu then
         CrankTicks = PD.getCrankTicks(LEVEL_SELECT_CRANK_SPEED)
     else
         CrankTicks = PD.getCrankTicks(MOVE_CRANK_SPEED)
+    end
+end
+
+-- BUTTON INPUT:
+function PD.leftButtonDown()
+    if not InTransition then
+        if levelSelect then
+            levelSelect:cursorLeft()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:left()
+        end
+    end
+end
+
+function PD.upButtonDown()
+    if not InTransition then
+        if onMenu then
+            menuManager:cursorUp()
+        elseif levelSelect then
+            levelSelect:cursorUp()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:up()
+        end
+        if credits then
+            CreditsScroll = -5
+        end
+    end
+end
+
+function PD.downButtonDown()
+    if not InTransition then
+        if onMenu then
+            menuManager:cursorDown()
+        elseif levelSelect then
+            levelSelect:cursorDown()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:down()
+        end
+        if credits then
+            CreditsScroll = 5
+        end
+    end
+end
+
+function PD.downButtonUp()
+    if not InTransition and credits then
+        CreditsScroll = 0
+    end
+end
+
+function PD.upButtonUp()
+    if not InTransition and credits then
+        CreditsScroll = 0
+    end
+end
+
+function PD.rightButtonDown()
+    if not InTransition then
+        if levelSelect then
+            levelSelect:cursorRight()
+        end
+        if gameWinScreen and not gameWinScreen.closed then
+            gameWinScreen:right()
+        end
+    end
+end
+
+function PD.AButtonDown()
+    if not InTransition then
+        if onMenu then
+            blipSound:play()
+            menuManager:cursorSelect()
+            onMenu = false
+        elseif OnControlScreen and Tutorial then
+            blipSound:play()
+            Tutorial:next()
+        elseif levelSelect then
+            blipSound:play()
+            levelSelect:select()
+            levelSelect = nil
+        elseif not LevelFinished and not credits then
+            RemoveBackTimer()
+            moveForwardTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveForward)
+        elseif ReadyToContinue then
+            blipSound:play()
+            ReadyToContinue = false
+            LevelFinished = false
+            if not bonusLevelAnimationPlayed and allStarsEarned() then
+                bonusLevelAnimationPlayed = true
+                playBonusLevelAnimation = true
+                Transition("level_select")
+            elseif levelManager.levelNum == BONUS_LEVEL then
+                SLIB:removeAll()
+                gameWinScreen = GameWinScreen()
+            elseif levelManager.levelNum == TOTAL_LEVELS then
+                Transition("menu")
+            else
+                levelManager.levelNum += 1
+                levelManager:resetLevel()
+            end
+        end
+    end
+end
+
+function PD.AButtonUp()
+    if not InTransition then
+        if not onMenu then
+            RemoveForwardTimer()
+        end
+    end
+end
+
+function PD.BButtonDown()
+    if not InTransition then
+        if not LevelFinished and not (onMenu or levelSelect or OnControlScreen or credits) then
+            RemoveForwardTimer()
+            moveBackTimer = PD.timer.keyRepeatTimerWithDelay(INIT_MOVE_DELAY, MOVE_DELAY, moveBack)
+        elseif levelSelect or credits then
+            blipSound:play()
+            Transition("menu")
+            levelSelect = nil
+            credits = nil
+        elseif OnControlScreen and Tutorial then
+            blipSound:play()
+            Tutorial:back()
+        end
+    end
+end
+
+function PD.BButtonUp()
+    if not InTransition then
+        if not onMenu then
+            RemoveBackTimer()
+        end
     end
 end

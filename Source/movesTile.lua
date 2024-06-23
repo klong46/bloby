@@ -1,14 +1,14 @@
-import "CoreLibs/sprites"
 import "staticObject"
 import "constants"
 
-local font = GFX.font.new("fonts/Roobert-9-Mono-Condensed")
-
 class('MovesTile').extends(SLIB)
+
+local font = GFX.font.new("fonts/Roobert-9-Mono-Condensed")
+local SIZE = {WIDTH = 30, HEIGHT = 20}
 
 function MovesTile:init(position)
     MovesTile.super.init(self)
-    self:setSize(30, 20)
+    self:setSize(SIZE.WIDTH, SIZE.HEIGHT)
     self:moveTo((position.x * TILE_SIZE) - 1, (position.y * TILE_SIZE) - 7)
     self:setZIndex(2)
     self:add()

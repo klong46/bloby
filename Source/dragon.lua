@@ -1,4 +1,5 @@
 import "dragonScale"
+import "constants"
 
 class('Dragon').extends(SLIB)
 
@@ -15,10 +16,19 @@ function Dragon:init(grid)
     self:drawScales()
 end
 
+function Dragon:isEye(x, y)
+    if y == 2 then
+        if x == 1 or x == 3 then
+            return true
+        end
+    end
+    return false
+end
+
 function Dragon:drawScales()
     for x=0,DRAGON_WIDTH-1 do
         for y=0,DRAGON_WIDTH-1 do
-            table.insert(self.scales, DragonScale(PD.geometry.point.new(x+START_X, y+START_Y), self.direction, self.grid))
+            table.insert(self.scales, DragonScale(PD.geometry.point.new(x+START_X, y+START_Y), self.direction, self.grid, self:isEye(x, y)))
         end
     end
 end
@@ -31,12 +41,12 @@ function Dragon:move(step, isForward, laserBases, turn)
         self.blocked = false
         for i, scale in ipairs(self.scales) do
             scale:addPastMove()
-            if scale.alive then
-                scale:setIsBlocked(GUARD_OBSTACLES)
+            if scale.alive and not self.blocked then
+                if scale.isEye then scale:setImage(scale:getEyeImage()) end
+                scale:setIsBlocked(DRAGON_OBSTACLES)
                 if scale.isBlocked then self.blocked = true end
             end
         end
-
         if not self.blocked then
             for i, scale in ipairs(self.scales) do
                 if scale.alive then
@@ -45,10 +55,11 @@ function Dragon:move(step, isForward, laserBases, turn)
                 end
             end
         end
-
         for i, scale in ipairs(self.scales) do
-            if self.scales[i]:onLaser(laserBases, turn) then
-                self.scales[i].alive = false
+            if scale.alive then
+                if scale:onLaser(laserBases, turn) then
+                    scale.alive = false
+                end
             end
         end
     else

@@ -2,8 +2,6 @@ PD = playdate
 GFX = PD.graphics
 SLIB = GFX.sprite
 
-Turn = 0
-
 DIRECTIONS = {UP = -1, DOWN = 1, LEFT = -2, RIGHT = 2}
 MOVE_CRANK_SPEED = 6
 LEVEL_SELECT_CRANK_SPEED = 4
@@ -36,6 +34,7 @@ LADDER_TILE = 8
 PLAYER_TILE = 9
 PLAYER_OBSTACLES = {WALL_TILE, RIGHT_LASER_TILE, LEFT_LASER_TILE, UP_LASER_TILE, DOWN_LASER_TILE}
 GUARD_OBSTACLES =  {WALL_TILE, RIGHT_LASER_TILE, LEFT_LASER_TILE, UP_LASER_TILE, DOWN_LASER_TILE, LADDER_TILE}
+DRAGON_OBSTACLES = GUARD_OBSTACLES
 
 function GetTile(x, y)
     return ((y-1)*TILES_PER_ROW)+x
@@ -53,15 +52,15 @@ function GetByDirection(optionsList, direction)
     end
 end
 
-function PrintGrid(grid)
-    print("NEW GRID")
-    local text = ""
-    for i, tile in ipairs(grid) do
-        text = text .. tostring(tile)
-        if (i % 20 == 0) then
-            print(text)
-            print()
-            text = ""
-        end
-    end
-end
+-- function PrintGrid(grid)
+--     print("NEW GRID")
+--     local text = ""
+--     for i, tile in ipairs(grid) do
+--         text = text .. tostring(tile)
+--         if (i % 20 == 0) then
+--             print(text)
+--             print()
+--             text = ""
+--         end
+--     end
+-- end

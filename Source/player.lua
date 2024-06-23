@@ -1,11 +1,10 @@
-import "CoreLibs/sprites"
-import "CoreLibs/animation"
 import "dynamicObject"
 import "constants"
 
+class('Player').extends(DynamicObject)
+
 local DEATH_ANIMATION_SPEED = 22
 local stars = 1
-
 local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_up'),
     GFX.image.new('img/player/player_down'),
@@ -13,8 +12,6 @@ local PLAYER_IMAGES <const> = {
     GFX.image.new('img/player/player_right')
 }
 local deathAnimationTable = GFX.imagetable.new('img/player/death_animation')
-
-class('Player').extends(DynamicObject)
 
 function Player:init(position, direction, grid)
     Player.super.init(self, PLAYER_IMAGES[1], position, direction, grid, PLAYER_IMAGES)

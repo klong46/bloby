@@ -1,10 +1,14 @@
 import "CoreLibs/sprites"
 import "constants"
+import "transition"
 
 class('MenuManager').extends(SLIB)
 
 local currentLevel = 1
 local numScores = 0
+
+local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
+
 
 function MenuManager:init(startingLevel, scores)
     MenuManager.super.init(self)
@@ -17,6 +21,7 @@ function MenuManager:init(startingLevel, scores)
 end
 
 function MenuManager:cursorUp()
+    blipSound:play()
     if self.selectedBox == 1 then
         self.selectedBox = 3
     else
@@ -27,6 +32,7 @@ function MenuManager:cursorUp()
 end
 
 function MenuManager:cursorDown()
+    blipSound:play()
     if self.selectedBox == 3 then
         self.selectedBox = 1
     else
@@ -39,15 +45,23 @@ end
 function MenuManager:cursorSelect()
     if self.selectedBox == 1 then
         if currentLevel == 1 and numScores == 0 then
-            Tutorial = ControlScreen()
+            Transition("tutorial")
         else
-            StartGame(currentLevel)
+            Transition("start_game", currentLevel)
         end
-        
     elseif self.selectedBox == 2 then
-        GoToLevelSelect()
+        Transition("level_select")
     else
-        GoToCredits()
+        Transition("credits")
     end
     self:remove()
+end
+
+function MenuManager:update()
+    MenuManager.super.update(self)
+    if CrankTicks > 0 then
+        self:cursorDown()
+    elseif CrankTicks < 0 then
+        self:cursorUp()
+    end
 end

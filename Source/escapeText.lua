@@ -1,14 +1,15 @@
-import "CoreLibs/sprites"
 import "constants"
-
-local bigFont = GFX.font.new("fonts/font-rains-3x")
 
 class('EscapeText').extends(SLIB)
 
+local bigFont = GFX.font.new("fonts/font-rains-3x")
+local POSITION = {X = 226, Y = 85}
+local SIZE = {WIDTH = 200, HEIGHT = 100}
+
 function EscapeText:init()
     EscapeText.super.init(self)
-    self:setSize(200, 100)
-    self:moveTo(226, 85)
+    self:setSize(SIZE.WIDTH, SIZE.HEIGHT)
+    self:moveTo(POSITION.X, POSITION.Y)
     self:setZIndex(6)
     self:add()
 end

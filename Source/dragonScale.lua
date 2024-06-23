@@ -1,14 +1,30 @@
+import "constants"
+
 class('DragonScale').extends(DynamicObject)
 
-local SCALE_IMAGE = GFX.image.new('img/dragon/scale')
 local deathAnimationTable = GFX.imagetable.new('img/dragon/scale_death_animation')
 local DEATH_ANIMATION_SPEED = 50
 
-function DragonScale:init(position, direction, grid)
-    DragonScale.super.init(self, SCALE_IMAGE, position, direction, grid)
+local SCALE_IMAGE = GFX.image.new('img/dragon/scale')
+local EYE_IMAGES = {
+    GFX.image.new('img/dragon/dragon_eyes/eye_up'),
+    GFX.image.new('img/dragon/dragon_eyes/eye_down'),
+    GFX.image.new('img/dragon/dragon_eyes/eye_left'),
+    GFX.image.new('img/dragon/dragon_eyes/eye_right')
+    
+}
+
+function DragonScale:init(position, direction, grid, isEye)
+    local image = SCALE_IMAGE
+    if isEye then
+        image = EYE_IMAGES[3]
+    end
+    DragonScale.super.init(self, image, position, direction, grid)
     self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
     self.deathAnimation.paused = true
     self.alive = true
+    self.isEye = isEye
+    self:setZIndex(2)
     self:add()
 end
 
@@ -26,9 +42,17 @@ function DragonScale:moveBack()
     end
 end
 
+function DragonScale:getEyeImage()
+    return GetByDirection(EYE_IMAGES, self.direction)
+end
+
 function DragonScale:reanimate()
+    local image = SCALE_IMAGE
+    if self.isEye then
+        image = self:getEyeImage()
+    end
     self:restartDeathAnimation()
-    self:setImage(SCALE_IMAGE)
+    self:setImage(image)
     self:setVisible(true)
 end
 
@@ -39,7 +63,7 @@ end
 
 function DragonScale:update()
     DragonScale.super.update(self)
-    if not self.alive then
+    if not self.alive and self:isVisible() then
         self.deathAnimation.paused = false
         self:setImage(self.deathAnimation:image())
         if not self.deathAnimation:isValid() then

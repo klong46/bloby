@@ -1,5 +1,6 @@
-import "CoreLibs/sprites"
 import "constants"
+
+class('Mouse').extends(DynamicObject)
 
 local inactiveImage = GFX.image.new('img/mouse/mouse_inactive')
 local stallAnimationTable = GFX.imagetable.new('img/mouse/mouse_stalling_animation')
@@ -7,14 +8,15 @@ local eatAnimationTable = GFX.imagetable.new('img/mouse/mouse_eat_animation')
 local STALL_ANIMATION_SPEED = 30
 local EAT_ANIMATION_SPEED = 30
 
+local awakeSound = playdate.sound.sampleplayer.new('snd/mouse_awake')
+
+
 local MOUSE_IMAGES <const> = {
     GFX.image.new('img/mouse/mouse_up'),
     GFX.image.new('img/mouse/mouse_down'),
     GFX.image.new('img/mouse/mouse_left'),
     GFX.image.new('img/mouse/mouse_right')
 }
-
-class('Mouse').extends(DynamicObject)
 
 function Mouse:init(position, delay, grid)
     Mouse.super.init(self, inactiveImage, position, DEFAULT_MOUSE_DIRECTION, grid, MOUSE_IMAGES)
@@ -27,6 +29,7 @@ function Mouse:init(position, delay, grid)
     self.stalled = false
     self.stalledTurns = 0
     self.gameOver = false
+    self.awoken = false
     self:setZIndex(2)
 end
 
@@ -48,6 +51,7 @@ function Mouse:moveBack()
     end
     if self:isInactive() then
         self:setImage(inactiveImage)
+        self.awoken = false
     end
 end
 
@@ -57,6 +61,10 @@ function Mouse:isInactive()
 end
 
 function Mouse:moveForward(playerMove)
+    if not self.awoken then
+        awakeSound:play()
+        self.awoken = true
+    end
     self.position = playerMove.position
     self:setDirectionImage(playerMove.direction)
     self.direction = playerMove.direction
@@ -100,7 +108,7 @@ function Mouse:update()
                 ResetLevel()
             end
         end
-    elseif self.stalled then
+    elseif self.stalled and self.awoken then
         self:setImage(self.stallAnimation:image())
     else
         if self:isInactive() then

@@ -1,15 +1,13 @@
-import "CoreLibs/sprites"
-import "CoreLibs/timer"
 import "staticObject"
 import "constants"
 import "star"
+
+class('Stars').extends(SLIB)
 
 local ANIMATION_DURATION = 500
 local starNum = 1
 local limit = 0
 local starTimer = nil
-
-class('Stars').extends(SLIB)
 
 function Stars:init(num)
     Stars.super.init(self)

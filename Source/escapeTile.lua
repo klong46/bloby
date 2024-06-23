@@ -1,18 +1,19 @@
-import "CoreLibs/sprites"
 import "constants"
 
 class('EscapeTile').extends(SLIB)
 
 local image = GFX.image.new('img/escape_tile')
 local ANIMATOR_DURATION = 1000
+local FADE_STRENGTH = 0.5
+local POSITION = {X = 200, Y = 120}
 local stars
 
 function EscapeTile:init(starsEarned)
     EscapeTile.super.init(self)
-    self.fadeAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, 0.5, playdate.easingFunctions.outCubic)
+    self.fadeAnimator = GFX.animator.new(ANIMATOR_DURATION, 0, FADE_STRENGTH, playdate.easingFunctions.outCubic)
     stars = starsEarned
     self.animationFinished = false
-    self:moveTo(200, 120)
+    self:moveTo(POSITION.X, POSITION.Y)
     self:setZIndex(6)
     self:add()
 end
