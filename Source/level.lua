@@ -75,6 +75,7 @@ function Level:init(levelNum)
     self:setZIndex(4)
     self:moveTo(200,120)
     StartThemeMusic(levelNum)
+    self.levelNumScreen = LevelNumScreen(levelNum)
     self:add()
 end
 
@@ -168,6 +169,10 @@ function Level:moveForward()
         self:checkPlayerInteractions()
         -- check if move is valid after turn ends
         self.player:setIsBlocked(PLAYER_OBSTACLES)
+    end
+    if self.levelNumScreen and not self.levelNumScreen.dismissed then
+        self.levelNumScreen.dismissed = true
+        self.levelNumScreen.text.dismissed = true
     end
 end
 

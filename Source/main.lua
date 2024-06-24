@@ -18,6 +18,7 @@ import "controlScreen"
 import "gameWinScreen"
 import "creditsText"
 import "transition"
+import "levelNumScreen"
 
 local menuMusic = PD.sound.fileplayer.new('snd/opening')
 menuMusic:setVolume(0.7)
