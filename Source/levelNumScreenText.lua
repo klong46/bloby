@@ -3,7 +3,6 @@ import "constants"
 class('LevelNumScreenText').extends(SLIB)
 
 local bigFont = GFX.font.new("fonts/font-rains-3x")
-local ANIMATOR_DURATION = 1500
 local SIZE = {WIDTH = 200, HEIGHT = 25}
 local POSITION = {X = 200, Y = 125}
 
@@ -14,7 +13,6 @@ function LevelNumScreenText:init(levelNum)
         POSITION.X -= 12
     end
     self.dismissed = false
-    self.fadeAnimator = GFX.animator.new(ANIMATOR_DURATION, 1, 0, playdate.easingFunctions.outCubic)
     self:setSize(SIZE.WIDTH, SIZE.HEIGHT)
     self:moveTo(POSITION.X, POSITION.Y)
     self:setZIndex(12)
