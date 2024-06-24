@@ -4,7 +4,7 @@ import "levelNumScreenText"
 class('LevelNumScreen').extends(SLIB)
 
 local image = GFX.image.new('img/escape_tile')
-local ANIMATOR_DURATION = 320
+local ANIMATOR_DURATION = 400
 local POSITION = {X = 200, Y = 120}
 
 

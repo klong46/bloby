@@ -53,7 +53,6 @@ local onMenu = true
 local levelSelect
 local moveForwardTimer
 local moveBackTimer
-local creditsScrollTimer = nil
 LevelFinished = false
 ReadyToContinue = false
 OnControlScreen = false

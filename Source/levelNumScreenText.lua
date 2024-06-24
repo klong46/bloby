@@ -10,7 +10,7 @@ function LevelNumScreenText:init(levelNum)
     LevelNumScreenText.super.init(self)
     self.levelNum = levelNum
     if levelNum > 9 then
-        POSITION.X -= 12
+        POSITION.X = 180
     end
     self.dismissed = false
     self:setSize(SIZE.WIDTH, SIZE.HEIGHT)

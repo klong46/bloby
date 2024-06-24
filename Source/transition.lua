@@ -10,7 +10,7 @@ function Transition:init(destination, levelNum)
     self.transitionAnimation = GFX.animation.loop.new(FRAME_RATE, animationTable, false)
     self.destination = destination
     self.levelNum = levelNum
-    self:setZIndex(10)
+    self:setZIndex(13)
     self:moveTo(200, 120)
     InTransition = true
     self.halfway = false
@@ -43,7 +43,7 @@ function Transition:update()
         self.halfway = true
     end
     if not self.transitionAnimation:isValid() then
-        self:remove()
         InTransition = false
+        self:remove()
     end
 end
