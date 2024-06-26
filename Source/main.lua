@@ -128,8 +128,7 @@ local function initMenu()
 end
 
 
--- Logo()
-InTransition = false
+Logo()
 initMenu()
 
 function ReturnToMenu()
