@@ -19,6 +19,7 @@ import "gameWinScreen"
 import "creditsText"
 import "transition"
 import "levelNumScreen"
+import "logo"
 
 local menuMusic = PD.sound.fileplayer.new('snd/opening')
 menuMusic:setVolume(0.7)
@@ -57,7 +58,7 @@ LevelFinished = false
 ReadyToContinue = false
 OnControlScreen = false
 Tutorial = nil
-InTransition = false
+InTransition = true
 CreditsScroll = 0
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
@@ -125,6 +126,8 @@ local function initMenu()
     onMenu = true
 end
 
+
+Logo()
 initMenu()
 
 function ReturnToMenu()
