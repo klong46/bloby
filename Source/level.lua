@@ -107,6 +107,8 @@ function Level:drawTiles(playerDirection)
             local position = PD.geometry.point.new(x, y)
             if tile == WALL_TILE then
                 Wall(position, self:wallIsSurrounded(x, y))
+            elseif tile == PANEL_TILE then
+                Wall(position, false, true)
             elseif tile == EMPTY_TILE then
                 Floor(position)
             elseif tile == GUARD_TILE then
@@ -125,7 +127,7 @@ function Level:drawTiles(playerDirection)
                 elseif tile == DOWN_LASER_TILE then
                     table.insert(self.laserBases, LaserBase(position, self.grid, DIRECTIONS.DOWN, self:getLaserCadence(), self:getLaserOffset()))
                 elseif tile == PLAYER_TILE then
-                    self.player = Player(position, playerDirection, self.grid)
+                    self.player = Player(position, playerDirection, self.grid, self.levelNum)
                     self.grid[GetTile(x, y)] = EMPTY_TILE
                 elseif tile == LADDER_TILE then
                     self.ladder = Ladder(position)

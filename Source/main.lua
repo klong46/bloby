@@ -59,6 +59,7 @@ ReadyToContinue = false
 OnControlScreen = false
 Tutorial = nil
 InTransition = true
+ReadingPanel = false
 CreditsScroll = 0
 local INIT_MOVE_DELAY = 200
 local MOVE_DELAY = 50
@@ -127,7 +128,8 @@ local function initMenu()
 end
 
 
-Logo()
+-- Logo()
+InTransition = false
 initMenu()
 
 function ReturnToMenu()
@@ -277,9 +279,13 @@ function PD.leftButtonDown()
     if not InTransition then
         if levelSelect then
             levelSelect:cursorLeft()
-        end
-        if gameWinScreen and not gameWinScreen.closed then
+        elseif gameWinScreen and not gameWinScreen.closed then
             gameWinScreen:left()
+        elseif not LevelFinished and not credits and not onMenu and levelManager.level.player.isBlocked then
+            local player = levelManager.level.player
+            player:setDirectionImage(DIRECTIONS.LEFT)
+            player.direction = DIRECTIONS.LEFT
+            player:checkPanel()
         end
     end
 end
@@ -290,9 +296,13 @@ function PD.upButtonDown()
             menuManager:cursorUp()
         elseif levelSelect then
             levelSelect:cursorUp()
-        end
-        if gameWinScreen and not gameWinScreen.closed then
+        elseif gameWinScreen and not gameWinScreen.closed then
             gameWinScreen:up()
+        elseif not LevelFinished and not credits and levelManager.level.player.isBlocked then
+            local player = levelManager.level.player
+            player:setDirectionImage(DIRECTIONS.UP)
+            player.direction = DIRECTIONS.UP
+            player:checkPanel()
         end
         if credits then
             CreditsScroll = -5
@@ -306,9 +316,13 @@ function PD.downButtonDown()
             menuManager:cursorDown()
         elseif levelSelect then
             levelSelect:cursorDown()
-        end
-        if gameWinScreen and not gameWinScreen.closed then
+        elseif gameWinScreen and not gameWinScreen.closed then
             gameWinScreen:down()
+        elseif not LevelFinished and not credits and levelManager.level.player.isBlocked then
+            local player = levelManager.level.player
+            player:setDirectionImage(DIRECTIONS.DOWN)
+            player.direction = DIRECTIONS.DOWN
+            player:checkPanel()
         end
         if credits then
             CreditsScroll = 5
@@ -332,9 +346,13 @@ function PD.rightButtonDown()
     if not InTransition then
         if levelSelect then
             levelSelect:cursorRight()
-        end
-        if gameWinScreen and not gameWinScreen.closed then
+        elseif gameWinScreen and not gameWinScreen.closed then
             gameWinScreen:right()
+        elseif not LevelFinished and not credits and not onMenu and levelManager.level.player.isBlocked then
+            local player = levelManager.level.player
+            player:setDirectionImage(DIRECTIONS.RIGHT)
+            player.direction = DIRECTIONS.RIGHT
+            player:checkPanel()
         end
     end
 end

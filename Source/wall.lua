@@ -4,6 +4,7 @@ import "constants"
 class('Wall').extends(StaticObject)
 
 local blank_wall = GFX.image.new('img/walls/wall_0')
+local panel_tile = GFX.image.new('img/panels/panel-tile')
 local ROTATIONS = {
     90,
     180,
@@ -21,10 +22,14 @@ local images = {
     GFX.image.new('img/walls/wall_8'),
 }
 
-function Wall:init(position, surrounded)
+function Wall:init(position, surrounded, isPanel)
     Wall.super.init(self, blank_wall, position)
     self.surrounded = surrounded
-    self:setImage(self:getImage(position))
+    if isPanel then
+        self:setImage(panel_tile)
+    else
+        self:setImage(self:getImage(position))
+    end
     self:setZIndex(1)
     self:add()
 end

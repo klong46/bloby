@@ -1,5 +1,6 @@
 import "dynamicObject"
 import "constants"
+import "panel"
 
 class('Player').extends(DynamicObject)
 
@@ -13,20 +14,25 @@ local PLAYER_IMAGES <const> = {
 }
 local deathAnimationTable = GFX.imagetable.new('img/player/death_animation')
 
-function Player:init(position, direction, grid)
+function Player:init(position, direction, grid, levelNum)
     Player.super.init(self, PLAYER_IMAGES[1], position, direction, grid, PLAYER_IMAGES)
     self.isDead = false
+    self.levelNum = levelNum
     self.deathAnimation = GFX.animation.loop.new(DEATH_ANIMATION_SPEED, deathAnimationTable, false)
     self.deathAnimation.paused = true
+    self.readingPanel = false
     self.fadeAnimator = nil
+    self.panel = nil
     self:setZIndex(3)
     self:setDirectionImage(direction)
 end
 
 function Player:move(step, isForward)
+    self:checkPanel()
     if isForward then
         self:addPastMove()
         self:moveForward(step)
+        self:checkPanel()
     else
         self:moveBack()
     end
@@ -55,25 +61,24 @@ function Player:finishLevel(starsEarned)
     self.fadeAnimator = GFX.animator.new(1500, 1, 0, PD.easingFunctions.outCubic)
 end
 
+function Player:checkPanel()
+    self:lookingAtPanel()
+    if self.readingPanel and not self.panel then
+        self.panel = Panel(self.levelNum)
+    elseif self.panel then
+        self.panel:remove()
+        self.panel = nil
+    end
+end
+
+function Player:lookingAtPanel()
+    local nextPosition = self:getNextTilePosition(self.position.x, self.position.y)
+    local nextTile = self.grid[(GetTile(nextPosition[1], nextPosition[2]))]
+    self.readingPanel = (nextTile == PANEL_TILE)
+end
+
 function Player:update()
     Player.super.update(self)
-    if PD.buttonIsPressed(PD.kButtonUp) and self.isBlocked then
-        self:setDirectionImage(DIRECTIONS.UP)
-        self.direction = DIRECTIONS.UP
-    end
-    if PD.buttonIsPressed(PD.kButtonDown) and self.isBlocked then
-        self:setDirectionImage(DIRECTIONS.DOWN)
-        self.direction = DIRECTIONS.DOWN
-    end
-    if PD.buttonIsPressed(PD.kButtonLeft) and self.isBlocked then
-        self:setDirectionImage(DIRECTIONS.LEFT)
-        self.direction = DIRECTIONS.LEFT
-    end
-    if PD.buttonIsPressed(PD.kButtonRight) and self.isBlocked then
-        self:setDirectionImage(DIRECTIONS.RIGHT)
-        self.direction = DIRECTIONS.RIGHT
-    end
-
     if self.isDead then
         self.deathAnimation.paused = false
         self:setImage(self.deathAnimation:image())
