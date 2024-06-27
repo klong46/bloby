@@ -35,19 +35,23 @@ end
 
 function Dragon:move(step, isForward, laserBases, turn)
     for i, scale in ipairs(self.scales) do
-        scale.lastPosition = PD.geometry.point.new(scale.position.x, scale.position.y)
+        
     end
     if isForward then
         self.blocked = false
         for i, scale in ipairs(self.scales) do
-            scale:addPastMove()
-            if not self.blocked and scale.alive then
+            if scale.alive then
                 if scale.isEye then scale:setImage(scale:getEyeImage()) end
                 scale:setIsBlocked(DRAGON_OBSTACLES)
-                if scale.isBlocked then self.blocked = true end
+                if scale.isBlocked then
+                    self.blocked = true
+                    break
+                end
             end
         end
         for i, scale in ipairs(self.scales) do
+            scale.lastPosition = PD.geometry.point.new(scale.position.x, scale.position.y)
+            scale:addPastMove()
             if scale.alive then
                 if not self.blocked then
                     scale:moveForward(step)
