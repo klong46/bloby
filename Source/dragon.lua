@@ -34,9 +34,6 @@ function Dragon:drawScales()
 end
 
 function Dragon:move(step, isForward, laserBases, turn)
-    for i, scale in ipairs(self.scales) do
-        
-    end
     if isForward then
         self.blocked = false
         for i, scale in ipairs(self.scales) do
