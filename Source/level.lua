@@ -75,7 +75,8 @@ function Level:init(levelNum)
     self:setZIndex(4)
     self:moveTo(200,120)
     StartThemeMusic(levelNum)
-    self.levelNumScreen = LevelNumScreen(levelNum)
+    local targetNum = self.starTargets[2]
+    self.levelNumScreen = LevelNumScreen(levelNum, targetNum)
     self:add()
 end
 

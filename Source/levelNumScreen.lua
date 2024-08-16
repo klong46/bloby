@@ -8,13 +8,13 @@ local ANIMATOR_DURATION = 400
 local POSITION = {X = 200, Y = 120}
 
 
-function LevelNumScreen:init(levelNum)
+function LevelNumScreen:init(levelNum, targetNum)
     LevelNumScreen.super.init(self)
     self.dismissed = false
     self:setImage(image:fadedImage(0.5, GFX.image.kDitherTypeBayer8x8))
     self:moveTo(POSITION.X, POSITION.Y)
     self:setZIndex(11)
-    self.text = LevelNumScreenText(levelNum)
+    self.text = LevelNumScreenText(levelNum, targetNum)
     self:add()
 end
 
