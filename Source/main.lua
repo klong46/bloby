@@ -147,7 +147,14 @@ function StartGame(levelNum)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
     end)
-    pdMenu:addMenuItem("next level", function() levelManager.level:checkPlayerWin(true) end)
+    pdMenu:addMenuItem("next level",
+        function()
+            levelManager.level:checkPlayerWin(true)
+            levelManager.level.levelNumScreen.text:remove()
+            levelManager.level.levelNumScreen.text.targetText:remove()
+            levelManager.level.levelNumScreen:remove()
+        end
+    )
 end
 
 -- DEVELOPMENT: goes straight to TEST_LEVEL
@@ -240,7 +247,14 @@ function LevelOver(stars)
             timer:remove()
         end
     end)
-    pdMenu:addMenuItem("next level", function() levelManager.level:checkPlayerWin(true) end)
+    pdMenu:addMenuItem("next level",
+        function()
+            levelManager.level:checkPlayerWin(true)
+            levelManager.level.levelNumScreen.text:remove()
+            levelManager.level.levelNumScreen.text.targetText:remove()
+            levelManager.level.levelNumScreen:remove()
+        end
+    )
     if #starScores >= levelManager.levelNum then
         if starScores[levelManager.levelNum] < stars then
             starScores[levelManager.levelNum] = stars
