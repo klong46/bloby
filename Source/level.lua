@@ -240,8 +240,8 @@ function Level:checkPlayerDeath()
     end
 end
 
-function Level:checkPlayerWin()
-    if self.player:onLadder(self.grid) then
+function Level:checkPlayerWin(skipLevel)
+    if self.player:onLadder(self.grid) or skipLevel then
         if self.levelNum == BONUS_LEVEL then
             BossMusic:setVolume(0.2)
         else
