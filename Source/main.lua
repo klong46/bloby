@@ -382,6 +382,13 @@ function PD.AButtonDown()
                 Transition("level_select")
             elseif levelManager.levelNum == BONUS_LEVEL then
                 SLIB:removeAll()
+                pdMenu:removeAllMenuItems()
+                pdMenu:addMenuItem("menu",
+                    function()
+                        Transition("menu")
+                        gameWinScreen = nil
+                    end
+                )
                 gameWinScreen = GameWinScreen()
             elseif levelManager.levelNum == TOTAL_LEVELS then
                 Transition("menu")
