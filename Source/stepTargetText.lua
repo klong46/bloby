@@ -18,5 +18,5 @@ end
 function StepTargetText:draw()
     GFX.setImageDrawMode(GFX.kDrawModeCopy)
     GFX.setFont(bigFont, "bold")
-    GFX.drawText("*3 stars = "..self.targetNum.." steps*", 0, 0)
+    GFX.drawText("*3 stars = "..self.targetNum.." moves*", 0, 0)
 end
