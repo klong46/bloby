@@ -386,6 +386,7 @@ function PD.AButtonDown()
                 pdMenu:addMenuItem("menu",
                     function()
                         Transition("menu")
+                        gameWinScreen.menuMusic:stop()
                         gameWinScreen = nil
                     end
                 )
