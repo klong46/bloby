@@ -27,18 +27,6 @@ ThemeMusic = PD.sound.fileplayer.new('snd/bytf')
 BossMusic = PD.sound.fileplayer.new('snd/bytf-fast')
 local blipSound = playdate.sound.sampleplayer.new('snd/blip_select')
 
-local function resetSaveData()
-    local gameData = {
-        currentLevel = 1,
-        scores = {},
-        startingLevel = 1,
-        highestUnlockedLevel = 1,
-        bonusLevelAnimationPlayed = false
-    }
-    PD.datastore.write(gameData)
-end
--- resetSaveData()
-
 -- INSTANCE VARS
 local gameData = {}
 local startingLevel = 1
@@ -156,15 +144,6 @@ function StartGame(levelNum)
         end
     )
 end
-
--- DEVELOPMENT: goes straight to TEST_LEVEL
--- StartGame(TEST_LEVEL)
--- onMenu = false
--- starScores = {}
--- for i = 1, 30, 1 do
---     table.insert(starScores, 3)
--- end
--- starScores[7] = 1
 
 local function levelSelectCursorDown(scrollTimer)
     levelSelect:cursorRight()

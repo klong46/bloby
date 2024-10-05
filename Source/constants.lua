@@ -52,16 +52,3 @@ function GetByDirection(optionsList, direction)
         return optionsList[4]
     end
 end
-
--- function PrintGrid(grid)
---     print("NEW GRID")
---     local text = ""
---     for i, tile in ipairs(grid) do
---         text = text .. tostring(tile)
---         if (i % 20 == 0) then
---             print(text)
---             print()
---             text = ""
---         end
---     end
--- end
