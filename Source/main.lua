@@ -135,14 +135,6 @@ function StartGame(levelNum)
     RestartMenuItem = pdMenu:addMenuItem("restart", function()
         levelManager:resetLevel()
     end)
-    pdMenu:addMenuItem("next level",
-        function()
-            levelManager.level:checkPlayerWin(true)
-            levelManager.level.levelNumScreen.text:remove()
-            levelManager.level.levelNumScreen.text.targetText:remove()
-            levelManager.level.levelNumScreen:remove()
-        end
-    )
 end
 
 local function levelSelectCursorDown(scrollTimer)
@@ -226,14 +218,6 @@ function LevelOver(stars)
             timer:remove()
         end
     end)
-    pdMenu:addMenuItem("next level",
-        function()
-            levelManager.level:checkPlayerWin(true)
-            levelManager.level.levelNumScreen.text:remove()
-            levelManager.level.levelNumScreen.text.targetText:remove()
-            levelManager.level.levelNumScreen:remove()
-        end
-    )
     if #starScores >= levelManager.levelNum then
         if starScores[levelManager.levelNum] < stars then
             starScores[levelManager.levelNum] = stars
